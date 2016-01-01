@@ -1,4 +1,10 @@
 [package]
 name = "scraper"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["Curtis McEnroe <programble@gmail.com>"]
+
+[dependencies]
+html5ever = "0.2.11"
+selectors = "0.2.2"
+tendril = "0.1.6"
+typed-arena = "1.1.0"
