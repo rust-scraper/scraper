@@ -7,4 +7,3 @@ authors = ["Curtis McEnroe <programble@gmail.com>"]
 html5ever = "0.2.11"
 selectors = "0.2.2"
 tendril = "0.1.6"
-typed-arena = "1.1.0"
