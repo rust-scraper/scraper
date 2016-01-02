@@ -16,7 +16,7 @@
 )]
 
 extern crate html5ever;
-extern crate string_cache;
+#[macro_use] extern crate string_cache;
 extern crate tendril;
 extern crate typed_arena;
 

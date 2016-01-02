@@ -162,8 +162,25 @@ impl<'a> TreeSink for Dom<'a> {
         self.quirks_mode = mode;
     }
 
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Self::Handle {
-        unimplemented!()
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Handle<'a> {
+        if name == qualname!(html, "template") {
+            let contents = self.create_tree_node(Node::Document);
+            let element = Element {
+                name: name,
+                attrs: attrs,
+                script_already_started: None,
+                template_contents: Some(contents),
+            };
+            Handle(self.create_tree_node(Node::Element(element)))
+        } else {
+            let element = Element {
+                name: name,
+                attrs: attrs,
+                script_already_started: None,
+                template_contents: None,
+            };
+            Handle(self.create_tree_node(Node::Element(element)))
+        }
     }
 
     fn create_comment(&mut self, text: StrTendril) -> Handle<'a> {
