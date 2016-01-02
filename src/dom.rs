@@ -2,6 +2,7 @@
 
 use std::borrow::Cow;
 use std::fmt;
+use std::ops::Deref;
 
 use html5ever::Attribute;
 use html5ever::tree_builder::{TreeSink, QuirksMode, NodeOrText};
@@ -36,6 +37,14 @@ pub struct TreeNode<'a> {
     pub prev_sibling: Option<&'a TreeNode<'a>>,
 }
 
+/// A reference to a `TreeNode`.
+#[derive(Debug, Clone)]
+pub struct Handle<'a>(&'a TreeNode<'a>);
+impl<'a> Deref for Handle<'a> {
+    type Target = TreeNode<'a>;
+    fn deref(&self) -> &TreeNode<'a> { self.0 }
+}
+
 impl<'a> fmt::Debug for Dom<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         f.debug_struct("Dom")
@@ -45,7 +54,7 @@ impl<'a> fmt::Debug for Dom<'a> {
 }
 
 impl<'a> TreeSink for Dom<'a> {
-    type Handle = &'a TreeNode<'a>;
+    type Handle = Handle<'a>;
 
     fn parse_error(&mut self, msg: Cow<'static, str>) {
         unimplemented!();
