@@ -17,8 +17,8 @@ pub struct Dom<'a> {
     /// Parse errors.
     pub errors: Vec<Cow<'static, str>>,
 
-    /// The root node.
-    pub root: &'a TreeNode<'a>,
+    /// The document root node.
+    pub document: &'a TreeNode<'a>,
 }
 
 /// A node in the DOM tree.
@@ -51,7 +51,7 @@ impl<'a> Deref for Handle<'a> {
 impl<'a> fmt::Debug for Dom<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         f.debug_struct("Dom")
-            .field("root", &self.root)
+            .field("document", &self.document)
             .finish()
     }
 }
@@ -64,8 +64,8 @@ impl<'a> TreeSink for Dom<'a> {
         self.errors.push(msg);
     }
 
-    fn get_document(&mut self) -> Self::Handle {
-        unimplemented!()
+    fn get_document(&mut self) -> Handle<'a> {
+        Handle(self.document)
     }
 
     fn get_template_contents(&self, target: Self::Handle) -> Self::Handle {
