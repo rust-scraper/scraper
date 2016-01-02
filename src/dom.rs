@@ -83,7 +83,7 @@ pub struct Element<'a> {
     /// Attributes.
     pub attrs: RefCell<HashMap<QualName, StrTendril>>,
     /// A script element's "already started" flag.
-    pub script_already_started: Option<bool>,
+    pub script_already_started: Cell<Option<bool>>,
     /// A template element's contents.
     pub template_contents: Option<&'a TreeNode<'a>>,
 }
@@ -204,19 +204,19 @@ impl<'a> TreeSink for Dom<'a> {
             let element = Element {
                 name: name,
                 attrs: RefCell::new(attrs),
-                script_already_started: None,
+                script_already_started: Cell::new(None),
                 template_contents: Some(contents),
             };
             Handle(self.create_tree_node(Node::Element(element)))
         } else {
-            let mut element = Element {
+            let element = Element {
                 name: name,
                 attrs: RefCell::new(attrs),
-                script_already_started: None,
+                script_already_started: Cell::new(None),
                 template_contents: None,
             };
             if element.name == qualname!(html, "script") {
-                element.script_already_started = Some(false);
+                element.script_already_started.set(Some(false));
             }
             Handle(self.create_tree_node(Node::Element(element)))
         }
@@ -364,7 +364,15 @@ impl<'a> TreeSink for Dom<'a> {
         }
     }
 
-    fn mark_script_already_started(&mut self, node: Self::Handle) {
-        unimplemented!();
+    fn mark_script_already_started(&mut self, node: Handle<'a>) {
+        let Handle(node) = node;
+        if let Node::Element(ref element) = node.node {
+            if element.script_already_started.get().is_none() {
+                panic!("not a script element");
+            }
+            element.script_already_started.set(Some(true));
+        } else {
+            panic!("not an element");
+        }
     }
 }
