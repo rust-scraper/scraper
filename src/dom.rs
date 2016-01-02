@@ -202,13 +202,14 @@ impl<'a> TreeSink for Dom<'a> {
 
     fn append(&mut self, parent: Handle<'a>, child: NodeOrText<Handle<'a>>) {
         let Handle(parent) = parent;
-
         match child {
             NodeOrText::AppendNode(Handle(node)) => {
                 parent.append_child(node);
             },
+
             NodeOrText::AppendText(text) => {
                 let siblings = parent.children.get();
+
                 if let Some((_, &TreeNode { node: Node::Text(ref tendril), .. })) = siblings {
                     tendril.borrow_mut().push_tendril(&text);
                 } else {
