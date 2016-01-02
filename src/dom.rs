@@ -285,8 +285,18 @@ impl<'a> TreeSink for Dom<'a> {
         self.document.append_child(self.create_tree_node(Node::Doctype(doctype)));
     }
 
-    fn add_attrs_if_missing(&mut self, target: Self::Handle, attrs: Vec<Attribute>) {
-        unimplemented!();
+    fn add_attrs_if_missing(&mut self, target: Handle<'a>, attrs: Vec<Attribute>) {
+        let Handle(node) = target;
+        if let Node::Element(ref element) = node.node {
+            let mut elem_attrs = element.attrs.borrow_mut();
+            for attr in attrs {
+                if !elem_attrs.contains_key(&attr.name) {
+                    let _ = elem_attrs.insert(attr.name, attr.value);
+                }
+            }
+        } else {
+            panic!("not an element");
+        }
     }
 
     fn remove_from_parent(&mut self, target: Handle<'a>) {
