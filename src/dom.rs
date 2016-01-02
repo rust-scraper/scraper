@@ -147,6 +147,8 @@ impl<'a> TreeSink for Dom<'a> {
 
         // Orphan node.
         node.parent.set(None);
+        node.next_sibling.set(None);
+        node.prev_sibling.set(None);
     }
 
     fn reparent_children(&mut self, node: Self::Handle, new_parent: Self::Handle) {
