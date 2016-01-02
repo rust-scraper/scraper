@@ -137,7 +137,12 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     fn get_template_contents(&self, target: Self::Handle) -> Self::Handle {
-        unimplemented!()
+        let Handle(node) = target;
+        if let Node::Element(ref element) = node.node {
+            Handle(element.template_contents.unwrap())
+        } else {
+            panic!("not an element")
+        }
     }
 
     fn same_node(&self, x: Handle<'a>, y: Handle<'a>) -> bool {
