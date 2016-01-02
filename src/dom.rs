@@ -113,8 +113,40 @@ impl<'a> TreeSink for Dom<'a> {
         unimplemented!();
     }
 
+    #[allow(trivial_casts)]
     fn remove_from_parent(&mut self, target: Handle<'a>) {
-        unimplemented!();
+        let node = target.deref();
+        let parent = match node.parent.get() {
+            Some(p) => p,
+            None => return,
+        };
+        let prev_sibling = node.prev_sibling.get();
+        let next_sibling = node.next_sibling.get();
+
+        // Update sibling refs.
+        if let Some(sibling) = prev_sibling {
+            sibling.next_sibling.set(node.next_sibling.get());
+        }
+        if let Some(sibling) = next_sibling {
+            sibling.prev_sibling.set(node.prev_sibling.get());
+        }
+
+        // Update parent refs.
+        if prev_sibling.is_none() && next_sibling.is_none() {
+            parent.children.set(None);
+        } else {
+            let mut parent_children = parent.children.get().unwrap();
+            if parent_children.0 as *const _ == node as *const _ {
+                parent_children.0 = next_sibling.unwrap();
+            }
+            if parent_children.1 as *const _ == node as *const _ {
+                parent_children.1 = prev_sibling.unwrap();
+            }
+            parent.children.set(Some(parent_children));
+        }
+
+        // Orphan node.
+        node.parent.set(None);
     }
 
     fn reparent_children(&mut self, node: Self::Handle, new_parent: Self::Handle) {
