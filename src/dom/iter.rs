@@ -81,7 +81,7 @@ impl<'a> TreeNode<'a> {
     }
 
     /// Returns an iterator over this node's children.
-    pub fn children(&'a self) -> Children {
+    pub fn children(&self) -> Children<'a> {
         if let Some((front, back)) = self.children.get() {
             Children {
                 front: Some(front),
