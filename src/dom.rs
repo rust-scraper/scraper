@@ -175,12 +175,11 @@ impl<'a> TreeSink for Dom<'a> {
             child = node.next_sibling.get();
         }
 
-        // Introduce children to their new siblings.
-        let new_siblings = new_parent.children.get();
-        if let Some((eldest, youngest)) = new_siblings {
-            youngest.next_sibling.set(Some(children.0));
-            children.0.prev_sibling.set(Some(youngest));
-            new_parent.children.set(Some((youngest, children.1)));
+        // Append children to their new siblings.
+        if let Some((first, last)) = new_parent.children.get() {
+            last.next_sibling.set(Some(children.0));
+            children.0.prev_sibling.set(Some(last));
+            new_parent.children.set(Some((first, children.1)));
         } else {
             new_parent.children.set(Some(children));
         }
