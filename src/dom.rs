@@ -13,7 +13,7 @@ use typed_arena::Arena;
 
 /// Arena-allocated DOM.
 pub struct Dom<'a> {
-    arena: Arena<TreeNode<'a>>,
+    arena: &'a Arena<TreeNode<'a>>,
 
     /// Parse errors.
     pub errors: Vec<Cow<'static, str>>,
@@ -97,7 +97,7 @@ impl<'a> Deref for Handle<'a> {
 
 impl<'a> Dom<'a> {
     /// Creates a TreeNode in the arena.
-    fn create_tree_node(&self, node: Node<'a>) -> &TreeNode<'a> {
+    fn create_tree_node(&self, node: Node<'a>) -> &'a TreeNode<'a> {
         let node = TreeNode {
             node: node,
             parent: Cell::new(None),
@@ -149,7 +149,7 @@ impl<'a> TreeSink for Dom<'a> {
         same_node(x.0, y.0)
     }
 
-    fn elem_name(&self, target: Self::Handle) -> QualName {
+    fn elem_name(&self, target: Handle<'a>) -> QualName {
         let Handle(node) = target;
         if let Node::Element(ref element) = node.node {
             element.name.clone()
@@ -166,8 +166,8 @@ impl<'a> TreeSink for Dom<'a> {
         unimplemented!()
     }
 
-    fn create_comment(&mut self, text: StrTendril) -> Self::Handle {
-        unimplemented!()
+    fn create_comment(&mut self, text: StrTendril) -> Handle<'a> {
+        Handle(self.create_tree_node(Node::Comment(text)))
     }
 
     fn append(&mut self, parent: Self::Handle, child: NodeOrText<Self::Handle>) {
