@@ -130,6 +130,24 @@ impl<'a> TreeNode<'a> {
         }
         child.parent.set(Some(self));
     }
+
+    fn insert_before(&'a self, sibling: &'a TreeNode<'a>) {
+        let parent = self.parent.get().unwrap();
+
+        if let Some(prev) = self.prev_sibling.get() {
+            sibling.prev_sibling.set(Some(prev));
+            sibling.next_sibling.set(Some(self));
+            prev.next_sibling.set(Some(sibling));
+            self.prev_sibling.set(Some(sibling));
+        } else {
+            sibling.next_sibling.set(Some(self));
+            self.prev_sibling.set(Some(sibling));
+            let last = parent.children.get().unwrap().1;
+            parent.children.set(Some((sibling, last)));
+        }
+
+        sibling.parent.set(Some(parent));
+    }
 }
 
 #[allow(trivial_casts)]
@@ -220,8 +238,34 @@ impl<'a> TreeSink for Dom<'a> {
         }
     }
 
-    fn append_before_sibling(&mut self, sibling: Self::Handle, new_node: NodeOrText<Self::Handle>) -> Result<(), NodeOrText<Self::Handle>> {
-        unimplemented!()
+    fn append_before_sibling(
+        &mut self,
+        sibling: Handle<'a>,
+        new_node: NodeOrText<Handle<'a>>
+    ) -> Result<(), NodeOrText<Handle<'a>>> {
+        let Handle(sibling) = sibling;
+        if sibling.parent.get().is_none() {
+            return Err(new_node)
+        }
+
+        match new_node {
+            NodeOrText::AppendNode(Handle(node)) => {
+                self.remove_from_parent(Handle(node));
+                sibling.insert_before(node);
+            },
+
+            NodeOrText::AppendText(text) => {
+                let prev_sibling = sibling.prev_sibling.get();
+                if let Some(&TreeNode { node: Node::Text(ref tendril), .. }) = prev_sibling {
+                    tendril.borrow_mut().push_tendril(&text);
+                } else {
+                    let node = Node::Text(RefCell::new(text));
+                    sibling.insert_before(self.create_tree_node(node));
+                }
+            },
+        }
+
+        Ok(())
     }
 
     fn append_doctype_to_document(&mut self, name: StrTendril, public_id: StrTendril, system_id: StrTendril) {
@@ -232,7 +276,6 @@ impl<'a> TreeSink for Dom<'a> {
         unimplemented!();
     }
 
-    #[allow(trivial_casts)]
     fn remove_from_parent(&mut self, target: Handle<'a>) {
         let Handle(node) = target;
         let parent = match node.parent.get() {
