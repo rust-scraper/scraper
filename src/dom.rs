@@ -29,7 +29,7 @@ pub struct Dom<'a> {
 #[derive(Debug)]
 pub struct TreeNode<'a> {
     /// The DOM node.
-    pub node: (),
+    pub node: Node,
 
     /// The parent node.
     pub parent: Cell<Option<&'a TreeNode<'a>>>,
@@ -44,12 +44,31 @@ pub struct TreeNode<'a> {
     pub prev_sibling: Cell<Option<&'a TreeNode<'a>>>,
 }
 
+/// A DOM node.
+#[derive(Debug)]
+pub enum Node {
+}
+
 /// A reference to a `TreeNode`.
 #[derive(Debug, Clone)]
 pub struct Handle<'a>(&'a TreeNode<'a>);
 impl<'a> Deref for Handle<'a> {
     type Target = TreeNode<'a>;
     fn deref(&self) -> &TreeNode<'a> { self.0 }
+}
+
+impl<'a> Dom<'a> {
+    /// Creates a TreeNode in the arena.
+    fn create_tree_node(&self, node: Node) -> &TreeNode<'a> {
+        let node = TreeNode {
+            node: node,
+            parent: Cell::new(None),
+            children: Cell::new(None),
+            next_sibling: Cell::new(None),
+            prev_sibling: Cell::new(None),
+        };
+        self.arena.alloc(node)
+    }
 }
 
 impl<'a> fmt::Debug for Dom<'a> {
