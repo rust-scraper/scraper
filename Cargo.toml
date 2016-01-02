@@ -6,5 +6,6 @@ authors = ["Curtis McEnroe <programble@gmail.com>"]
 [dependencies]
 html5ever = "0.2.11"
 selectors = "0.2.2"
+string_cache = "0.2.5"
 tendril = "0.1.6"
 typed-arena = "1.1.0"

@@ -1,7 +1,12 @@
 //! DOM implementation.
 
+use std::borrow::Cow;
 use std::fmt;
 
+use html5ever::Attribute;
+use html5ever::tree_builder::{TreeSink, QuirksMode, NodeOrText};
+use string_cache::QualName;
+use tendril::StrTendril;
 use typed_arena::Arena;
 
 /// Arena-allocated DOM.
@@ -36,5 +41,69 @@ impl<'a> fmt::Debug for Dom<'a> {
         f.debug_struct("Dom")
             .field("root", &self.root)
             .finish()
+    }
+}
+
+impl<'a> TreeSink for Dom<'a> {
+    type Handle = &'a TreeNode<'a>;
+
+    fn parse_error(&mut self, msg: Cow<'static, str>) {
+        unimplemented!();
+    }
+
+    fn get_document(&mut self) -> Self::Handle {
+        unimplemented!()
+    }
+
+    fn get_template_contents(&self, target: Self::Handle) -> Self::Handle {
+        unimplemented!()
+    }
+
+    fn same_node(&self, x: Self::Handle, y: Self::Handle) -> bool {
+        unimplemented!()
+    }
+
+    fn elem_name(&self, target: Self::Handle) -> QualName {
+        unimplemented!()
+    }
+
+    fn set_quirks_mode(&mut self, mode: QuirksMode) {
+        unimplemented!();
+    }
+
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Self::Handle {
+        unimplemented!()
+    }
+
+    fn create_comment(&mut self, text: StrTendril) -> Self::Handle {
+        unimplemented!()
+    }
+
+    fn append(&mut self, parent: Self::Handle, child: NodeOrText<Self::Handle>) {
+        unimplemented!();
+    }
+
+    fn append_before_sibling(&mut self, sibling: Self::Handle, new_node: NodeOrText<Self::Handle>) -> Result<(), NodeOrText<Self::Handle>> {
+        unimplemented!()
+    }
+
+    fn append_doctype_to_document(&mut self, name: StrTendril, public_id: StrTendril, system_id: StrTendril) {
+        unimplemented!();
+    }
+
+    fn add_attrs_if_missing(&mut self, target: Self::Handle, attrs: Vec<Attribute>) {
+        unimplemented!();
+    }
+
+    fn remove_from_parent(&mut self, target: Self::Handle) {
+        unimplemented!();
+    }
+
+    fn reparent_children(&mut self, node: Self::Handle, new_parent: Self::Handle) {
+        unimplemented!();
+    }
+
+    fn mark_script_already_started(&mut self, node: Self::Handle) {
+        unimplemented!();
     }
 }
