@@ -1,6 +1,7 @@
 //! DOM implementation.
 
 use std::borrow::Cow;
+use std::cell::Cell;
 use std::fmt;
 use std::ops::Deref;
 
@@ -31,16 +32,16 @@ pub struct TreeNode<'a> {
     pub node: (),
 
     /// The parent node.
-    pub parent: Option<&'a TreeNode<'a>>,
+    pub parent: Cell<Option<&'a TreeNode<'a>>>,
 
     /// The first and last children.
-    pub children: Option<(&'a TreeNode<'a>, &'a TreeNode<'a>)>,
+    pub children: Cell<Option<(&'a TreeNode<'a>, &'a TreeNode<'a>)>>,
 
     /// The next sibling.
-    pub next_sibling: Option<&'a TreeNode<'a>>,
+    pub next_sibling: Cell<Option<&'a TreeNode<'a>>>,
 
     /// The previous sibling.
-    pub prev_sibling: Option<&'a TreeNode<'a>>,
+    pub prev_sibling: Cell<Option<&'a TreeNode<'a>>>,
 }
 
 /// A reference to a `TreeNode`.
@@ -112,7 +113,7 @@ impl<'a> TreeSink for Dom<'a> {
         unimplemented!();
     }
 
-    fn remove_from_parent(&mut self, target: Self::Handle) {
+    fn remove_from_parent(&mut self, target: Handle<'a>) {
         unimplemented!();
     }
 
