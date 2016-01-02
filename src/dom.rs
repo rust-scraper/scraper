@@ -1,11 +1,9 @@
 //! DOM implementation.
 
-use std::cell::RefCell;
 use std::fmt;
 use std::ops::Deref;
-use std::rc::{Rc, Weak};
 
-use html5ever::rcdom::{RcDom, Node};
+use html5ever::rcdom::{self, RcDom};
 use selectors::Element;
 use selectors::parser::AttrSelector;
 use string_cache::{Atom, Namespace};
@@ -24,13 +22,13 @@ impl fmt::Debug for Dom {
     }
 }
 
-/// Our own `rcdom::Handle`.
+/// Wrapper around `Handle`.
 #[derive(Debug)]
-pub struct Handle(Rc<RefCell<Node>>);
+pub struct Handle(rcdom::Handle);
 
 impl Deref for Handle {
-    type Target = Rc<RefCell<Node>>;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    type Target = rcdom::Handle;
+    fn deref(&self) -> &rcdom::Handle { &self.0 }
 }
 
 impl Element for Handle {
