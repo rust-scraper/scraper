@@ -150,7 +150,12 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     fn elem_name(&self, target: Self::Handle) -> QualName {
-        unimplemented!()
+        let Handle(node) = target;
+        if let Node::Element(ref element) = node.node {
+            element.name.clone()
+        } else {
+            panic!("not an element")
+        }
     }
 
     fn set_quirks_mode(&mut self, mode: QuirksMode) {
