@@ -2,6 +2,7 @@
 
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
 use std::fmt;
 use std::ops::Deref;
 
@@ -80,7 +81,7 @@ pub struct Element<'a> {
     /// Name.
     pub name: QualName,
     /// Attributes.
-    pub attrs: Vec<Attribute>,
+    pub attrs: HashMap<QualName, StrTendril>,
     /// A script element's "already started" flag.
     pub script_already_started: Option<bool>,
     /// A template element's contents.
@@ -194,6 +195,10 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Handle<'a> {
+        let attrs = attrs.into_iter()
+            .map(|a| (a.name, a.value))
+            .collect();
+
         if name == qualname!(html, "template") {
             let contents = self.create_tree_node(Node::Document);
             let element = Element {
