@@ -157,8 +157,33 @@ impl<'a> TreeSink for Dom<'a> {
         node.prev_sibling.set(None);
     }
 
-    fn reparent_children(&mut self, node: Self::Handle, new_parent: Self::Handle) {
-        unimplemented!();
+    fn reparent_children(&mut self, node: Handle<'a>, new_parent: Handle<'a>) {
+        let old_parent = node.deref();
+        let Handle(new_parent) = new_parent;
+        let children = match old_parent.children.get() {
+            Some(c) => c,
+            None => return,
+        };
+
+        // Orphan children.
+        old_parent.children.set(None);
+
+        // Adopt children.
+        let mut child = Some(children.0);
+        while let Some(node) = child {
+            node.parent.set(Some(new_parent));
+            child = node.next_sibling.get();
+        }
+
+        // Introduce children to their new siblings.
+        let new_siblings = new_parent.children.get();
+        if let Some((eldest, youngest)) = new_siblings {
+            youngest.next_sibling.set(Some(children.0));
+            children.0.prev_sibling.set(Some(youngest));
+            new_parent.children.set(Some((youngest, children.1)));
+        } else {
+            new_parent.children.set(Some(children));
+        }
     }
 
     fn mark_script_already_started(&mut self, node: Self::Handle) {
