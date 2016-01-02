@@ -158,7 +158,7 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     fn reparent_children(&mut self, node: Handle<'a>, new_parent: Handle<'a>) {
-        let old_parent = node.deref();
+        let Handle(old_parent) = node;
         let Handle(new_parent) = new_parent;
         let children = match old_parent.children.get() {
             Some(c) => c,
