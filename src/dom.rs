@@ -60,6 +60,11 @@ impl<'a> fmt::Debug for Dom<'a> {
     }
 }
 
+#[allow(trivial_casts)]
+fn same_node<'a>(a: &TreeNode<'a>, b: &TreeNode<'a>) -> bool {
+    a as *const _ == b as *const _
+}
+
 #[allow(unused_variables)]
 impl<'a> TreeSink for Dom<'a> {
     type Handle = Handle<'a>;
@@ -76,9 +81,8 @@ impl<'a> TreeSink for Dom<'a> {
         unimplemented!()
     }
 
-    #[allow(trivial_casts)]
     fn same_node(&self, x: Handle<'a>, y: Handle<'a>) -> bool {
-        x.0 as *const _ == y.0 as *const _
+        same_node(x.0, y.0)
     }
 
     fn elem_name(&self, target: Self::Handle) -> QualName {
@@ -136,10 +140,10 @@ impl<'a> TreeSink for Dom<'a> {
             parent.children.set(None);
         } else {
             let mut parent_children = parent.children.get().unwrap();
-            if parent_children.0 as *const _ == node as *const _ {
+            if same_node(parent_children.0, node) {
                 parent_children.0 = next_sibling.unwrap();
             }
-            if parent_children.1 as *const _ == node as *const _ {
+            if same_node(parent_children.1, node) {
                 parent_children.1 = prev_sibling.unwrap();
             }
             parent.children.set(Some(parent_children));
