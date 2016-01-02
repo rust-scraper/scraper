@@ -121,7 +121,7 @@ impl<'a> TreeSink for Dom<'a> {
 
     #[allow(trivial_casts)]
     fn remove_from_parent(&mut self, target: Handle<'a>) {
-        let node = target.deref();
+        let Handle(node) = target;
         let parent = match node.parent.get() {
             Some(p) => p,
             None => return,
