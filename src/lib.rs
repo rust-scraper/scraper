@@ -14,9 +14,3 @@
     unused_results,
     variant_size_differences
 )]
-
-extern crate html5ever;
-extern crate selectors;
-extern crate string_cache;
-
-pub mod dom;
