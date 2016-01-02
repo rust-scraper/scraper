@@ -76,7 +76,7 @@ impl<'a> Iterator for Ancestors<'a> {
 
 impl<'a> TreeNode<'a> {
     /// Returns an iterator over this node's siblings, starting with this node.
-    pub fn iter(&'a self) -> Siblings {
+    pub fn iter<'b: 'a>(&'b self) -> Siblings {
         Siblings { node: Some(self) }
     }
 
@@ -96,7 +96,7 @@ impl<'a> TreeNode<'a> {
     }
 
     /// Returns an iterator over this node's ancestors, starting with this node.
-    pub fn ancestors(&'a self) -> Ancestors {
+    pub fn ancestors<'b: 'a>(&'b self) -> Ancestors {
         Ancestors { node: Some(self) }
     }
 }
