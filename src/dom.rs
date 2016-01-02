@@ -156,7 +156,6 @@ fn same_node<'a>(a: &TreeNode<'a>, b: &TreeNode<'a>) -> bool {
     a as *const _ == b as *const _
 }
 
-#[allow(unused_variables)]
 impl<'a> TreeSink for Dom<'a> {
     type Handle = Handle<'a>;
 
