@@ -81,7 +81,7 @@ pub struct Element<'a> {
     /// Name.
     pub name: QualName,
     /// Attributes.
-    pub attrs: HashMap<QualName, StrTendril>,
+    pub attrs: RefCell<HashMap<QualName, StrTendril>>,
     /// A script element's "already started" flag.
     pub script_already_started: Option<bool>,
     /// A template element's contents.
@@ -203,7 +203,7 @@ impl<'a> TreeSink for Dom<'a> {
             let contents = self.create_tree_node(Node::Document);
             let element = Element {
                 name: name,
-                attrs: attrs,
+                attrs: RefCell::new(attrs),
                 script_already_started: None,
                 template_contents: Some(contents),
             };
@@ -211,7 +211,7 @@ impl<'a> TreeSink for Dom<'a> {
         } else {
             let mut element = Element {
                 name: name,
-                attrs: attrs,
+                attrs: RefCell::new(attrs),
                 script_already_started: None,
                 template_contents: None,
             };
