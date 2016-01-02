@@ -204,12 +204,15 @@ impl<'a> TreeSink for Dom<'a> {
             };
             Handle(self.create_tree_node(Node::Element(element)))
         } else {
-            let element = Element {
+            let mut element = Element {
                 name: name,
                 attrs: attrs,
                 script_already_started: None,
                 template_contents: None,
             };
+            if element.name == qualname!(html, "script") {
+                element.script_already_started = Some(false);
+            }
             Handle(self.create_tree_node(Node::Element(element)))
         }
     }
