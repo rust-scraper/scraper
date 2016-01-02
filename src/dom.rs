@@ -55,7 +55,9 @@ impl<'a> Deref for Handle<'a> {
 impl<'a> fmt::Debug for Dom<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         f.debug_struct("Dom")
+            .field("errors", &self.errors)
             .field("document", &self.document)
+            .field("quirks_mode", &self.quirks_mode)
             .finish()
     }
 }
