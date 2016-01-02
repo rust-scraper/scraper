@@ -29,7 +29,6 @@ pub struct Dom<'a> {
 }
 
 /// A node in the DOM tree.
-#[derive(Debug)]
 pub struct TreeNode<'a> {
     /// The DOM node.
     pub node: Node<'a>,
@@ -119,6 +118,17 @@ impl<'a> fmt::Debug for Dom<'a> {
             .field("errors", &self.errors)
             .field("document", &self.document)
             .field("quirks_mode", &self.quirks_mode)
+            .finish()
+    }
+}
+
+impl<'a> fmt::Debug for TreeNode<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        // Avoid parent and prev_sibling, which would cause an infinite loop.
+        f.debug_struct("TreeNode")
+            .field("node", &self.node)
+            .field("children", &self.children)
+            .field("next_sibling", &self.next_sibling)
             .finish()
     }
 }
