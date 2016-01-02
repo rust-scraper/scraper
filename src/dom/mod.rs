@@ -179,3 +179,4 @@ impl<'a> fmt::Debug for TreeNode<'a> {
 
 pub mod iter;
 pub mod tree_sink;
+mod display;
