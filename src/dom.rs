@@ -72,8 +72,9 @@ impl<'a> TreeSink for Dom<'a> {
         unimplemented!()
     }
 
-    fn same_node(&self, x: Self::Handle, y: Self::Handle) -> bool {
-        unimplemented!()
+    #[allow(trivial_casts)]
+    fn same_node(&self, x: Handle<'a>, y: Handle<'a>) -> bool {
+        x.0 as *const _ == y.0 as *const _
     }
 
     fn elem_name(&self, target: Self::Handle) -> QualName {
