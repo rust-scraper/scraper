@@ -1,7 +1,7 @@
 //! DOM implementation.
 
 use std::borrow::Cow;
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::ops::Deref;
 
@@ -57,7 +57,7 @@ pub enum Node<'a> {
     Comment(StrTendril),
 
     /// Text.
-    Text(StrTendril),
+    Text(RefCell<StrTendril>),
 
     /// An element.
     Element(Element<'a>),
@@ -116,6 +116,19 @@ impl<'a> fmt::Debug for Dom<'a> {
             .field("document", &self.document)
             .field("quirks_mode", &self.quirks_mode)
             .finish()
+    }
+}
+
+impl<'a> TreeNode<'a> {
+    fn append_child(&'a self, child: &'a TreeNode<'a>) {
+        if let Some((first, last)) = self.children.get() {
+            last.next_sibling.set(Some(child));
+            child.prev_sibling.set(Some(last));
+            self.children.set(Some((first, child)));
+        } else {
+            self.children.set(Some((child, child)));
+        }
+        child.parent.set(Some(self));
     }
 }
 
@@ -187,8 +200,23 @@ impl<'a> TreeSink for Dom<'a> {
         Handle(self.create_tree_node(Node::Comment(text)))
     }
 
-    fn append(&mut self, parent: Self::Handle, child: NodeOrText<Self::Handle>) {
-        unimplemented!();
+    fn append(&mut self, parent: Handle<'a>, child: NodeOrText<Handle<'a>>) {
+        let Handle(parent) = parent;
+
+        match child {
+            NodeOrText::AppendNode(Handle(node)) => {
+                parent.append_child(node);
+            },
+            NodeOrText::AppendText(text) => {
+                let siblings = parent.children.get();
+                if let Some((_, &TreeNode { node: Node::Text(ref tendril), .. })) = siblings {
+                    tendril.borrow_mut().push_tendril(&text);
+                } else {
+                    let node = Node::Text(RefCell::new(text));
+                    parent.append_child(self.create_tree_node(node));
+                }
+            },
+        }
     }
 
     fn append_before_sibling(&mut self, sibling: Self::Handle, new_node: NodeOrText<Self::Handle>) -> Result<(), NodeOrText<Self::Handle>> {
