@@ -4,6 +4,7 @@ use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt;
+use std::mem;
 use std::ops::Deref;
 
 use html5ever::Attribute;
@@ -14,7 +15,7 @@ use typed_arena::Arena;
 
 /// Arena-allocated DOM.
 pub struct Dom<'a> {
-    arena: &'a Arena<TreeNode<'a>>,
+    arena: Arena<TreeNode<'a>>,
 
     /// Parse errors.
     pub errors: Vec<Cow<'static, str>>,
@@ -106,7 +107,8 @@ impl<'a> Dom<'a> {
             next_sibling: Cell::new(None),
             prev_sibling: Cell::new(None),
         };
-        self.arena.alloc(node)
+        // Convince the compiler that node will live as long as 'a.
+        unsafe { mem::transmute(self.arena.alloc(node)) }
     }
 }
 
