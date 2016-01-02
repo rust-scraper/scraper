@@ -26,11 +26,6 @@ impl fmt::Debug for Dom {
 #[derive(Debug)]
 pub struct Handle(rcdom::Handle);
 
-impl Deref for Handle {
-    type Target = rcdom::Handle;
-    fn deref(&self) -> &rcdom::Handle { &self.0 }
-}
-
 impl Element for Handle {
     fn parent_element(&self) -> Option<Self> {
         unimplemented!()
