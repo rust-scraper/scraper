@@ -19,6 +19,9 @@ pub struct Dom<'a> {
 
     /// The document root node.
     pub document: &'a TreeNode<'a>,
+
+    /// The quirks mode.
+    pub quirks_mode: QuirksMode,
 }
 
 /// A node in the DOM tree.
@@ -82,7 +85,7 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     fn set_quirks_mode(&mut self, mode: QuirksMode) {
-        unimplemented!();
+        self.quirks_mode = mode;
     }
 
     fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Self::Handle {
