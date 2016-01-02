@@ -8,6 +8,7 @@ use std::mem;
 use std::ops::Deref;
 
 use html5ever::Attribute;
+use html5ever::driver::ParseResult;
 use html5ever::tree_builder::{TreeSink, QuirksMode, NodeOrText};
 use string_cache::QualName;
 use tendril::StrTendril;
@@ -376,4 +377,22 @@ impl<'a> TreeSink for Dom<'a> {
             panic!("not an element");
         }
     }
+}
+
+impl<'a> Default for Dom<'a> {
+    fn default() -> Self {
+        let mut dom = Dom {
+            arena: Arena::new(),
+            errors: Vec::new(),
+            quirks_mode: QuirksMode::NoQuirks,
+            document: unsafe { mem::uninitialized() },
+        };
+        dom.document = dom.create_tree_node(Node::Document);
+        dom
+    }
+}
+
+impl<'a> ParseResult for Dom<'a> {
+    type Sink = Dom<'a>;
+    fn get_result(sink: Dom<'a>) -> Dom<'a> { sink }
 }
