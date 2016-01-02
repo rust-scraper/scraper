@@ -123,6 +123,12 @@ impl<'a> Default for Dom<'a> {
 }
 
 impl<'a> TreeNode<'a> {
+    /// Returns true if `a` and `b` refer to the same `TreeNode`.
+    #[allow(trivial_casts)]
+    pub fn same(a: &'a TreeNode<'a>, b: &'a TreeNode<'a>) -> bool {
+        a as *const _ == b as *const _
+    }
+
     /// Returns the parent node.
     pub fn parent(&self) -> Option<&'a TreeNode<'a>> {
         self.parent.get()
@@ -147,35 +153,6 @@ impl<'a> TreeNode<'a> {
     pub fn prev_sibling(&self) -> Option<&'a TreeNode<'a>> {
         self.prev_sibling.get()
     }
-
-    /// Returns an iterator over this node's siblings, starting at this node.
-    pub fn iter(&'a self) -> Iter {
-        Iter { node: Some(self) }
-    }
-
-    /// Returns an iterator over this node's children.
-    pub fn children(&'a self) -> Iter {
-        if let Some(first) = self.first_child() {
-            first.iter()
-        } else {
-            Iter { node: None }
-        }
-    }
-}
-
-/// `TreeNode` iterator.
-#[derive(Debug)]
-pub struct Iter<'a> {
-    node: Option<&'a TreeNode<'a>>,
-}
-
-impl<'a> Iterator for Iter<'a> {
-    type Item = &'a TreeNode<'a>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let node = self.node;
-        self.node = self.node.and_then(TreeNode::next_sibling);
-        node
-    }
 }
 
 // Arena does not implement Debug.
@@ -199,3 +176,5 @@ impl<'a> fmt::Debug for TreeNode<'a> {
             .finish()
     }
 }
+
+pub mod iter;
