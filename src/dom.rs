@@ -29,7 +29,7 @@ pub struct Dom<'a> {
 #[derive(Debug)]
 pub struct TreeNode<'a> {
     /// The DOM node.
-    pub node: Node,
+    pub node: Node<'a>,
 
     /// The parent node.
     pub parent: Cell<Option<&'a TreeNode<'a>>>,
@@ -46,7 +46,45 @@ pub struct TreeNode<'a> {
 
 /// A DOM node.
 #[derive(Debug)]
-pub enum Node {
+pub enum Node<'a> {
+    /// The document itself.
+    Document,
+
+    /// A doctype.
+    Doctype(Doctype),
+
+    /// A comment.
+    Comment(StrTendril),
+
+    /// Text.
+    Text(StrTendril),
+
+    /// An element.
+    Element(Element<'a>),
+}
+
+/// A doctype.
+#[derive(Debug)]
+pub struct Doctype {
+    /// Name.
+    pub name: StrTendril,
+    /// Public ID.
+    pub public_id: StrTendril,
+    /// System ID.
+    pub system_id: StrTendril,
+}
+
+/// An element.
+#[derive(Debug)]
+pub struct Element<'a> {
+    /// Name.
+    pub name: QualName,
+    /// Attributes.
+    pub attrs: Vec<Attribute>,
+    /// A script element's "already started" flag.
+    pub script_already_started: Option<bool>,
+    /// A template element's contents.
+    pub template_contents: Option<&'a TreeNode<'a>>,
 }
 
 /// A reference to a `TreeNode`.
@@ -59,7 +97,7 @@ impl<'a> Deref for Handle<'a> {
 
 impl<'a> Dom<'a> {
     /// Creates a TreeNode in the arena.
-    fn create_tree_node(&self, node: Node) -> &TreeNode<'a> {
+    fn create_tree_node(&self, node: Node<'a>) -> &TreeNode<'a> {
         let node = TreeNode {
             node: node,
             parent: Cell::new(None),
