@@ -14,6 +14,9 @@ use typed_arena::Arena;
 pub struct Dom<'a> {
     arena: Arena<TreeNode<'a>>,
 
+    /// Parse errors.
+    pub errors: Vec<Cow<'static, str>>,
+
     /// The root node.
     pub root: &'a TreeNode<'a>,
 }
@@ -53,11 +56,12 @@ impl<'a> fmt::Debug for Dom<'a> {
     }
 }
 
+#[allow(unused_variables)]
 impl<'a> TreeSink for Dom<'a> {
     type Handle = Handle<'a>;
 
     fn parse_error(&mut self, msg: Cow<'static, str>) {
-        unimplemented!();
+        self.errors.push(msg);
     }
 
     fn get_document(&mut self) -> Self::Handle {
