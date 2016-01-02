@@ -269,7 +269,12 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     fn append_doctype_to_document(&mut self, name: StrTendril, public_id: StrTendril, system_id: StrTendril) {
-        unimplemented!();
+        let doctype = Doctype {
+            name: name,
+            public_id: public_id,
+            system_id: system_id,
+        };
+        self.document.append_child(self.create_tree_node(Node::Doctype(doctype)));
     }
 
     fn add_attrs_if_missing(&mut self, target: Self::Handle, attrs: Vec<Attribute>) {
