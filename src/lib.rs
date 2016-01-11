@@ -23,6 +23,7 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 
 use ego_tree::Tree;
+use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
 use string_cache::QualName;
 use tendril::StrTendril;
@@ -51,13 +52,12 @@ impl Html {
     }
 
     /// Parses an HTML document.
-    pub fn parse(_s: &str) -> Self {
-        unimplemented!()
-    }
-
-    /// Parses an HTML fragment.
-    pub fn parse_fragment(_s: &str) -> Self {
-        unimplemented!()
+    pub fn parse(s: &str) -> Self {
+        driver::parse_to(
+            Self::default(),
+            driver::one_input(StrTendril::from_slice(s)),
+            Default::default()
+        )
     }
 }
 
