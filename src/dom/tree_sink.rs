@@ -101,10 +101,7 @@ impl TreeSink for Dom {
             NodeOrText::AppendText(text) => {
                 let can_append = {
                     if let Some(mut last_child) = parent.last_child() {
-                        match *last_child.value() {
-                            Node::Text(_) => true,
-                            _ => false,
-                        }
+                        last_child.value().is_text()
                     } else {
                         false
                     }
@@ -155,10 +152,7 @@ impl TreeSink for Dom {
             NodeOrText::AppendText(text) => {
                 let can_append = {
                     if let Some(mut prev_sibling) = sibling.prev_sibling() {
-                        match *prev_sibling.value() {
-                            Node::Text(_) => true,
-                            _ => false,
-                        }
+                        prev_sibling.value().is_text()
                     } else {
                         false
                     }
