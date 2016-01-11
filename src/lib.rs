@@ -21,6 +21,7 @@ extern crate tendril;
 
 use std::borrow::Cow;
 use std::collections::HashMap;
+use std::fmt;
 
 use ego_tree::Tree;
 use html5ever::driver;
@@ -66,7 +67,7 @@ impl Default for Html {
 }
 
 /// An HTML node.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum HtmlNode {
     /// A document root.
     Document,
@@ -175,8 +176,20 @@ impl HtmlNode {
     }
 }
 
+impl fmt::Debug for HtmlNode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            HtmlNode::Document => write!(f, "Document"),
+            HtmlNode::Doctype(ref doctype) => write!(f, "Doctype({:?})", doctype),
+            HtmlNode::Comment(ref comment) => write!(f, "Comment({:?})", &comment[..]),
+            HtmlNode::Text(ref text) => write!(f, "Text({:?})", &text[..]),
+            HtmlNode::Element(ref element) => write!(f, "Element({:?})", element),
+        }
+    }
+}
+
 /// A doctype.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Doctype {
     /// Name.
     pub name: StrTendril,
@@ -188,14 +201,36 @@ pub struct Doctype {
     pub system_id: StrTendril,
 }
 
+impl fmt::Debug for Doctype {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "<!DOCTYPE {} PUBLIC {:?} {:?}>",
+            self.name,
+            &self.public_id[..],
+            &self.system_id[..]
+        )
+    }
+}
+
 /// An HTML element.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Element {
     /// Name.
     pub name: QualName,
 
     /// Attributes.
     pub attrs: HashMap<QualName, StrTendril>,
+}
+
+impl fmt::Debug for Element {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        try!(write!(f, "<{}", self.name.local));
+        for (key, value) in &self.attrs {
+            try!(write!(f, " {}={:?}", key.local, &value[..]));
+        }
+        write!(f, ">")
+    }
 }
 
 mod tree_sink;
