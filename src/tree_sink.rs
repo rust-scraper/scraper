@@ -1,7 +1,3 @@
-//! `TreeSink` implementation.
-
-use super::*;
-
 use std::borrow::Cow;
 
 use ego_tree::NodeId;
@@ -10,8 +6,12 @@ use html5ever::tree_builder::{TreeSink, QuirksMode, NodeOrText};
 use string_cache::QualName;
 use tendril::StrTendril;
 
-impl TreeSink for Dom {
-    type Handle = NodeId<Node>;
+use super::*;
+
+type Handle = NodeId<HtmlNode>;
+
+impl TreeSink for Html {
+    type Handle = NodeId<HtmlNode>;
 
     // Signal a parse error.
     fn parse_error(&mut self, msg: Cow<'static, str>) {
@@ -19,7 +19,7 @@ impl TreeSink for Dom {
     }
 
     // Get a handle to the Document node.
-    fn get_document(&mut self) -> NodeId<Node> {
+    fn get_document(&mut self) -> Handle {
         self.tree.root().id()
     }
 
@@ -27,30 +27,25 @@ impl TreeSink for Dom {
     //
     // The tree builder promises this will never be called with something else than a template
     // element.
-    fn get_template_contents(&self, target: NodeId<Node>) -> NodeId<Node> {
-        let node = self.tree.get(target);
-        if let &Node::Element(ref element) = node.value() {
-            element.template_contents_id.unwrap()
-        } else {
-            panic!("not an element")
-        }
+    fn get_template_contents(&self, _target: Handle) -> Handle {
+        unimplemented!()
     }
 
-    // Do two handles refer to the same node?
-    fn same_node(&self, x: NodeId<Node>, y: NodeId<Node>) -> bool {
+    // To two handles refer to the same node?
+    fn same_node(&self, x: Handle, y: Handle) -> bool {
         x == y
     }
 
     // What is the name of this element?
     //
     // Should never be called on a non-element node; feel free to panic!.
-    fn elem_name(&self, target: NodeId<Node>) -> QualName {
-        let node = self.tree.get(target);
-        if let &Node::Element(ref element) = node.value() {
-            element.name.clone()
-        } else {
-            panic!("not an element")
-        }
+    fn elem_name(&self, target: Handle) -> QualName {
+        self.tree.get(target)
+            .value()
+            .as_element()
+            .unwrap()
+            .name
+            .clone()
     }
 
     // Set the document's quirks mode.
@@ -63,34 +58,29 @@ impl TreeSink for Dom {
     // When creating a template element (name == qualname!(html, "template")), an associated
     // document fragment called the "template contents" should also be created. Later calls to
     // self.get_template_contents() with that given element return it.
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeId<Node> {
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Handle {
         let attrs = attrs.into_iter()
             .map(|a| (a.name, a.value))
             .collect();
 
-        let mut element = Element {
+        let element = Element {
             name: name,
             attrs: attrs,
-            template_contents_id: None,
         };
 
-        if element.name == qualname!(html, "template") {
-            element.template_contents_id = Some(self.tree.orphan(Node::Document).id());
-        }
-
-        self.tree.orphan(Node::Element(element)).id()
+        self.tree.orphan(HtmlNode::Element(element)).id()
     }
 
     // Create a comment node.
-    fn create_comment(&mut self, text: StrTendril) -> NodeId<Node> {
-        self.tree.orphan(Node::Comment(text)).id()
+    fn create_comment(&mut self, text: StrTendril) -> Handle {
+        self.tree.orphan(HtmlNode::Comment(text)).id()
     }
 
     // Append a node as the last child of the given node. If this would produce adjacent sibling
     // text nodes, it should concatenate the text instead.
     //
     // The child node will not already have a parent.
-    fn append(&mut self, parent: NodeId<Node>, child: NodeOrText<NodeId<Node>>) {
+    fn append(&mut self, parent: Handle, child: NodeOrText<Handle>) {
         let mut parent = self.tree.get_mut(parent);
 
         match child {
@@ -99,23 +89,15 @@ impl TreeSink for Dom {
             },
 
             NodeOrText::AppendText(text) => {
-                let can_append = {
-                    if let Some(mut last_child) = parent.last_child() {
-                        last_child.value().is_text()
-                    } else {
-                        false
-                    }
-                };
+                let can_concat = parent.last_child()
+                    .map(|mut n| n.value().is_text())
+                    .unwrap_or(false);
 
-                if can_append {
+                if can_concat {
                     let mut last_child = parent.last_child().unwrap();
-                    if let &mut Node::Text(ref mut tendril) = last_child.value() {
-                        tendril.push_tendril(&text);
-                    } else {
-                        unreachable!();
-                    }
+                    last_child.value().as_text_mut().unwrap().push_tendril(&text);
                 } else {
-                    parent.append(Node::Text(text));
+                    parent.append(HtmlNode::Text(text));
                 }
             },
         }
@@ -131,12 +113,11 @@ impl TreeSink for Dom {
     // NB: new_node may have an old parent, from which it should be removed.
     fn append_before_sibling(
         &mut self,
-        sibling: NodeId<Node>,
-        new_node: NodeOrText<NodeId<Node>>
-    ) -> Result<(), NodeOrText<NodeId<Node>>> {
-        if let NodeOrText::AppendNode(node_id) = new_node {
-            let mut new_node = self.tree.get_mut(node_id);
-            new_node.detach();
+        sibling: Handle,
+        new_node: NodeOrText<Handle>
+    ) -> Result<(), NodeOrText<Handle>> {
+        if let NodeOrText::AppendNode(id) = new_node {
+            self.tree.get_mut(id).detach();
         }
 
         let mut sibling = self.tree.get_mut(sibling);
@@ -150,23 +131,15 @@ impl TreeSink for Dom {
             },
 
             NodeOrText::AppendText(text) => {
-                let can_append = {
-                    if let Some(mut prev_sibling) = sibling.prev_sibling() {
-                        prev_sibling.value().is_text()
-                    } else {
-                        false
-                    }
-                };
+                let can_concat = sibling.prev_sibling()
+                    .map(|mut n| n.value().is_text())
+                    .unwrap_or(false);
 
-                if can_append {
+                if can_concat {
                     let mut prev_sibling = sibling.prev_sibling().unwrap();
-                    if let &mut Node::Text(ref mut tendril) = prev_sibling.value() {
-                        tendril.push_tendril(&text);
-                    } else {
-                        unreachable!();
-                    }
+                    prev_sibling.value().as_text_mut().unwrap().push_tendril(&text);
                 } else {
-                    sibling.insert_before(Node::Text(text));
+                    sibling.insert_before(HtmlNode::Text(text));
                 }
             },
         }
@@ -186,36 +159,32 @@ impl TreeSink for Dom {
             public_id: public_id,
             system_id: system_id,
         };
-        self.tree.root_mut().append(Node::Doctype(doctype));
+        self.tree.root_mut().append(HtmlNode::Doctype(doctype));
     }
 
     // Add each attribute to the given element, if no attribute with that name already exists. The
     // tree builder promises this will never be called with something else than an element.
-    fn add_attrs_if_missing(&mut self, target: NodeId<Node>, attrs: Vec<Attribute>) {
+    fn add_attrs_if_missing(&mut self, target: Handle, attrs: Vec<Attribute>) {
         let mut node = self.tree.get_mut(target);
-        if let &mut Node::Element(ref mut element) = node.value() {
-            for attr in attrs {
-                if !element.attrs.contains_key(&attr.name) {
-                    element.attrs.insert(attr.name, attr.value);
-                }
+        let mut element = node.value().as_element_mut().unwrap();
+        for attr in attrs {
+            if !element.attrs.contains_key(&attr.name) {
+                element.attrs.insert(attr.name, attr.value);
             }
-        } else {
-            panic!("not an element");
         }
     }
 
     // Detach the given node from its parent.
-    fn remove_from_parent(&mut self, target: NodeId<Node>) {
+    fn remove_from_parent(&mut self, target: Handle) {
         self.tree.get_mut(target).detach();
     }
 
     // Remove all the children from node and append them to new_parent.
-    fn reparent_children(&mut self, node: NodeId<Node>, new_parent: NodeId<Node>) {
+    fn reparent_children(&mut self, node: Handle, new_parent: Handle) {
         unsafe { self.tree.get_mut(new_parent).reparent_from_id_append(node); }
     }
 
     // Mark a HTML <script> element as "already started".
-    fn mark_script_already_started(&mut self, _node: NodeId<Node>) {
-        // Unnecessary.
+    fn mark_script_already_started(&mut self, _node: Handle) {
     }
 }
