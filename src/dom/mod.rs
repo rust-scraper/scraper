@@ -9,7 +9,7 @@ use string_cache::QualName;
 use tendril::StrTendril;
 
 /// A DOM tree.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dom {
     /// Parse errors.
     pub errors: Vec<Cow<'static, str>>,
@@ -22,7 +22,7 @@ pub struct Dom {
 }
 
 /// A DOM node.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Node {
     /// A document root.
     Document,
@@ -41,7 +41,7 @@ pub enum Node {
 }
 
 /// A doctype.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Doctype {
     /// Name.
     pub name: StrTendril,
@@ -54,7 +54,7 @@ pub struct Doctype {
 }
 
 /// An element.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
     /// Name.
     pub name: QualName,
@@ -79,6 +79,48 @@ impl Dom {
 
 impl Default for Dom {
     fn default() -> Self { Dom::new(QuirksMode::NoQuirks) }
+}
+
+impl Node {
+    /// Returns true if node is a document root.
+    pub fn is_document(&self) -> bool {
+        match *self {
+            Node::Document => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if node is a doctype.
+    pub fn is_doctype(&self) -> bool {
+        match *self {
+            Node::Doctype(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if node is a comment.
+    pub fn is_comment(&self) -> bool {
+        match *self {
+            Node::Comment(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if node is text.
+    pub fn is_text(&self) -> bool {
+        match *self {
+            Node::Text(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if node is an element.
+    pub fn is_element(&self) -> bool {
+        match *self {
+            Node::Element(_) => true,
+            _ => false,
+        }
+    }
 }
 
 mod tree_sink;
