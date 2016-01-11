@@ -1,50 +1,29 @@
 //! DOM implementation.
 
 use std::borrow::Cow;
-use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
-use std::{fmt, mem};
 
+use ego_tree::{Tree, NodeId};
 use html5ever::tree_builder::QuirksMode;
 use string_cache::QualName;
 use tendril::StrTendril;
-use typed_arena::Arena;
 
-/// Arena-allocated DOM.
-pub struct Dom<'a> {
-    arena: Arena<TreeNode<'a>>,
-
+/// A DOM tree.
+#[derive(Debug)]
+pub struct Dom {
     /// Parse errors.
     pub errors: Vec<Cow<'static, str>>,
 
-    /// The document root node.
-    pub document: &'a TreeNode<'a>,
+    /// The node tree.
+    pub tree: Tree<Node>,
 
     /// The quirks mode.
     pub quirks_mode: QuirksMode,
 }
 
-/// A node in the DOM tree.
-pub struct TreeNode<'a> {
-    /// The DOM node.
-    pub node: Node<'a>,
-
-    /// The parent node.
-    pub parent: Cell<Option<&'a TreeNode<'a>>>,
-
-    /// The first and last children.
-    pub children: Cell<Option<(&'a TreeNode<'a>, &'a TreeNode<'a>)>>,
-
-    /// The next sibling.
-    pub next_sibling: Cell<Option<&'a TreeNode<'a>>>,
-
-    /// The previous sibling.
-    pub prev_sibling: Cell<Option<&'a TreeNode<'a>>>,
-}
-
 /// A DOM node.
 #[derive(Debug)]
-pub enum Node<'a> {
+pub enum Node {
     /// A document root.
     Document,
 
@@ -55,12 +34,10 @@ pub enum Node<'a> {
     Comment(StrTendril),
 
     /// Text.
-    ///
-    /// Contained in a `RefCell` so that text can be concatenated together during tree building.
-    Text(RefCell<StrTendril>),
+    Text(StrTendril),
 
     /// An element.
-    Element(Element<'a>),
+    Element(Element),
 }
 
 /// A doctype.
@@ -78,105 +55,30 @@ pub struct Doctype {
 
 /// An element.
 #[derive(Debug)]
-pub struct Element<'a> {
+pub struct Element {
     /// Name.
     pub name: QualName,
 
     /// Attributes.
-    ///
-    /// Contained in a `RefCell` so that attributes can be added during tree building.
-    pub attrs: RefCell<HashMap<QualName, StrTendril>>,
+    pub attrs: HashMap<QualName, StrTendril>,
 
-    /// A template element's contents.
-    pub template_contents: Option<&'a TreeNode<'a>>,
+    /// The tree node ID of a template element's contents.
+    pub template_contents_id: Option<NodeId<Node>>,
 }
 
-impl<'a> Dom<'a> {
+impl Dom {
     /// Creates a new DOM.
-    pub fn new(quirks_mode: QuirksMode) -> Dom<'a> {
-        let mut dom = Dom {
-            arena: Arena::new(),
+    pub fn new(quirks_mode: QuirksMode) -> Self {
+        Dom {
             errors: Vec::new(),
+            tree: Tree::new(Node::Document),
             quirks_mode: quirks_mode,
-            document: unsafe { mem::uninitialized() },
-        };
-        dom.document = dom.new_tree_node(Node::Document);
-        dom
-    }
-
-    /// Creates a new TreeNode belonging to the DOM.
-    pub fn new_tree_node(&self, node: Node<'a>) -> &'a TreeNode<'a> {
-        let tree_node = TreeNode {
-            node: node,
-            parent: Cell::new(None),
-            children: Cell::new(None),
-            next_sibling: Cell::new(None),
-            prev_sibling: Cell::new(None),
-        };
-        // Convince the compiler that tree_node will live as long as 'a.
-        unsafe { mem::transmute(self.arena.alloc(tree_node)) }
+        }
     }
 }
 
-impl<'a> Default for Dom<'a> {
-    fn default() -> Dom<'a> { Dom::new(QuirksMode::NoQuirks) }
+impl Default for Dom {
+    fn default() -> Self { Dom::new(QuirksMode::NoQuirks) }
 }
 
-impl<'a> TreeNode<'a> {
-    /// Returns true if `a` and `b` refer to the same `TreeNode`.
-    #[allow(trivial_casts)]
-    pub fn same(a: &'a TreeNode<'a>, b: &'a TreeNode<'a>) -> bool {
-        a as *const _ == b as *const _
-    }
-
-    /// Returns the parent node.
-    pub fn parent(&self) -> Option<&'a TreeNode<'a>> {
-        self.parent.get()
-    }
-
-    /// Returns the first child.
-    pub fn first_child(&self) -> Option<&'a TreeNode<'a>> {
-        self.children.get().map(|c| c.0)
-    }
-
-    /// Returns the last child.
-    pub fn last_child(&self) -> Option<&'a TreeNode<'a>> {
-        self.children.get().map(|c| c.1)
-    }
-
-    /// Returns the next sibling.
-    pub fn next_sibling(&self) -> Option<&'a TreeNode<'a>> {
-        self.next_sibling.get()
-    }
-
-    /// Returns the previous sibling.
-    pub fn prev_sibling(&self) -> Option<&'a TreeNode<'a>> {
-        self.prev_sibling.get()
-    }
-}
-
-// Arena does not implement Debug.
-impl<'a> fmt::Debug for Dom<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        f.debug_struct("Dom")
-            .field("errors", &self.errors)
-            .field("document", &self.document)
-            .field("quirks_mode", &self.quirks_mode)
-            .finish()
-    }
-}
-
-// Avoid recursive parts of the structure.
-impl<'a> fmt::Debug for TreeNode<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        f.debug_struct("TreeNode")
-            .field("node", &self.node)
-            .field("children", &self.children)
-            .field("next_sibling", &self.next_sibling)
-            .finish()
-    }
-}
-
-pub mod iter;
-pub mod tree_sink;
-mod display;
+mod tree_sink;

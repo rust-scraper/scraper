@@ -1,11 +1,11 @@
 [package]
+authors = ["Curtis McEnroe <programble@gmail.com>"]
 name = "scraper"
 version = "0.0.0"
-authors = ["Curtis McEnroe <programble@gmail.com>"]
 
 [dependencies]
+ego-tree = "0.1.0"
 html5ever = "0.2.11"
 selectors = "0.2.2"
 string_cache = "0.2.5"
 tendril = "0.1.6"
-typed-arena = "1.1.0"

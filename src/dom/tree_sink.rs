@@ -3,55 +3,15 @@
 use super::*;
 
 use std::borrow::Cow;
-use std::cell::RefCell;
-use std::ops::Deref;
 
+use ego_tree::NodeId;
 use html5ever::Attribute;
-use html5ever::driver::ParseResult;
 use html5ever::tree_builder::{TreeSink, QuirksMode, NodeOrText};
 use string_cache::QualName;
 use tendril::StrTendril;
 
-/// A reference to a `TreeNode`.
-#[derive(Debug, Clone)]
-pub struct Handle<'a>(&'a TreeNode<'a>);
-
-impl<'a> Deref for Handle<'a> {
-    type Target = TreeNode<'a>;
-    fn deref(&self) -> &TreeNode<'a> { self.0 }
-}
-
-fn append_child<'a>(parent: &'a TreeNode<'a>, child: &'a TreeNode<'a>) {
-    if let Some((first, last)) = parent.children.get() {
-        last.next_sibling.set(Some(child));
-        child.prev_sibling.set(Some(last));
-        parent.children.set(Some((first, child)));
-    } else {
-        parent.children.set(Some((child, child)));
-    }
-    child.parent.set(Some(parent));
-}
-
-fn insert_before<'a>(node: &'a TreeNode<'a>, new_node: &'a TreeNode<'a>) {
-    let parent = node.parent().unwrap();
-
-    if let Some(prev) = node.prev_sibling() {
-        new_node.prev_sibling.set(Some(prev));
-        new_node.next_sibling.set(Some(node));
-        prev.next_sibling.set(Some(new_node));
-        node.prev_sibling.set(Some(new_node));
-    } else {
-        new_node.next_sibling.set(Some(node));
-        node.prev_sibling.set(Some(new_node));
-        let last = parent.children.get().unwrap().1;
-        parent.children.set(Some((new_node, last)));
-    }
-
-    new_node.parent.set(Some(parent));
-}
-
-impl<'a> TreeSink for Dom<'a> {
-    type Handle = Handle<'a>;
+impl TreeSink for Dom {
+    type Handle = NodeId<Node>;
 
     // Signal a parse error.
     fn parse_error(&mut self, msg: Cow<'static, str>) {
@@ -59,34 +19,34 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     // Get a handle to the Document node.
-    fn get_document(&mut self) -> Handle<'a> {
-        Handle(self.document)
+    fn get_document(&mut self) -> NodeId<Node> {
+        self.tree.root().id()
     }
 
     // Get a handle to a template's template contents.
     //
     // The tree builder promises this will never be called with something else than a template
     // element.
-    fn get_template_contents(&self, target: Handle<'a>) -> Handle<'a> {
-        let Handle(node) = target;
-        if let Node::Element(ref element) = node.node {
-            Handle(element.template_contents.unwrap())
+    fn get_template_contents(&self, target: NodeId<Node>) -> NodeId<Node> {
+        let node = self.tree.get(target);
+        if let &Node::Element(ref element) = node.value() {
+            element.template_contents_id.unwrap()
         } else {
             panic!("not an element")
         }
     }
 
     // Do two handles refer to the same node?
-    fn same_node(&self, x: Handle<'a>, y: Handle<'a>) -> bool {
-        TreeNode::same(x.0, y.0)
+    fn same_node(&self, x: NodeId<Node>, y: NodeId<Node>) -> bool {
+        x == y
     }
 
     // What is the name of this element?
     //
     // Should never be called on a non-element node; feel free to panic!.
-    fn elem_name(&self, target: Handle<'a>) -> QualName {
-        let Handle(node) = target;
-        if let Node::Element(ref element) = node.node {
+    fn elem_name(&self, target: NodeId<Node>) -> QualName {
+        let node = self.tree.get(target);
+        if let &Node::Element(ref element) = node.value() {
             element.name.clone()
         } else {
             panic!("not an element")
@@ -103,52 +63,62 @@ impl<'a> TreeSink for Dom<'a> {
     // When creating a template element (name == qualname!(html, "template")), an associated
     // document fragment called the "template contents" should also be created. Later calls to
     // self.get_template_contents() with that given element return it.
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Handle<'a> {
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeId<Node> {
         let attrs = attrs.into_iter()
             .map(|a| (a.name, a.value))
             .collect();
 
-        if name == qualname!(html, "template") {
-            let contents = self.new_tree_node(Node::Document);
-            let element = Element {
-                name: name,
-                attrs: RefCell::new(attrs),
-                template_contents: Some(contents),
-            };
-            Handle(self.new_tree_node(Node::Element(element)))
-        } else {
-            let element = Element {
-                name: name,
-                attrs: RefCell::new(attrs),
-                template_contents: None,
-            };
-            Handle(self.new_tree_node(Node::Element(element)))
+        let mut element = Element {
+            name: name,
+            attrs: attrs,
+            template_contents_id: None,
+        };
+
+        if element.name == qualname!(html, "template") {
+            element.template_contents_id = Some(self.tree.orphan(Node::Document).id());
         }
+
+        self.tree.orphan(Node::Element(element)).id()
     }
 
     // Create a comment node.
-    fn create_comment(&mut self, text: StrTendril) -> Handle<'a> {
-        Handle(self.new_tree_node(Node::Comment(text)))
+    fn create_comment(&mut self, text: StrTendril) -> NodeId<Node> {
+        self.tree.orphan(Node::Comment(text)).id()
     }
 
     // Append a node as the last child of the given node. If this would produce adjacent sibling
     // text nodes, it should concatenate the text instead.
     //
     // The child node will not already have a parent.
-    fn append(&mut self, parent: Handle<'a>, child: NodeOrText<Handle<'a>>) {
-        let Handle(parent) = parent;
+    fn append(&mut self, parent: NodeId<Node>, child: NodeOrText<NodeId<Node>>) {
+        let mut parent = self.tree.get_mut(parent);
+
         match child {
-            NodeOrText::AppendNode(Handle(node)) => {
-                append_child(parent, node);
+            NodeOrText::AppendNode(id) => {
+                unsafe { parent.append_id(id); }
             },
 
             NodeOrText::AppendText(text) => {
-                let last_child = parent.last_child();
-                if let Some(&TreeNode { node: Node::Text(ref tendril), .. }) = last_child {
-                    tendril.borrow_mut().push_tendril(&text);
+                let can_append = {
+                    if let Some(mut last_child) = parent.last_child() {
+                        match *last_child.value() {
+                            Node::Text(_) => true,
+                            _ => false,
+                        }
+                    } else {
+                        false
+                    }
+                };
+
+                if can_append {
+                    let mut last_child = parent.last_child().unwrap();
+                    if let &mut Node::Text(ref mut tendril) = last_child.value() {
+                        tendril.push_tendril(&text);
+                    } else {
+                        unreachable!();
+                    }
                 } else {
-                    let node = Node::Text(RefCell::new(text));
-                    append_child(parent, self.new_tree_node(node));
+                    parent.append(Node::Text(text));
                 }
             },
         }
@@ -164,27 +134,45 @@ impl<'a> TreeSink for Dom<'a> {
     // NB: new_node may have an old parent, from which it should be removed.
     fn append_before_sibling(
         &mut self,
-        sibling: Handle<'a>,
-        new_node: NodeOrText<Handle<'a>>
-    ) -> Result<(), NodeOrText<Handle<'a>>> {
-        let Handle(sibling) = sibling;
+        sibling: NodeId<Node>,
+        new_node: NodeOrText<NodeId<Node>>
+    ) -> Result<(), NodeOrText<NodeId<Node>>> {
+        if let NodeOrText::AppendNode(node_id) = new_node {
+            let mut new_node = self.tree.get_mut(node_id);
+            new_node.detach();
+        }
+
+        let mut sibling = self.tree.get_mut(sibling);
         if sibling.parent().is_none() {
-            return Err(new_node)
+            return Err(new_node);
         }
 
         match new_node {
-            NodeOrText::AppendNode(Handle(node)) => {
-                self.remove_from_parent(Handle(node));
-                insert_before(sibling, node);
+            NodeOrText::AppendNode(id) => {
+                unsafe { sibling.insert_id_before(id); }
             },
 
             NodeOrText::AppendText(text) => {
-                let prev = sibling.prev_sibling();
-                if let Some(&TreeNode { node: Node::Text(ref tendril), .. }) = prev {
-                    tendril.borrow_mut().push_tendril(&text);
+                let can_append = {
+                    if let Some(mut prev_sibling) = sibling.prev_sibling() {
+                        match *prev_sibling.value() {
+                            Node::Text(_) => true,
+                            _ => false,
+                        }
+                    } else {
+                        false
+                    }
+                };
+
+                if can_append {
+                    let mut prev_sibling = sibling.prev_sibling().unwrap();
+                    if let &mut Node::Text(ref mut tendril) = prev_sibling.value() {
+                        tendril.push_tendril(&text);
+                    } else {
+                        unreachable!();
+                    }
                 } else {
-                    let node = Node::Text(RefCell::new(text));
-                    insert_before(sibling, self.new_tree_node(node));
+                    sibling.insert_before(Node::Text(text));
                 }
             },
         }
@@ -204,18 +192,17 @@ impl<'a> TreeSink for Dom<'a> {
             public_id: public_id,
             system_id: system_id,
         };
-        append_child(self.document, self.new_tree_node(Node::Doctype(doctype)));
+        self.tree.root_mut().append(Node::Doctype(doctype));
     }
 
     // Add each attribute to the given element, if no attribute with that name already exists. The
     // tree builder promises this will never be called with something else than an element.
-    fn add_attrs_if_missing(&mut self, target: Handle<'a>, attrs: Vec<Attribute>) {
-        let Handle(node) = target;
-        if let Node::Element(ref element) = node.node {
-            let mut elem_attrs = element.attrs.borrow_mut();
+    fn add_attrs_if_missing(&mut self, target: NodeId<Node>, attrs: Vec<Attribute>) {
+        let mut node = self.tree.get_mut(target);
+        if let &mut Node::Element(ref mut element) = node.value() {
             for attr in attrs {
-                if !elem_attrs.contains_key(&attr.name) {
-                    let _ = elem_attrs.insert(attr.name, attr.value);
+                if !element.attrs.contains_key(&attr.name) {
+                    element.attrs.insert(attr.name, attr.value);
                 }
             }
         } else {
@@ -224,79 +211,17 @@ impl<'a> TreeSink for Dom<'a> {
     }
 
     // Detach the given node from its parent.
-    fn remove_from_parent(&mut self, target: Handle<'a>) {
-        let Handle(node) = target;
-        let parent = match node.parent() {
-            Some(p) => p,
-            None => return,
-        };
-        let prev_sibling = node.prev_sibling();
-        let next_sibling = node.next_sibling();
-
-        // Update sibling refs.
-        if let Some(prev) = prev_sibling {
-            prev.next_sibling.set(node.next_sibling());
-        }
-        if let Some(next) = next_sibling {
-            next.prev_sibling.set(node.prev_sibling());
-        }
-
-        // Update parent refs.
-        if prev_sibling.is_none() && next_sibling.is_none() {
-            parent.children.set(None);
-        } else {
-            let mut parent_children = parent.children.get().unwrap();
-            if TreeNode::same(parent_children.0, node) {
-                parent_children.0 = next_sibling.unwrap();
-            }
-            if TreeNode::same(parent_children.1, node) {
-                parent_children.1 = prev_sibling.unwrap();
-            }
-            parent.children.set(Some(parent_children));
-        }
-
-        // Orphan node.
-        node.parent.set(None);
-        node.next_sibling.set(None);
-        node.prev_sibling.set(None);
+    fn remove_from_parent(&mut self, target: NodeId<Node>) {
+        self.tree.get_mut(target).detach();
     }
 
     // Remove all the children from node and append them to new_parent.
-    fn reparent_children(&mut self, node: Handle<'a>, new_parent: Handle<'a>) {
-        let Handle(old_parent) = node;
-        let Handle(new_parent) = new_parent;
-        let children = match old_parent.children.get() {
-            Some(c) => c,
-            None => return,
-        };
-
-        // Orphan children.
-        old_parent.children.set(None);
-
-        // Adopt children.
-        let mut child = Some(children.0);
-        while let Some(node) = child {
-            node.parent.set(Some(new_parent));
-            child = node.next_sibling();
-        }
-
-        // Append children to their new siblings.
-        if let Some((first, last)) = new_parent.children.get() {
-            last.next_sibling.set(Some(children.0));
-            children.0.prev_sibling.set(Some(last));
-            new_parent.children.set(Some((first, children.1)));
-        } else {
-            new_parent.children.set(Some(children));
-        }
+    fn reparent_children(&mut self, node: NodeId<Node>, new_parent: NodeId<Node>) {
+        unsafe { self.tree.get_mut(new_parent).reparent_from_id_append(node); }
     }
 
     // Mark a HTML <script> element as "already started".
-    fn mark_script_already_started(&mut self, _node: Handle<'a>) {
+    fn mark_script_already_started(&mut self, _node: NodeId<Node>) {
         // Unnecessary.
     }
-}
-
-impl<'a> ParseResult for Dom<'a> {
-    type Sink = Dom<'a>;
-    fn get_result(sink: Dom<'a>) -> Dom<'a> { sink }
 }
