@@ -60,6 +60,17 @@ impl Html {
             Default::default()
         )
     }
+
+    /// Parses an HTML fragment.
+    pub fn parse_fragment(s: &str) -> Self {
+        driver::parse_fragment_to(
+            Self::default(),
+            driver::one_input(StrTendril::from_slice(s)),
+            qualname!(html, "body"),
+            Vec::new(),
+            Default::default()
+        )
+    }
 }
 
 impl Default for Html {
