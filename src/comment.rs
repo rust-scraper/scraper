@@ -6,6 +6,7 @@ use std::ops::Deref;
 use tendril::StrTendril;
 
 /// An HTML comment.
+#[derive(Clone, PartialEq, Eq)]
 pub struct Comment {
     comment: StrTendril,
 }

@@ -6,6 +6,7 @@ use std::ops::Deref;
 use tendril::StrTendril;
 
 /// HTML text.
+#[derive(Clone, PartialEq, Eq)]
 pub struct Text {
     text: StrTendril,
 }
