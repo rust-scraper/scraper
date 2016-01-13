@@ -2,13 +2,14 @@
 
 use std::collections::{HashSet, HashMap};
 use std::collections::{hash_set, hash_map};
+use std::fmt;
 use std::ops::Deref;
 
 use string_cache::{QualName, Atom};
 use tendril::StrTendril;
 
 /// An HTML element.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Element {
     name: QualName,
     id: Atom,
@@ -76,5 +77,15 @@ impl<'a> Iterator for Attrs<'a> {
 
     fn next(&mut self) -> Option<(&'a str, &'a str)> {
         self.inner.next().map(|(k, v)| (k.local.deref(), v.deref()))
+    }
+}
+
+impl fmt::Debug for Element {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        try!(write!(f, "<{}", self.name()));
+        for (key, value) in self.attrs() {
+            try!(write!(f, " {}={:?}", key, value));
+        }
+        write!(f, ">")
     }
 }
