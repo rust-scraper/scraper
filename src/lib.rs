@@ -17,4 +17,5 @@
 extern crate string_cache;
 extern crate tendril;
 
+pub mod doctype;
 pub mod element;
