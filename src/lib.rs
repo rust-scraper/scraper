@@ -14,8 +14,10 @@
     variant_size_differences
 )]
 
+extern crate cssparser;
 extern crate ego_tree;
 extern crate html5ever;
+extern crate selectors;
 #[macro_use] extern crate string_cache;
 extern crate tendril;
 
@@ -224,3 +226,4 @@ impl fmt::Debug for Element {
 }
 
 mod html;
+mod css;
