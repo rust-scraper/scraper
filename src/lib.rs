@@ -24,7 +24,6 @@ use std::collections::HashMap;
 use std::fmt;
 
 use ego_tree::Tree;
-use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
 use string_cache::QualName;
 use tendril::StrTendril;
@@ -50,26 +49,6 @@ impl Html {
             quirks_mode: quirks_mode,
             tree: Tree::new(HtmlNode::Document),
         }
-    }
-
-    /// Parses an HTML document.
-    pub fn parse(s: &str) -> Self {
-        driver::parse_to(
-            Self::default(),
-            driver::one_input(StrTendril::from_slice(s)),
-            Default::default()
-        )
-    }
-
-    /// Parses an HTML fragment.
-    pub fn parse_fragment(s: &str) -> Self {
-        driver::parse_fragment_to(
-            Self::default(),
-            driver::one_input(StrTendril::from_slice(s)),
-            qualname!(html, "body"),
-            Vec::new(),
-            Default::default()
-        )
     }
 }
 

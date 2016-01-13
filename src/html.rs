@@ -2,11 +2,34 @@ use std::borrow::Cow;
 
 use ego_tree::NodeId;
 use html5ever::Attribute;
+use html5ever::driver;
 use html5ever::tree_builder::{TreeSink, QuirksMode, NodeOrText};
 use string_cache::QualName;
 use tendril::StrTendril;
 
 use super::*;
+
+impl Html {
+    /// Parses an HTML document.
+    pub fn parse(s: &str) -> Self {
+        driver::parse_to(
+            Self::default(),
+            driver::one_input(StrTendril::from_slice(s)),
+            Default::default()
+        )
+    }
+
+    /// Parses an HTML fragment.
+    pub fn parse_fragment(s: &str) -> Self {
+        driver::parse_fragment_to(
+            Self::default(),
+            driver::one_input(StrTendril::from_slice(s)),
+            qualname!(html, "body"),
+            Vec::new(),
+            Default::default()
+        )
+    }
+}
 
 type Handle = NodeId<HtmlNode>;
 
