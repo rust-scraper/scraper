@@ -244,4 +244,4 @@ impl fmt::Debug for Element {
     }
 }
 
-mod tree_sink;
+mod html;
