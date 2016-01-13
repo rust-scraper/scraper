@@ -19,4 +19,5 @@ extern crate tendril;
 
 pub mod doctype;
 pub mod comment;
+pub mod text;
 pub mod element;
