@@ -12,3 +12,9 @@
     unused_results,
     variant_size_differences
 )]
+
+#[macro_use]
+extern crate string_cache;
+extern crate tendril;
+
+pub mod element;
