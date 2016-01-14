@@ -12,8 +12,10 @@
     variant_size_differences
 )]
 
+extern crate cssparser;
 extern crate ego_tree;
 extern crate html5ever;
+extern crate selectors;
 #[macro_use]
 extern crate string_cache;
 extern crate tendril;
@@ -30,4 +32,5 @@ pub mod doctype;
 pub mod element;
 pub mod html;
 pub mod node;
+pub mod selector;
 pub mod text;
