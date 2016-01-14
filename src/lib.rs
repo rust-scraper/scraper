@@ -21,4 +21,4 @@ pub mod doctype;
 pub mod comment;
 pub mod text;
 pub mod element;
-pub mod html;
+pub mod node;
