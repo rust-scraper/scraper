@@ -1,12 +1,14 @@
 //! HTML nodes.
 
+use std::fmt;
+
 use doctype::Doctype;
 use comment::Comment;
 use text::Text;
 use element::Element;
 
 /// An HTML node.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum Node {
     /// The document root.
     Document,
@@ -76,5 +78,19 @@ impl Node {
     /// Returns self as an element.
     pub fn as_element(&self) -> Option<&Element> {
         match *self { Node::Element(ref e) => Some(e), _ => None }
+    }
+}
+
+// Always use one line.
+impl fmt::Debug for Node {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            Node::Document => write!(f, "Document"),
+            Node::Fragment => write!(f, "Fragment"),
+            Node::Doctype(ref d) => write!(f, "Doctype({:?})", d),
+            Node::Comment(ref c) => write!(f, "Comment({:?})", c),
+            Node::Text(ref t) => write!(f, "Text({:?})", t),
+            Node::Element(ref e) => write!(f, "Element({:?})", e),
+        }
     }
 }
