@@ -15,7 +15,7 @@ pub struct Element {
     pub name: QualName,
 
     /// The element ID.
-    pub id: Atom,
+    pub id: Option<Atom>,
 
     /// The element classes.
     pub classes: HashSet<Atom>,
@@ -25,14 +25,35 @@ pub struct Element {
 }
 
 impl Element {
+    /// Creates an element from name and attributes.
+    pub fn new(name: QualName, attrs: HashMap<QualName, StrTendril>) -> Self {
+        let id = attrs.get(&qualname!("", "id"))
+            .map(Deref::deref)
+            .map(Atom::from);
+
+        let classes = attrs.get(&qualname!("", "class"))
+            .map(Deref::deref)
+            .into_iter()
+            .flat_map(str::split_whitespace)
+            .map(Atom::from)
+            .collect();
+
+        Element {
+            name: name,
+            id: id,
+            classes: classes,
+            attrs: attrs,
+        }
+    }
+
     /// Returns the element name.
     pub fn name(&self) -> &str {
         self.name.local.deref()
     }
 
     /// Returns the element ID.
-    pub fn id(&self) -> &str {
-        self.id.deref()
+    pub fn id(&self) -> Option<&str> {
+        self.id.as_ref().map(Deref::deref)
     }
 
     /// Returns true if element has the class.
