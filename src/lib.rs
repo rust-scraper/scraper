@@ -9,10 +9,11 @@
     unused_extern_crates,
     unused_import_braces,
     unused_qualifications,
-    unused_results,
     variant_size_differences
 )]
 
+extern crate ego_tree;
+extern crate html5ever;
 #[macro_use]
 extern crate string_cache;
 extern crate tendril;
@@ -22,3 +23,4 @@ pub mod comment;
 pub mod text;
 pub mod element;
 pub mod node;
+pub mod html;
