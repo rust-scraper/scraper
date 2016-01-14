@@ -2,7 +2,7 @@ extern crate scraper;
 
 use std::io::{self, Read};
 
-use scraper::html::Html;
+use scraper::Html;
 
 fn main() {
     let mut fragment = String::new();
@@ -10,4 +10,3 @@ fn main() {
     let html = Html::parse_fragment(&fragment);
     println!("{:#?}", html);
 }
-
