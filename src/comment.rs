@@ -8,7 +8,8 @@ use tendril::StrTendril;
 /// An HTML comment.
 #[derive(Clone, PartialEq, Eq)]
 pub struct Comment {
-    comment: StrTendril,
+    /// The comment text.
+    pub comment: StrTendril,
 }
 
 impl Deref for Comment {

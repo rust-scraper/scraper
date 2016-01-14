@@ -11,10 +11,17 @@ use tendril::StrTendril;
 /// An HTML element.
 #[derive(Clone, PartialEq, Eq)]
 pub struct Element {
-    name: QualName,
-    id: Atom,
-    classes: HashSet<Atom>,
-    attrs: HashMap<QualName, StrTendril>,
+    /// The element name.
+    pub name: QualName,
+
+    /// The element ID.
+    pub id: Atom,
+
+    /// The element classes.
+    pub classes: HashSet<Atom>,
+
+    /// The element attributes.
+    pub attrs: HashMap<QualName, StrTendril>,
 }
 
 impl Element {

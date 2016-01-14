@@ -8,7 +8,8 @@ use tendril::StrTendril;
 /// HTML text.
 #[derive(Clone, PartialEq, Eq)]
 pub struct Text {
-    text: StrTendril,
+    /// The text.
+    pub text: StrTendril,
 }
 
 impl Deref for Text {

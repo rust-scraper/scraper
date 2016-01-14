@@ -8,9 +8,14 @@ use tendril::StrTendril;
 /// A doctype.
 #[derive(Clone, PartialEq, Eq)]
 pub struct Doctype {
-    name: StrTendril,
-    public_id: StrTendril,
-    system_id: StrTendril,
+    /// The doctype name.
+    pub name: StrTendril,
+
+    /// The doctype public ID.
+    pub public_id: StrTendril,
+
+    /// The doctype system ID.
+    pub system_id: StrTendril,
 }
 
 impl Doctype {
