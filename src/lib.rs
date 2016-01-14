@@ -25,6 +25,7 @@ pub use doctype::Doctype;
 pub use element::Element;
 pub use html::Html;
 pub use node::Node;
+pub use selector::Selector;
 pub use text::Text;
 
 pub mod comment;
