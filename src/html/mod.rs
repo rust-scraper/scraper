@@ -3,7 +3,9 @@
 use std::borrow::Cow;
 
 use ego_tree::Tree;
+use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
+use tendril::StrTendril;
 
 use node::Node;
 
@@ -41,12 +43,22 @@ impl Html {
 
     /// Parses a string of HTML as a document.
     pub fn parse_document(document: &str) -> Self {
-        unimplemented!()
+        driver::parse_to(
+            Self::new_document(),
+            driver::one_input(StrTendril::from_slice(document)),
+            Default::default()
+        )
     }
 
     /// Parses a string of HTML as a fragment.
     pub fn parse_fragment(fragment: &str) -> Self {
-        unimplemented!()
+        driver::parse_fragment_to(
+            Self::new_fragment(),
+            driver::one_input(StrTendril::from_slice(fragment)),
+            qualname!(html, "body"),
+            Vec::new(),
+            Default::default()
+        )
     }
 }
 
