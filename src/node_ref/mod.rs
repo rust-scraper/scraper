@@ -7,7 +7,7 @@ use ego_tree;
 use node::Node;
 
 /// Wrapper around a reference to an HTML node.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NodeRef<'a>(pub ego_tree::NodeRef<'a, Node>);
 
 impl<'a> Deref for NodeRef<'a> {

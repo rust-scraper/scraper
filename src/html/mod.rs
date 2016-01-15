@@ -3,11 +3,14 @@
 use std::borrow::Cow;
 
 use ego_tree::Tree;
+use ego_tree::iter::Nodes;
 use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
 use tendril::StrTendril;
 
 use node::Node;
+use node_ref::NodeRef;
+use selector::Selector;
 
 /// An HTML tree.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -59,6 +62,35 @@ impl Html {
             Vec::new(),
             Default::default()
         )
+    }
+
+    /// Returns an iterator over elements matching a selector.
+    pub fn select<'a, 'b>(&'a self, selector: &'b Selector) -> Select<'a, 'b> {
+        Select {
+            selector: selector,
+            inner: self.tree.nodes(),
+        }
+    }
+}
+
+/// Iterator over elements matching a selector.
+#[derive(Debug)]
+pub struct Select<'a, 'b> {
+    inner: Nodes<'a, Node>,
+    selector: &'b Selector,
+}
+
+impl<'a, 'b> Iterator for Select<'a, 'b> {
+    type Item = NodeRef<'a>;
+
+    fn next(&mut self) -> Option<NodeRef<'a>> {
+        for node in self.inner.by_ref() {
+            let node_ref = NodeRef(node);
+            if node.value().is_element() && self.selector.matches(node_ref) {
+                return Some(node_ref);
+            }
+        }
+        None
     }
 }
 
