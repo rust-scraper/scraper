@@ -76,8 +76,8 @@ impl Html {
     /// Returns an iterator over elements matching a selector.
     pub fn select<'a, 'b>(&'a self, selector: &'b Selector) -> Select<'a, 'b> {
         Select {
-            selector: selector,
             inner: self.tree.nodes(),
+            selector: selector,
         }
     }
 }
