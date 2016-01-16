@@ -4,7 +4,7 @@ use selectors::Element;
 use selectors::parser::AttrSelector;
 use string_cache::{QualName, Atom, Namespace};
 
-use node_ref::NodeRef;
+use super::NodeRef;
 
 impl<'a> Element for NodeRef<'a> {
     fn parent_element(&self) -> Option<Self> {

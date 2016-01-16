@@ -8,11 +8,20 @@ use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
 use tendril::StrTendril;
 
-use node::Node;
-use node_ref::NodeRef;
-use selector::Selector;
+use {Node, NodeRef, Selector};
 
 /// An HTML tree.
+///
+/// Implements the `TreeSink` trait from the `html5ever` crate, which allows HTML to be parsed.
+///
+/// Note that the `TreeSink` implementation does not support the `<template>` element.
+///
+/// # Examples
+///
+/// ```
+/// use scraper::Html;
+/// let html = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Html {
     /// Parse errors.

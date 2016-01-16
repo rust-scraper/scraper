@@ -2,10 +2,7 @@
 
 use std::fmt;
 
-use doctype::Doctype;
-use comment::Comment;
-use text::Text;
-use element::Element;
+use {Doctype, Comment, Text, Element};
 
 /// An HTML node.
 #[derive(Clone, PartialEq, Eq)]
