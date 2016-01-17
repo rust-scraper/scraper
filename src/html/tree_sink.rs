@@ -6,12 +6,8 @@ use html5ever::Attribute;
 use string_cache::QualName;
 use tendril::StrTendril;
 
-use comment::Comment;
-use doctype::Doctype;
-use element::Element;
-use html::Html;
-use node::Node;
-use text::Text;
+use super::Html;
+use node::{Node, Doctype, Comment, Text, Element};
 
 type Handle = NodeId<Node>;
 
