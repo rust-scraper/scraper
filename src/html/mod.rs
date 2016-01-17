@@ -12,6 +12,9 @@ use {Node, NodeRef, Selector};
 
 /// An HTML tree.
 ///
+/// Parsing does not fail hard. Instead, the `quirks_mode` is set and errors are added to the
+/// `errors` field. The `tree` will still be populated as best as possible.
+///
 /// Implements the `TreeSink` trait from the `html5ever` crate, which allows HTML to be parsed.
 ///
 /// Note that the `TreeSink` implementation does not support the `<template>` element.
