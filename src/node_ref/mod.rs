@@ -55,7 +55,7 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     type Item = NodeRef<'a>;
 
     fn next(&mut self) -> Option<NodeRef<'a>> {
-        for edge in self.inner {
+        for edge in &mut self.inner {
             if let Edge::Open(node) = edge {
                 let node_ref = NodeRef(node);
                 if node.value().is_element() && self.selector.matches(&node_ref) {
