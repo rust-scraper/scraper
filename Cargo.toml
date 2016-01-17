@@ -1,7 +1,16 @@
 [package]
-authors = ["Curtis McEnroe <programble@gmail.com>"]
 name = "scraper"
 version = "0.0.0"
+
+description = "HTML parsing and querying with CSS selectors"
+keywords = ["html", "css", "selector", "scraping"]
+
+authors = ["Curtis McEnroe <programble@gmail.com>"]
+license = "ISC"
+
+documentation = "https://cmcenroe.me/scraper/scraper"
+repository = "https://github.com/programble/scraper"
+readme="README.md"
 
 [dependencies]
 cssparser = "0.4.0"
