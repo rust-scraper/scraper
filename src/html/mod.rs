@@ -98,9 +98,12 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     fn next(&mut self) -> Option<NodeRef<'a>> {
         for node in self.inner.by_ref() {
             let node_ref = NodeRef(node);
-            if node.value().is_element() && self.selector.matches(&node_ref) {
-                return Some(node_ref);
-            }
+
+            let matches = node.parent().is_some()
+                && node.value().is_element()
+                && self.selector.matches(&node_ref);
+
+            if matches { return Some(node_ref); }
         }
         None
     }
