@@ -12,7 +12,10 @@ use node::{Node, Doctype, Comment, Text, Element};
 type Handle = NodeId<Node>;
 
 impl TreeSink for Html {
+    type Output = Self;
     type Handle = NodeId<Node>;
+
+    fn finish(self) -> Self { self }
 
     // Signal a parse error.
     fn parse_error(&mut self, msg: Cow<'static, str>) {

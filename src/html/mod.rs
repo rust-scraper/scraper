@@ -6,7 +6,7 @@ use ego_tree::Tree;
 use ego_tree::iter::Nodes;
 use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
-use tendril::StrTendril;
+use tendril::TendrilSink;
 
 use {Node, NodeRef, Selector};
 
@@ -58,22 +58,19 @@ impl Html {
 
     /// Parses a string of HTML as a document.
     pub fn parse_document(document: &str) -> Self {
-        driver::parse_to(
-            Self::new_document(),
-            driver::one_input(StrTendril::from_slice(document)),
-            Default::default()
-        )
+        let parser = driver::parse_document(Self::new_document(), Default::default());
+        parser.one(document)
     }
 
     /// Parses a string of HTML as a fragment.
     pub fn parse_fragment(fragment: &str) -> Self {
-        driver::parse_fragment_to(
+        let parser = driver::parse_fragment(
             Self::new_fragment(),
-            driver::one_input(StrTendril::from_slice(fragment)),
+            Default::default(),
             qualname!(html, "body"),
-            Vec::new(),
-            Default::default()
-        )
+            Vec::new()
+        );
+        parser.one(fragment)
     }
 
     /// Returns an iterator over elements matching a selector.
