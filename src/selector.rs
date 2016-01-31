@@ -1,8 +1,10 @@
 //! CSS selectors.
 
 use cssparser::Parser;
-use selectors::{matching, Element};
-use selectors::parser::{self, ParserContext};
+use selectors::matching;
+use selectors::parser::{self, ParserContext, SelectorImpl};
+
+use node_ref::NodeRef;
 
 /// Wrapper around CSS selectors.
 ///
@@ -17,7 +19,7 @@ use selectors::parser::{self, ParserContext};
 #[derive(Debug, Clone, PartialEq)]
 pub struct Selector {
     /// The CSS selectors.
-    pub selectors: Vec<parser::Selector>,
+    pub selectors: Vec<parser::Selector<Simple>>,
 }
 
 impl Selector {
@@ -39,7 +41,15 @@ impl Selector {
     /// # Panics
     ///
     /// Panics if a `NodeRef` does not reference an element.
-    pub fn matches<E: Element>(&self, node: &E) -> bool {
+    pub fn matches(&self, node: &NodeRef) -> bool {
         matching::matches(&self.selectors, node, None)
     }
+}
+
+/// A simple implementation of `SelectorImpl` with no pseudo-classes or pseudo-elements.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Simple;
+impl SelectorImpl for Simple {
+    type NonTSPseudoClass = ();
+    type PseudoElement = ();
 }
