@@ -9,8 +9,6 @@ use tendril::StrTendril;
 use super::Html;
 use node::{Node, Doctype, Comment, Text, Element};
 
-type Handle = NodeId<Node>;
-
 impl TreeSink for Html {
     type Output = Self;
     type Handle = NodeId<Node>;
@@ -28,19 +26,19 @@ impl TreeSink for Html {
     }
 
     // Get a handle to the Document node.
-    fn get_document(&mut self) -> Handle {
+    fn get_document(&mut self) -> Self::Handle {
         self.tree.root().id()
     }
 
     // Do two handles refer to the same node?
-    fn same_node(&self, x: Handle, y: Handle) -> bool {
+    fn same_node(&self, x: Self::Handle, y: Self::Handle) -> bool {
         x == y
     }
 
     // What is the name of this element?
     //
     // Should never be called on a non-element node; feel free to panic!.
-    fn elem_name(&self, target: Handle) -> QualName {
+    fn elem_name(&self, target: Self::Handle) -> QualName {
         self.tree.get(target)
             .value()
             .as_element()
@@ -54,7 +52,7 @@ impl TreeSink for Html {
     // When creating a template element (name == qualname!(html, "template")), an associated
     // document fragment called the "template contents" should also be created. Later calls to
     // self.get_template_contents() with that given element return it.
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Handle {
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> Self::Handle {
         let attrs = attrs.into_iter()
             .map(|a| (a.name, a.value))
             .collect();
@@ -62,7 +60,7 @@ impl TreeSink for Html {
     }
 
     // Create a comment node.
-    fn create_comment(&mut self, text: StrTendril) -> Handle {
+    fn create_comment(&mut self, text: StrTendril) -> Self::Handle {
         self.tree.orphan(Node::Comment(Comment { comment: text })).id()
     }
 
@@ -85,7 +83,7 @@ impl TreeSink for Html {
     // text nodes, it should concatenate the text instead.
     //
     // The child node will not already have a parent.
-    fn append(&mut self, parent: Handle, child: NodeOrText<Handle>) {
+    fn append(&mut self, parent: Self::Handle, child: NodeOrText<Self::Handle>) {
         let mut parent = self.tree.get_mut(parent);
 
         match child {
@@ -121,9 +119,9 @@ impl TreeSink for Html {
     // NB: new_node may have an old parent, from which it should be removed.
     fn append_before_sibling(
         &mut self,
-        sibling: Handle,
-        new_node: NodeOrText<Handle>
-    ) -> Result<(), NodeOrText<Handle>> {
+        sibling: Self::Handle,
+        new_node: NodeOrText<Self::Handle>
+    ) -> Result<(), NodeOrText<Self::Handle>> {
         if let NodeOrText::AppendNode(id) = new_node {
             self.tree.get_mut(id).detach();
         }
@@ -159,18 +157,18 @@ impl TreeSink for Html {
     }
 
     // Detach the given node from its parent.
-    fn remove_from_parent(&mut self, target: Handle) {
+    fn remove_from_parent(&mut self, target: Self::Handle) {
         self.tree.get_mut(target).detach();
     }
 
     // Remove all the children from node and append them to new_parent.
-    fn reparent_children(&mut self, node: Handle, new_parent: Handle) {
+    fn reparent_children(&mut self, node: Self::Handle, new_parent: Self::Handle) {
         unsafe { self.tree.get_mut(new_parent).reparent_from_id_append(node); }
     }
 
     // Add each attribute to the given element, if no attribute with that name already exists. The
     // tree builder promises this will never be called with something else than an element.
-    fn add_attrs_if_missing(&mut self, target: Handle, attrs: Vec<Attribute>) {
+    fn add_attrs_if_missing(&mut self, target: Self::Handle, attrs: Vec<Attribute>) {
         let mut node = self.tree.get_mut(target);
         let mut element = match *node.value() {
             Node::Element(ref mut e) => e,
@@ -188,11 +186,11 @@ impl TreeSink for Html {
     //
     // The tree builder promises this will never be called with something else than a template
     // element.
-    fn get_template_contents(&self, _target: Handle) -> Handle {
+    fn get_template_contents(&self, _target: Self::Handle) -> Self::Handle {
         unimplemented!()
     }
 
     // Mark a HTML <script> element as "already started".
-    fn mark_script_already_started(&mut self, _node: Handle) {
+    fn mark_script_already_started(&mut self, _node: Self::Handle) {
     }
 }
