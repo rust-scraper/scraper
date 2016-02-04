@@ -5,8 +5,11 @@ use selectors::parser::AttrSelector;
 use string_cache::{QualName, Atom, Namespace};
 
 use super::NodeRef;
+use selector::Simple;
 
 impl<'a> Element for NodeRef<'a> {
+    type Impl = Simple;
+
     fn parent_element(&self) -> Option<Self> {
         self.parent().and_then(|parent| {
             if parent.value().is_element() {
@@ -58,31 +61,7 @@ impl<'a> Element for NodeRef<'a> {
         &self.value().as_element().unwrap().name.ns
     }
 
-    fn get_active_state(&self) -> bool {
-        false
-    }
-
-    fn get_focus_state(&self) -> bool {
-        false
-    }
-
-    fn get_hover_state(&self) -> bool {
-        false
-    }
-
-    fn get_enabled_state(&self) -> bool {
-        false
-    }
-
-    fn get_disabled_state(&self) -> bool {
-        false
-    }
-
-    fn get_checked_state(&self) -> bool {
-        false
-    }
-
-    fn get_intermediate_state(&self) -> bool {
+    fn match_non_ts_pseudo_class(&self, _pc: ()) -> bool {
         false
     }
 
@@ -122,10 +101,6 @@ impl<'a> Element for NodeRef<'a> {
         self.parent()
             .map(|parent| parent.value().is_document())
             .unwrap_or(false)
-    }
-
-    fn is_link(&self) -> bool {
-        false
     }
 
     fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
