@@ -49,8 +49,7 @@ impl<'a> Element for NodeRef<'a> {
         // FIXME: Is there more to this?
         self.value()
             .as_element()
-            .map(|element| element.name.ns == ns!(html))
-            .unwrap_or(false)
+            .map_or(false, |element| element.name.ns == ns!(html))
     }
 
     fn get_local_name(&self) -> &Atom {
@@ -88,8 +87,7 @@ impl<'a> Element for NodeRef<'a> {
             .attrs
             .get(&QualName::new(ns!(), attr.name.clone()))
             .map(Deref::deref)
-            .map(test)
-            .unwrap_or(false)
+            .map_or(false, test)
     }
 
     fn is_empty(&self) -> bool {
@@ -99,8 +97,7 @@ impl<'a> Element for NodeRef<'a> {
 
     fn is_root(&self) -> bool {
         self.parent()
-            .map(|parent| parent.value().is_document())
-            .unwrap_or(false)
+            .map_or(false, |parent| parent.value().is_document())
     }
 
     fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {

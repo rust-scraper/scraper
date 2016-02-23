@@ -93,8 +93,7 @@ impl TreeSink for Html {
 
             NodeOrText::AppendText(text) => {
                 let can_concat = parent.last_child()
-                    .map(|mut n| n.value().is_text())
-                    .unwrap_or(false);
+                    .map_or(false, |mut n| n.value().is_text());
 
                 if can_concat {
                     let mut last_child = parent.last_child().unwrap();
@@ -138,8 +137,7 @@ impl TreeSink for Html {
 
             NodeOrText::AppendText(text) => {
                 let can_concat = sibling.prev_sibling()
-                    .map(|mut n| n.value().is_text())
-                    .unwrap_or(false);
+                    .map_or(false, |mut n| n.value().is_text());
 
                 if can_concat {
                     let mut prev_sibling = sibling.prev_sibling().unwrap();
@@ -176,9 +174,7 @@ impl TreeSink for Html {
         };
 
         for attr in attrs {
-            if !element.attrs.contains_key(&attr.name) {
-                element.attrs.insert(attr.name, attr.value);
-            }
+            element.attrs.entry(attr.name).or_insert(attr.value);
         }
     }
 
