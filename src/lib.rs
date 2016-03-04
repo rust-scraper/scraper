@@ -23,7 +23,7 @@
 //! "#;
 //!
 //! let document = Html::parse_document(html);
-//! assert!(document.errors.is_empty());
+//! # assert!(document.errors.is_empty());
 //! ```
 //!
 //! ## Parsing a fragment
@@ -31,7 +31,7 @@
 //! ```
 //! # use scraper::Html;
 //! let fragment = Html::parse_fragment("<h1>Hello, world!</h1>");
-//! assert!(fragment.errors.is_empty());
+//! # assert!(fragment.errors.is_empty());
 //! ```
 //!
 //! ## Parsing a selector
@@ -53,8 +53,8 @@
 //! # "#;
 //! # let document = Html::parse_document(html);
 //! # let selector = Selector::parse("h1").unwrap();
-//! for node in document.select(&selector) {
-//!     assert_eq!("h1", node.value().as_element().unwrap().name());
+//! for element in document.select(&selector) {
+//!     assert_eq!("h1", element.value().name())
 //! }
 //! ```
 //!
@@ -65,8 +65,8 @@
 //! # let document = Html::parse_document("<h1>Hello, <i>world!</i></h1>");
 //! # let selector = Selector::parse("h1").unwrap();
 //! let h1 = document.select(&selector).next().unwrap();
-//! for node in h1.select(&Selector::parse("i").unwrap()) {
-//!     assert_eq!("i", node.value().as_element().unwrap().name());
+//! for element in h1.select(&Selector::parse("i").unwrap()) {
+//!     assert_eq!("i", element.value().name());
 //! }
 //! ```
 //!
@@ -78,12 +78,7 @@
 //! let selector = Selector::parse(r#"input[name="foo"]"#).unwrap();
 //!
 //! let input = fragment.select(&selector).next().unwrap();
-//! let value = input.value()
-//!     .as_element()
-//!     .unwrap()
-//!     .attr("value")
-//!     .unwrap();
-//!
+//! let value = input.value().attr("value").unwrap();
 //! assert_eq!("bar", value);
 //! ```
 //!
@@ -122,10 +117,10 @@ extern crate tendril;
 
 pub use html::Html;
 pub use node::Node;
-pub use node_ref::NodeRef;
+pub use element_ref::ElementRef;
 pub use selector::Selector;
 
 pub mod html;
 pub mod node;
-pub mod node_ref;
+pub mod element_ref;
 pub mod selector;

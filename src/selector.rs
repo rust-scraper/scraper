@@ -4,7 +4,7 @@ use cssparser::Parser;
 use selectors::matching;
 use selectors::parser::{self, ParserContext, SelectorImpl};
 
-use node_ref::NodeRef;
+use element_ref::ElementRef;
 
 /// Wrapper around CSS selectors.
 ///
@@ -35,14 +35,8 @@ impl Selector {
     }
 
     /// Returns true if the element matches this selector.
-    ///
-    /// The `NodeRef` wrapper implements the `Element` trait required here.
-    ///
-    /// # Panics
-    ///
-    /// Panics if a `NodeRef` does not reference an element.
-    pub fn matches(&self, node: &NodeRef) -> bool {
-        matching::matches(&self.selectors, node, None)
+    pub fn matches(&self, element: &ElementRef) -> bool {
+        matching::matches(&self.selectors, element, None)
     }
 }
 

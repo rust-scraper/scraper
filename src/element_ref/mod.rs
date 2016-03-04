@@ -1,32 +1,45 @@
-//! Node references.
+//! Element references.
 
 use std::ops::Deref;
 
-use ego_tree;
+use ego_tree::NodeRef;
 use ego_tree::iter::{Traverse, Edge};
 
 use {Node, Selector};
+use node::Element;
 
-/// Wrapper around a reference to an HTML node.
+/// Wrapper around a reference to an HTML element node.
 ///
 /// This wrapper implements the `Element` trait from the `selectors` crate, which allows it to be
 /// matched against CSS selectors.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct NodeRef<'a>(pub ego_tree::NodeRef<'a, Node>);
-
-impl<'a> Deref for NodeRef<'a> {
-    type Target = ego_tree::NodeRef<'a, Node>;
-
-    fn deref(&self) -> &ego_tree::NodeRef<'a, Node> {
-        &self.0
-    }
+pub struct ElementRef<'a> {
+    node: NodeRef<'a, Node>,
 }
 
-impl<'a> NodeRef<'a> {
-    /// Returns an iterator over child elements matching a selector.
+impl<'a> ElementRef<'a> {
+    fn new(node: NodeRef<'a, Node>) -> Self {
+        ElementRef { node: node }
+    }
+
+    /// Wraps a `NodeRef` only if it references a `Node::Element`.
+    pub fn wrap(node: NodeRef<'a, Node>) -> Option<Self> {
+        if node.value().is_element() {
+            Some(ElementRef::new(node))
+        } else {
+            None
+        }
+    }
+
+    /// Returns the `Element` referenced by `self`.
+    pub fn value(&self) -> &Element {
+        self.node.value().as_element().unwrap()
+    }
+
+    /// Returns an iterator over descendent elements matching a selector.
     pub fn select<'b>(&self, selector: &'b Selector) -> Select<'a, 'b> {
         let mut inner = self.traverse();
-        inner.next(); // Skip Open(self).
+        inner.next(); // Skip Edge::Open(self).
 
         Select {
             inner: inner,
@@ -36,13 +49,16 @@ impl<'a> NodeRef<'a> {
 
     /// Returns an iterator over descendent text nodes.
     pub fn text(&self) -> Text {
-        Text {
-            inner: self.traverse(),
-        }
+        Text { inner: self.traverse() }
     }
 }
 
-/// Iterator over child elements matching a selector.
+impl<'a> Deref for ElementRef<'a> {
+    type Target = NodeRef<'a, Node>;
+    fn deref(&self) -> &NodeRef<'a, Node> { &self.node }
+}
+
+/// Iterator over descendent elements matching a selector.
 #[derive(Debug, Clone)]
 pub struct Select<'a, 'b> {
     inner: Traverse<'a, Node>,
@@ -50,14 +66,15 @@ pub struct Select<'a, 'b> {
 }
 
 impl<'a, 'b> Iterator for Select<'a, 'b> {
-    type Item = NodeRef<'a>;
+    type Item = ElementRef<'a>;
 
-    fn next(&mut self) -> Option<NodeRef<'a>> {
+    fn next(&mut self) -> Option<ElementRef<'a>> {
         for edge in &mut self.inner {
             if let Edge::Open(node) = edge {
-                let node_ref = NodeRef(node);
-                if node.value().is_element() && self.selector.matches(&node_ref) {
-                    return Some(node_ref);
+                if let Some(element) = ElementRef::wrap(node) {
+                    if self.selector.matches(&element) {
+                        return Some(element);
+                    }
                 }
             }
         }

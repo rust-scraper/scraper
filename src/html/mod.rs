@@ -8,7 +8,7 @@ use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
 use tendril::TendrilSink;
 
-use {Node, NodeRef, Selector};
+use {Node, ElementRef, Selector};
 
 /// An HTML tree.
 ///
@@ -88,17 +88,15 @@ pub struct Select<'a, 'b> {
 }
 
 impl<'a, 'b> Iterator for Select<'a, 'b> {
-    type Item = NodeRef<'a>;
+    type Item = ElementRef<'a>;
 
-    fn next(&mut self) -> Option<NodeRef<'a>> {
+    fn next(&mut self) -> Option<ElementRef<'a>> {
         for node in self.inner.by_ref() {
-            let node_ref = NodeRef(node);
-
-            let matches = node.parent().is_some()
-                && node.value().is_element()
-                && self.selector.matches(&node_ref);
-
-            if matches { return Some(node_ref); }
+            if let Some(element) = ElementRef::wrap(node) {
+                if element.parent().is_some() && self.selector.matches(&element) {
+                    return Some(element);
+                }
+            }
         }
         None
     }

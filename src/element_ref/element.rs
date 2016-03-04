@@ -4,61 +4,53 @@ use selectors::Element;
 use selectors::parser::AttrSelector;
 use string_cache::{QualName, Atom, Namespace};
 
-use super::NodeRef;
+use super::ElementRef;
 use selector::Simple;
 
 /// Note: will never match against non-tree-structure pseudo-classes.
-impl<'a> Element for NodeRef<'a> {
+impl<'a> Element for ElementRef<'a> {
     type Impl = Simple;
 
     fn parent_element(&self) -> Option<Self> {
-        self.parent().and_then(|parent| {
-            if parent.value().is_element() {
-                Some(NodeRef(parent))
-            } else {
-                None
-            }
-        })
+        self.parent().and_then(ElementRef::wrap)
     }
 
     fn first_child_element(&self) -> Option<Self> {
         self.children()
             .find(|child| child.value().is_element())
-            .map(NodeRef)
+            .map(ElementRef::new)
     }
 
     fn last_child_element(&self) -> Option<Self> {
         self.children()
             .rev()
             .find(|child| child.value().is_element())
-            .map(NodeRef)
+            .map(ElementRef::new)
     }
 
     fn prev_sibling_element(&self) -> Option<Self> {
         self.prev_siblings()
-            .find(|child| child.value().is_element())
-            .map(NodeRef)
+            .find(|sibling| sibling.value().is_element())
+            .map(ElementRef::new)
     }
 
     fn next_sibling_element(&self) -> Option<Self> {
         self.next_siblings()
-            .find(|child| child.value().is_element())
-            .map(NodeRef)
+            .find(|sibling| sibling.value().is_element())
+            .map(ElementRef::new)
     }
 
     fn is_html_element_in_html_document(&self) -> bool {
         // FIXME: Is there more to this?
-        self.value()
-            .as_element()
-            .map_or(false, |element| element.name.ns == ns!(html))
+        self.value().name.ns == ns!(html)
     }
 
     fn get_local_name(&self) -> &Atom {
-        &self.value().as_element().unwrap().name.local
+        &self.value().name.local
     }
 
     fn get_namespace(&self) -> &Namespace {
-        &self.value().as_element().unwrap().name.ns
+        &self.value().name.ns
     }
 
     fn match_non_ts_pseudo_class(&self, _pc: ()) -> bool {
@@ -66,25 +58,15 @@ impl<'a> Element for NodeRef<'a> {
     }
 
     fn get_id(&self) -> Option<Atom> {
-        self.value()
-            .as_element()
-            .unwrap()
-            .id
-            .clone()
+        self.value().id.clone()
     }
 
     fn has_class(&self, name: &Atom) -> bool {
-        self.value()
-            .as_element()
-            .unwrap()
-            .classes
-            .contains(name)
+        self.value().classes.contains(name)
     }
 
     fn match_attr<F>(&self, attr: &AttrSelector, test: F) -> bool where F: Fn(&str) -> bool {
         self.value()
-            .as_element()
-            .unwrap()
             .attrs
             .get(&QualName::new(ns!(), attr.name.clone()))
             .map(Deref::deref)
@@ -102,7 +84,7 @@ impl<'a> Element for NodeRef<'a> {
     }
 
     fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
-        for class in &self.value().as_element().unwrap().classes {
+        for class in &self.value().classes {
             callback(class);
         }
     }
