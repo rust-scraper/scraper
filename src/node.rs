@@ -197,9 +197,7 @@ pub struct Element {
 }
 
 impl Element {
-    /// Creates an element from name and attributes.
-    ///
-    /// Used by the `Html` `TreeSink` implementation.
+    #[doc(hidden)]
     pub fn new(name: QualName, attrs: HashMap<QualName, StrTendril>) -> Self {
         let id = attrs.get(&qualname!("", "id"))
             .map(Deref::deref)

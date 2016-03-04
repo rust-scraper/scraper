@@ -8,7 +8,7 @@ use ego_tree::iter::{Traverse, Edge};
 use {Node, Selector};
 use node::Element;
 
-/// Wrapper around a reference to an HTML element node.
+/// Wrapper around a reference to an element node.
 ///
 /// This wrapper implements the `Element` trait from the `selectors` crate, which allows it to be
 /// matched against CSS selectors.

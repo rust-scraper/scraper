@@ -9,13 +9,6 @@ use element_ref::ElementRef;
 /// Wrapper around CSS selectors.
 ///
 /// Represents a "selector group", i.e. a comma-separated list of selectors.
-///
-/// # Examples
-///
-/// ```
-/// use scraper::Selector;
-/// let selector = Selector::parse("h1.foo, h2.foo").unwrap();
-/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Selector {
     /// The CSS selectors.

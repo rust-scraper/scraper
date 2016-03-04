@@ -16,13 +16,6 @@ use {Node, ElementRef, Selector};
 /// `errors` field. The `tree` will still be populated as best as possible.
 ///
 /// Implements the `TreeSink` trait from the `html5ever` crate, which allows HTML to be parsed.
-///
-/// # Examples
-///
-/// ```
-/// use scraper::Html;
-/// let html = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
-/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Html {
     /// Parse errors.

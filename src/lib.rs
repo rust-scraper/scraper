@@ -19,73 +19,87 @@
 //!     <!DOCTYPE html>
 //!     <meta charset="utf-8">
 //!     <title>Hello, world!</title>
-//!     <h1>Hello, <i>world!</i></h1>
+//!     <h1 class="foo">Hello, <i>world!</i></h1>
 //! "#;
 //!
 //! let document = Html::parse_document(html);
-//! # assert!(document.errors.is_empty());
 //! ```
 //!
 //! ## Parsing a fragment
 //!
 //! ```
-//! # use scraper::Html;
-//! let fragment = Html::parse_fragment("<h1>Hello, world!</h1>");
-//! # assert!(fragment.errors.is_empty());
+//! use scraper::Html;
+//! let fragment = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
 //! ```
 //!
 //! ## Parsing a selector
 //!
 //! ```
 //! use scraper::Selector;
-//! let selector = Selector::parse("h1").unwrap();
+//! let selector = Selector::parse("h1.foo").unwrap();
 //! ```
 //!
 //! ## Selecting elements
 //!
 //! ```
-//! # use scraper::{Html, Selector};
-//! # let html = r#"
-//! #     <!DOCTYPE html>
-//! #     <meta charset="utf-8">
-//! #     <title>Hello, world!</title>
-//! #     <h1>Hello, <i>world!</i></h1>
-//! # "#;
-//! # let document = Html::parse_document(html);
-//! # let selector = Selector::parse("h1").unwrap();
-//! for element in document.select(&selector) {
-//!     assert_eq!("h1", element.value().name())
+//! use scraper::{Html, Selector};
+//!
+//! let html = r#"
+//!     <ul>
+//!         <li>Foo</li>
+//!         <li>Bar</li>
+//!         <li>Baz</li>
+//!     </ul>
+//! "#;
+//!
+//! let fragment = Html::parse_fragment(html);
+//! let selector = Selector::parse("li").unwrap();
+//!
+//! for element in fragment.select(&selector) {
+//!     assert_eq!("li", element.value().name());
 //! }
 //! ```
 //!
-//! ## Selecting child elements
+//! ## Selecting descendent elements
 //!
 //! ```
-//! # use scraper::{Html, Selector};
-//! # let document = Html::parse_document("<h1>Hello, <i>world!</i></h1>");
-//! # let selector = Selector::parse("h1").unwrap();
-//! let h1 = document.select(&selector).next().unwrap();
-//! for element in h1.select(&Selector::parse("i").unwrap()) {
-//!     assert_eq!("i", element.value().name());
+//! use scraper::{Html, Selector};
+//!
+//! let html = r#"
+//!     <ul>
+//!         <li>Foo</li>
+//!         <li>Bar</li>
+//!         <li>Baz</li>
+//!     </ul>
+//! "#;
+//!
+//! let fragment = Html::parse_fragment(html);
+//! let ul_selector = Selector::parse("ul").unwrap();
+//! let li_selector = Selector::parse("li").unwrap();
+//!
+//! let ul = fragment.select(&ul_selector).next().unwrap();
+//! for element in ul.select(&li_selector) {
+//!     assert_eq!("li", element.value().name());
 //! }
 //! ```
 //!
 //! ## Accessing element attributes
 //!
 //! ```
-//! # use scraper::{Html, Selector};
-//! let fragment = Html::parse_fragment(r#"<input type="hidden" name="foo" value="bar">"#);
+//! use scraper::{Html, Selector};
+//!
+//! let fragment = Html::parse_fragment(r#"<input name="foo" value="bar">"#);
 //! let selector = Selector::parse(r#"input[name="foo"]"#).unwrap();
 //!
 //! let input = fragment.select(&selector).next().unwrap();
-//! let value = input.value().attr("value").unwrap();
-//! assert_eq!("bar", value);
+//! assert_eq!(Some("bar"), input.value().attr("value"));
 //! ```
 //!
-//! ## Accessing text
+//! ## Accessing descendent text
 //!
 //! ```
-//! # use scraper::{Html, Selector};
+//! use scraper::{Html, Selector};
+//!
 //! let fragment = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
 //! let selector = Selector::parse("h1").unwrap();
 //!
