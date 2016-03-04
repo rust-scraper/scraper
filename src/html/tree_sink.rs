@@ -9,6 +9,7 @@ use tendril::StrTendril;
 use super::Html;
 use node::{Node, Doctype, Comment, Text, Element};
 
+/// Note: does not support the `<template>` element.
 impl TreeSink for Html {
     type Output = Self;
     type Handle = NodeId<Node>;

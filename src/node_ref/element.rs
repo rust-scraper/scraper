@@ -7,6 +7,7 @@ use string_cache::{QualName, Atom, Namespace};
 use super::NodeRef;
 use selector::Simple;
 
+/// Note: will never match against non-tree-structure pseudo-classes.
 impl<'a> Element for NodeRef<'a> {
     type Impl = Simple;
 

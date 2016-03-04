@@ -11,8 +11,6 @@ use {Node, Selector};
 ///
 /// This wrapper implements the `Element` trait from the `selectors` crate, which allows it to be
 /// matched against CSS selectors.
-///
-/// Note that this implementation will never match against non-tree-structure pseudo-classes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NodeRef<'a>(pub ego_tree::NodeRef<'a, Node>);
 

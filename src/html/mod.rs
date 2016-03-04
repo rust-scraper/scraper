@@ -17,8 +17,6 @@ use {Node, NodeRef, Selector};
 ///
 /// Implements the `TreeSink` trait from the `html5ever` crate, which allows HTML to be parsed.
 ///
-/// Note that the `TreeSink` implementation does not support the `<template>` element.
-///
 /// # Examples
 ///
 /// ```
