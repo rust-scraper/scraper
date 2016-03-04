@@ -33,6 +33,13 @@ impl<'a> NodeRef<'a> {
             selector: selector,
         }
     }
+
+    /// Returns an iterator over descendent text nodes.
+    pub fn text(&self) -> Text {
+        Text {
+            inner: self.traverse(),
+        }
+    }
 }
 
 /// Iterator over child elements matching a selector.
@@ -51,6 +58,27 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
                 let node_ref = NodeRef(node);
                 if node.value().is_element() && self.selector.matches(&node_ref) {
                     return Some(node_ref);
+                }
+            }
+        }
+        None
+    }
+}
+
+/// Iterator over descendent text nodes.
+#[derive(Debug, Clone)]
+pub struct Text<'a> {
+    inner: Traverse<'a, Node>,
+}
+
+impl<'a> Iterator for Text<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<&'a str> {
+        for edge in &mut self.inner {
+            if let Edge::Open(node) = edge {
+                if let &Node::Text(ref text) = node.value() {
+                    return Some(&*text);
                 }
             }
         }
