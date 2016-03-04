@@ -23,6 +23,7 @@
 //! "#;
 //!
 //! let document = Html::parse_document(html);
+//! assert!(document.errors.is_empty());
 //! ```
 //!
 //! ## Parsing a fragment
@@ -30,6 +31,7 @@
 //! ```
 //! # use scraper::Html;
 //! let fragment = Html::parse_fragment("<h1>Hello, world!</h1>");
+//! assert!(fragment.errors.is_empty());
 //! ```
 //!
 //! ## Parsing a selector
@@ -43,10 +45,16 @@
 //!
 //! ```
 //! # use scraper::{Html, Selector};
-//! # let document = Html::parse_document("");
+//! # let html = r#"
+//! #     <!DOCTYPE html>
+//! #     <meta charset="utf-8">
+//! #     <title>Hello, world!</title>
+//! #     <h1>Hello, <i>world!</i></h1>
+//! # "#;
+//! # let document = Html::parse_document(html);
 //! # let selector = Selector::parse("h1").unwrap();
 //! for node in document.select(&selector) {
-//!     println!("{:?}", node.value());
+//!     assert_eq!("h1", node.value().as_element().unwrap().name());
 //! }
 //! ```
 //!
@@ -58,7 +66,7 @@
 //! # let selector = Selector::parse("h1").unwrap();
 //! let h1 = document.select(&selector).next().unwrap();
 //! for node in h1.select(&Selector::parse("i").unwrap()) {
-//!     println!("{:?}", node.value());
+//!     assert_eq!("i", node.value().as_element().unwrap().name());
 //! }
 //! ```
 //!
@@ -75,6 +83,21 @@
 //!     .unwrap()
 //!     .attr("value")
 //!     .unwrap();
+//!
+//! assert_eq!("bar", value);
+//! ```
+//!
+//! ## Accessing text
+//!
+//! ```
+//! # use scraper::{Html, Selector};
+//! let fragment = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
+//! let selector = Selector::parse("h1").unwrap();
+//!
+//! let h1 = fragment.select(&selector).next().unwrap();
+//! let text = h1.text().collect::<Vec<_>>();
+//!
+//! assert_eq!(vec!["Hello, ", "world!"], text);
 //! ```
 
 #![warn(
