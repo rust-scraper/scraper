@@ -32,7 +32,7 @@ impl<'a> ElementRef<'a> {
     }
 
     /// Returns the `Element` referenced by `self`.
-    pub fn value(&self) -> &Element {
+    pub fn value(&self) -> &'a Element {
         self.node.value().as_element().unwrap()
     }
 
@@ -48,7 +48,7 @@ impl<'a> ElementRef<'a> {
     }
 
     /// Returns an iterator over descendent text nodes.
-    pub fn text(&self) -> Text {
+    pub fn text(&self) -> Text<'a> {
         Text { inner: self.traverse() }
     }
 }
