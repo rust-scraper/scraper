@@ -108,6 +108,20 @@
 //!
 //! assert_eq!(vec!["Hello, ", "world!"], text);
 //! ```
+//!
+//! ## Serializing HTML and inner HTML
+//!
+//! ```
+//! use scraper::{Html, Selector};
+//!
+//! let fragment = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
+//! let selector = Selector::parse("h1").unwrap();
+//!
+//! let h1 = fragment.select(&selector).next().unwrap();
+//!
+//! assert_eq!("<h1>Hello, <i>world!</i></h1>", h1.html());
+//! assert_eq!("Hello, <i>world!</i>", h1.inner_html());
+//! ```
 
 #![warn(
     missing_docs,
