@@ -48,11 +48,6 @@ impl<'a> ElementRef<'a> {
         }
     }
 
-    /// Returns an iterator over descendent text nodes.
-    pub fn text(&self) -> Text<'a> {
-        Text { inner: self.traverse() }
-    }
-
     fn serialize(&self, traversal_scope: TraversalScope) -> String {
         let opts = SerializeOpts {
             scripting_enabled: false, // It's not clear what this does.
@@ -71,6 +66,11 @@ impl<'a> ElementRef<'a> {
     /// Returns the inner HTML of this element.
     pub fn inner_html(&self) -> String {
         self.serialize(TraversalScope::ChildrenOnly)
+    }
+
+    /// Returns an iterator over descendent text nodes.
+    pub fn text(&self) -> Text<'a> {
+        Text { inner: self.traverse() }
     }
 }
 

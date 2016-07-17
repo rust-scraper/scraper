@@ -95,20 +95,6 @@
 //! assert_eq!(Some("bar"), input.value().attr("value"));
 //! ```
 //!
-//! ## Accessing descendent text
-//!
-//! ```
-//! use scraper::{Html, Selector};
-//!
-//! let fragment = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
-//! let selector = Selector::parse("h1").unwrap();
-//!
-//! let h1 = fragment.select(&selector).next().unwrap();
-//! let text = h1.text().collect::<Vec<_>>();
-//!
-//! assert_eq!(vec!["Hello, ", "world!"], text);
-//! ```
-//!
 //! ## Serializing HTML and inner HTML
 //!
 //! ```
@@ -121,6 +107,20 @@
 //!
 //! assert_eq!("<h1>Hello, <i>world!</i></h1>", h1.html());
 //! assert_eq!("Hello, <i>world!</i>", h1.inner_html());
+//! ```
+//!
+//! ## Accessing descendent text
+//!
+//! ```
+//! use scraper::{Html, Selector};
+//!
+//! let fragment = Html::parse_fragment("<h1>Hello, <i>world!</i></h1>");
+//! let selector = Selector::parse("h1").unwrap();
+//!
+//! let h1 = fragment.select(&selector).next().unwrap();
+//! let text = h1.text().collect::<Vec<_>>();
+//!
+//! assert_eq!(vec!["Hello, ", "world!"], text);
 //! ```
 
 #![warn(
