@@ -104,3 +104,4 @@ impl<'a> Iterator for Text<'a> {
 }
 
 mod element;
+mod serializable;
