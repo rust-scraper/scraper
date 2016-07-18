@@ -4,6 +4,7 @@ use std::ops::Deref;
 
 use ego_tree::NodeRef;
 use ego_tree::iter::{Traverse, Edge};
+use html5ever::serialize::{serialize, SerializeOpts, TraversalScope};
 
 use {Node, Selector};
 use node::Element;
@@ -45,6 +46,26 @@ impl<'a> ElementRef<'a> {
             inner: inner,
             selector: selector,
         }
+    }
+
+    fn serialize(&self, traversal_scope: TraversalScope) -> String {
+        let opts = SerializeOpts {
+            scripting_enabled: false, // It's not clear what this does.
+            traversal_scope: traversal_scope,
+        };
+        let mut buf = Vec::new();
+        serialize(&mut buf, self, opts).unwrap();
+        String::from_utf8(buf).unwrap()
+    }
+
+    /// Returns the HTML of this element.
+    pub fn html(&self) -> String {
+        self.serialize(TraversalScope::IncludeNode)
+    }
+
+    /// Returns the inner HTML of this element.
+    pub fn inner_html(&self) -> String {
+        self.serialize(TraversalScope::ChildrenOnly)
     }
 
     /// Returns an iterator over descendent text nodes.
@@ -104,3 +125,4 @@ impl<'a> Iterator for Text<'a> {
 }
 
 mod element;
+mod serializable;
