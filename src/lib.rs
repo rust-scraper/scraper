@@ -121,8 +121,11 @@
 //! let text = h1.text().collect::<Vec<_>>();
 //!
 //! assert_eq!(vec!["Hello, ", "world!"], text);
+//!
+//!
+//! let content: String = h1.content(Default::default()).into();
+//! assert_eq!("Hello, world!", content);
 //! ```
-
 #![warn(
     missing_docs,
     missing_debug_implementations,
