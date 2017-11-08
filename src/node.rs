@@ -5,8 +5,8 @@ use std::ops::Deref;
 use std::collections::{HashSet, HashMap};
 use std::collections::{hash_set, hash_map};
 
-use string_cache::{QualName, Atom};
-use tendril::StrTendril;
+use html5ever::{QualName, LocalName, Attribute};
+use html5ever::tendril::StrTendril;
 
 /// An HTML node.
 #[derive(Clone, PartialEq, Eq)]
@@ -28,6 +28,9 @@ pub enum Node {
 
     /// An element.
     Element(Element),
+
+    /// A processing instruction.
+    ProcessingInstruction(ProcessingInstruction),
 }
 
 impl Node {
@@ -80,6 +83,11 @@ impl Node {
     pub fn as_element(&self) -> Option<&Element> {
         match *self { Node::Element(ref e) => Some(e), _ => None }
     }
+
+    /// Returns self as an element.
+    pub fn as_processing_instruction(&self) -> Option<&ProcessingInstruction> {
+        match *self { Node::ProcessingInstruction(ref pi) => Some(pi), _ => None }
+    }
 }
 
 // Always use one line.
@@ -92,6 +100,7 @@ impl fmt::Debug for Node {
             Node::Comment(ref c) => write!(f, "Comment({:?})", c),
             Node::Text(ref t) => write!(f, "Text({:?})", t),
             Node::Element(ref e) => write!(f, "Element({:?})", e),
+            Node::ProcessingInstruction(ref pi) => write!(f, "ProcessingInstruction({:?})", pi),
         }
     }
 }
@@ -187,10 +196,10 @@ pub struct Element {
     pub name: QualName,
 
     /// The element ID.
-    pub id: Option<Atom>,
+    pub id: Option<LocalName>,
 
     /// The element classes.
-    pub classes: HashSet<Atom>,
+    pub classes: HashSet<LocalName>,
 
     /// The element attributes.
     pub attrs: HashMap<QualName, StrTendril>,
@@ -198,23 +207,29 @@ pub struct Element {
 
 impl Element {
     #[doc(hidden)]
-    pub fn new(name: QualName, attrs: HashMap<QualName, StrTendril>) -> Self {
-        let id = attrs.get(&qualname!("", "id"))
-            .map(Deref::deref)
-            .map(Atom::from);
+    pub fn new(name: QualName, attrs: Vec<Attribute>) -> Self {
+        let id = attrs.iter().find(|a| a.name.local.deref() == "id").map(
+            |a| {
+                LocalName::from(a.value.deref())
+            },
+        );
 
-        let classes = attrs.get(&qualname!("", "class"))
-            .map(Deref::deref)
-            .into_iter()
-            .flat_map(str::split_whitespace)
-            .map(Atom::from)
-            .collect();
+        let classes: HashSet<LocalName> = attrs
+            .iter()
+            .find(|a| a.name.local.deref() == "class")
+            .map_or(HashSet::new(), |a| {
+                a.value
+                    .deref()
+                    .split_whitespace()
+                    .map(LocalName::from)
+                    .collect()
+            });
 
         Element {
-            name: name,
-            id: id,
-            classes: classes,
-            attrs: attrs,
+            attrs: attrs.into_iter().map(|a| (a.name, a.value)).collect(),
+            name,
+            id,
+            classes,
         }
     }
 
@@ -230,7 +245,7 @@ impl Element {
 
     /// Returns true if element has the class.
     pub fn has_class(&self, class: &str) -> bool {
-        self.classes.contains(&Atom::from(class))
+        self.classes.contains(&LocalName::from(class))
     }
 
     /// Returns an iterator over the element's classes.
@@ -240,7 +255,7 @@ impl Element {
 
     /// Returns the value of an attribute.
     pub fn attr(&self, attr: &str) -> Option<&str> {
-        let qualname = QualName::new(ns!(), Atom::from(attr));
+        let qualname = QualName::new(None, ns!(), LocalName::from(attr));
         self.attrs.get(&qualname).map(Deref::deref)
     }
 
@@ -254,7 +269,7 @@ impl Element {
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Classes<'a> {
-    inner: hash_set::Iter<'a, Atom>,
+    inner: hash_set::Iter<'a, LocalName>,
 }
 
 impl<'a> Iterator for Classes<'a> {
@@ -287,5 +302,28 @@ impl fmt::Debug for Element {
             try!(write!(f, " {}={:?}", key, value));
         }
         write!(f, ">")
+    }
+}
+
+/// HTML Processing Instruction.
+#[derive(Clone, PartialEq, Eq)]
+pub struct ProcessingInstruction {
+    /// The PI target.
+    pub target: StrTendril,
+    /// The PI data.
+    pub data: StrTendril,
+}
+
+impl Deref for ProcessingInstruction {
+    type Target = str;
+
+    fn deref(&self) -> &str {
+        self.data.deref()
+    }
+}
+
+impl fmt::Debug for ProcessingInstruction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{:?} {:?}", self, self.data)
     }
 }

@@ -10,12 +10,12 @@ license = "ISC"
 
 documentation = "https://cmcenroe.me/scraper/scraper"
 repository = "https://github.com/programble/scraper"
-readme="README.md"
+readme = "README.md"
 
 [dependencies]
-cssparser = "0.5.0"
+cssparser = "0.13"
 ego-tree = "0.1.0"
-html5ever = "0.5.0"
-selectors = "0.5.0"
-string_cache = "0.2.5"
-tendril = "0.2.1"
+html5ever = "0.21.0"
+matches = "0.1.6"
+selectors = "0.18.0"
+tendril = "0.4.0"

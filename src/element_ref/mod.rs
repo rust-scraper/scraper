@@ -52,6 +52,7 @@ impl<'a> ElementRef<'a> {
         let opts = SerializeOpts {
             scripting_enabled: false, // It's not clear what this does.
             traversal_scope: traversal_scope,
+            create_missing_parent: false,
         };
         let mut buf = Vec::new();
         serialize(&mut buf, self, opts).unwrap();
@@ -65,7 +66,7 @@ impl<'a> ElementRef<'a> {
 
     /// Returns the inner HTML of this element.
     pub fn inner_html(&self) -> String {
-        self.serialize(TraversalScope::ChildrenOnly)
+        self.serialize(TraversalScope::ChildrenOnly(None))
     }
 
     /// Returns an iterator over descendent text nodes.
