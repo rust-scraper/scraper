@@ -169,7 +169,7 @@ impl TreeSink for Html {
     // tree builder promises this will never be called with something else than an element.
     fn add_attrs_if_missing(&mut self, target: Self::Handle, attrs: Vec<Attribute>) {
         let mut node = self.tree.get_mut(target);
-        let mut element = match *node.value() {
+        let element = match *node.value() {
             Node::Element(ref mut e) => e,
             _ => unreachable!(),
         };
