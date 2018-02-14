@@ -1,20 +1,21 @@
-use std::io::{Error, Write};
+use std::io::Error;
 
 use ego_tree::iter::Edge;
-use html5ever::serialize::{Serializable, Serializer, TraversalScope};
+use html5ever::serialize::{Serialize, Serializer, TraversalScope};
 
 use {ElementRef, Node};
 
-impl<'a> Serializable for ElementRef<'a> {
-    fn serialize<'w, W: Write>(
+
+impl<'a> Serialize for ElementRef<'a> {
+    fn serialize<S: Serializer>(
         &self,
-        serializer: &mut Serializer<'w, W>,
+        serializer: &mut S,
         traversal_scope: TraversalScope,
     ) -> Result<(), Error> {
         for edge in self.traverse() {
             match edge {
                 Edge::Open(node) => {
-                    if node == **self && traversal_scope == TraversalScope::ChildrenOnly {
+                    if node == **self && traversal_scope == TraversalScope::ChildrenOnly(None) {
                         continue;
                     }
 
@@ -37,7 +38,7 @@ impl<'a> Serializable for ElementRef<'a> {
                 },
 
                 Edge::Close(node) => {
-                    if node == **self && traversal_scope == TraversalScope::ChildrenOnly {
+                    if node == **self && traversal_scope == TraversalScope::ChildrenOnly(None) {
                         continue;
                     }
 

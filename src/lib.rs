@@ -135,12 +135,13 @@
     variant_size_differences
 )]
 
+#[macro_use]
+extern crate matches;
 extern crate cssparser;
 extern crate ego_tree;
+#[macro_use]
 extern crate html5ever;
 extern crate selectors;
-#[macro_use]
-extern crate string_cache;
 extern crate tendril;
 
 pub use html::Html;

@@ -1,11 +1,10 @@
-use std::ops::Deref;
-
 use selectors::Element;
-use selectors::parser::AttrSelector;
-use string_cache::{QualName, Atom, Namespace};
+use selectors::attr::{AttrSelectorOperation, NamespaceConstraint};
+use html5ever::{Namespace, LocalName};
+use selectors::matching;
 
 use super::ElementRef;
-use selector::Simple;
+use selector::{Simple, NonTSPseudoClass, PseudoElement};
 
 /// Note: will never match against non-tree-structure pseudo-classes.
 impl<'a> Element for ElementRef<'a> {
@@ -45,7 +44,7 @@ impl<'a> Element for ElementRef<'a> {
         self.value().name.ns == ns!(html)
     }
 
-    fn get_local_name(&self) -> &Atom {
+    fn get_local_name(&self) -> &LocalName {
         &self.value().name.local
     }
 
@@ -53,24 +52,21 @@ impl<'a> Element for ElementRef<'a> {
         &self.value().name.ns
     }
 
-    fn match_non_ts_pseudo_class(&self, _pc: ()) -> bool {
+    fn match_non_ts_pseudo_class<F>(
+        &self,
+        _pc: &NonTSPseudoClass,
+        _context: &mut matching::MatchingContext,
+        _flags_setter: &mut F,
+    ) -> bool {
         false
     }
 
-    fn get_id(&self) -> Option<Atom> {
+    fn get_id(&self) -> Option<LocalName> {
         self.value().id.clone()
     }
 
-    fn has_class(&self, name: &Atom) -> bool {
+    fn has_class(&self, name: &LocalName) -> bool {
         self.value().classes.contains(name)
-    }
-
-    fn match_attr<F>(&self, attr: &AttrSelector, test: F) -> bool where F: Fn(&str) -> bool {
-        self.value()
-            .attrs
-            .get(&QualName::new(ns!(), attr.name.clone()))
-            .map(Deref::deref)
-            .map_or(false, test)
     }
 
     fn is_empty(&self) -> bool {
@@ -83,9 +79,23 @@ impl<'a> Element for ElementRef<'a> {
             .map_or(false, |parent| parent.value().is_document())
     }
 
-    fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
-        for class in &self.value().classes {
-            callback(class);
-        }
+    fn attr_matches(
+        &self,
+        ns: &NamespaceConstraint<&Namespace>,
+        local_name: &LocalName,
+        operation: &AttrSelectorOperation<&String>,
+    ) -> bool {
+        self.value().attrs.iter().any(|(key, value)| {
+            !matches!(*ns, NamespaceConstraint::Specific(url) if *url != key.ns) &&
+                *local_name == key.local && operation.eval_str(value)
+        })
+    }
+
+    fn match_pseudo_element(
+        &self,
+        _pe: &PseudoElement,
+        _context: &mut matching::MatchingContext,
+    ) -> bool {
+        false
     }
 }

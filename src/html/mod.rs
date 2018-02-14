@@ -6,9 +6,11 @@ use ego_tree::Tree;
 use ego_tree::iter::Nodes;
 use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
+use html5ever::QualName;
 use tendril::TendrilSink;
 
-use {Node, ElementRef, Selector};
+use {Node, ElementRef};
+use selector::Selector;
 
 /// An HTML tree.
 ///
@@ -58,8 +60,8 @@ impl Html {
         let parser = driver::parse_fragment(
             Self::new_fragment(),
             Default::default(),
-            qualname!(html, "body"),
-            Vec::new()
+            QualName::new(None, ns!(html), local_name!("body")),
+            Vec::new(),
         );
         parser.one(fragment)
     }
