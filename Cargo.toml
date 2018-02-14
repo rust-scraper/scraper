@@ -11,7 +11,6 @@ authors = [
 ]
 license = "ISC"
 
-documentation = "https://cmcenroe.me/scraper/scraper"
 repository = "https://github.com/programble/scraper"
 readme = "README.md"
 

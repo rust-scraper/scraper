@@ -10,10 +10,6 @@
 
 HTML parsing and querying with CSS selectors.
 
-## [Documentation][docs]
-
-[docs]: https://cmcenroe.me/scraper/scraper
-
 ## License
 
 Copyright © 2016, Curtis McEnroe <curtis@cmcenroe.me>
