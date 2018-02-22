@@ -6,7 +6,7 @@ use smallvec::SmallVec;
 
 use html5ever::{LocalName, Namespace};
 use cssparser;
-use selectors::{parser, matching, visitor};
+use selectors::{matching, parser, visitor};
 use selectors::parser::SelectorParseErrorKind;
 
 use ElementRef;
@@ -33,10 +33,15 @@ impl Selector {
 
     /// Returns true if the element matches this selector.
     pub fn matches(&self, element: &ElementRef) -> bool {
-        let mut context = matching::MatchingContext::new(matching::MatchingMode::Normal, None, None, matching::QuirksMode::NoQuirks);
-        self.selectors.iter().any(|s| {
-            matching::matches_selector(&s, 0, None, element, &mut context, &mut |_, _| {})
-        })
+        let mut context = matching::MatchingContext::new(
+            matching::MatchingMode::Normal,
+            None,
+            None,
+            matching::QuirksMode::NoQuirks,
+        );
+        self.selectors
+            .iter()
+            .any(|s| matching::matches_selector(&s, 0, None, element, &mut context, &mut |_, _| {}))
     }
 }
 
@@ -45,9 +50,7 @@ struct Parser;
 impl<'i> parser::Parser<'i> for Parser {
     type Impl = Simple;
     type Error = SelectorParseErrorKind<'i>;
-
 }
-
 
 /// A simple implementation of `SelectorImpl` with no pseudo-classes or pseudo-elements.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -72,7 +75,6 @@ impl parser::SelectorImpl for Simple {
     fn is_active_or_hover(pc: &NonTSPseudoClass) -> bool {
         matches!(*pc, NonTSPseudoClass::Active | NonTSPseudoClass::Hover)
     }
-
 }
 
 /// Non Tree-Structural Pseudo-Class.
@@ -87,7 +89,6 @@ pub enum NonTSPseudoClass {
     /// active links
     Active,
 }
-
 
 impl parser::Visit for NonTSPseudoClass {
     type Impl = Simple;

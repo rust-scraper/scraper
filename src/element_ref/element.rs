@@ -1,11 +1,11 @@
 use selectors::{Element, OpaqueElement};
 use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use selectors::context::VisitedHandlingMode;
-use html5ever::{Namespace, LocalName};
+use html5ever::{LocalName, Namespace};
 use selectors::matching;
 
 use super::ElementRef;
-use selector::{Simple, NonTSPseudoClass, PseudoElement};
+use selector::{NonTSPseudoClass, PseudoElement, Simple};
 
 /// Note: will never match against non-tree-structure pseudo-classes.
 impl<'a> Element for ElementRef<'a> {
@@ -84,8 +84,8 @@ impl<'a> Element for ElementRef<'a> {
         operation: &AttrSelectorOperation<&String>,
     ) -> bool {
         self.value().attrs.iter().any(|(key, value)| {
-            !matches!(*ns, NamespaceConstraint::Specific(url) if *url != key.ns) &&
-                *local_name == key.local && operation.eval_str(value)
+            !matches!(*ns, NamespaceConstraint::Specific(url) if *url != key.ns)
+                && *local_name == key.local && operation.eval_str(value)
         })
     }
 
@@ -114,7 +114,6 @@ impl<'a> Element for ElementRef<'a> {
             None => false,
         }
     }
-
 }
 
 #[cfg(test)]
@@ -188,8 +187,6 @@ mod tests {
             false,
             element.has_class(&LocalName::from("my_class"), CaseSensitivity::CaseSensitive)
         );
-}
-
-
+    }
 
 }
