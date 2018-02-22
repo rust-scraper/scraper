@@ -116,3 +116,80 @@ impl<'a> Element for ElementRef<'a> {
     }
 
 }
+
+#[cfg(test)]
+mod tests {
+    use html::Html;
+    use selector::Selector;
+    use selectors::Element;
+    use selectors::attr::CaseSensitivity;
+
+    #[test]
+    fn test_has_id() {
+        use html5ever::LocalName;
+
+        let html = "<p id='link_id_456'>hey there</p>";
+        let fragment = Html::parse_fragment(html);
+        let sel = Selector::parse("p").unwrap();
+
+        let element = fragment.select(&sel).next().unwrap();
+        assert_eq!(
+            true,
+            element.has_id(
+                &LocalName::from("link_id_456"),
+                CaseSensitivity::CaseSensitive
+            )
+        );
+
+        let html = "<p>hey there</p>";
+        let fragment = Html::parse_fragment(html);
+        let element = fragment.select(&sel).next().unwrap();
+        assert_eq!(
+            false,
+            element.has_id(
+                &LocalName::from("any_link_id"),
+                CaseSensitivity::CaseSensitive
+            )
+        );
+    }
+
+    #[test]
+    fn test_is_link() {
+        let html = "<a href='https://www.example.com'>Example website</a>";
+        let fragment = Html::parse_fragment(html);
+        let sel = Selector::parse("a").unwrap();
+        let element = fragment.select(&sel).next().unwrap();
+        assert_eq!(true, element.is_link());
+
+        let html = "<p>hey there</p>";
+        let fragment = Html::parse_fragment(html);
+        let sel = Selector::parse("p").unwrap();
+        let element = fragment.select(&sel).next().unwrap();
+        assert_eq!(false, element.is_link());
+    }
+
+    #[test]
+    fn test_has_class() {
+        use html5ever::LocalName;
+        let html = "<p class='my_class'>hey there</p>";
+        let fragment = Html::parse_fragment(html);
+        let sel = Selector::parse("p").unwrap();
+        let element = fragment.select(&sel).next().unwrap();
+        assert_eq!(
+            true,
+            element.has_class(&LocalName::from("my_class"), CaseSensitivity::CaseSensitive)
+        );
+
+        let html = "<p>hey there</p>";
+        let fragment = Html::parse_fragment(html);
+        let sel = Selector::parse("p").unwrap();
+        let element = fragment.select(&sel).next().unwrap();
+        assert_eq!(
+            false,
+            element.has_class(&LocalName::from("my_class"), CaseSensitivity::CaseSensitive)
+        );
+}
+
+
+
+}
