@@ -1,9 +1,13 @@
 //! CSS selectors.
 
 use std::fmt;
+
+use smallvec::SmallVec;
+
 use html5ever::{LocalName, Namespace};
 use cssparser;
 use selectors::{parser, matching, visitor};
+use selectors::parser::SelectorParseErrorKind;
 
 use ElementRef;
 
@@ -13,32 +17,35 @@ use ElementRef;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Selector {
     /// The CSS selectors.
-    pub selectors: Vec<parser::Selector<Simple>>,
+    pub selectors: SmallVec<[parser::Selector<Simple>; 1]>,
 }
 
 impl Selector {
     /// Parses a CSS selector group.
-    ///
-    /// No meaningful error can be returned here, due to a limitation of the `selectors` and
-    /// `cssparser` crates.
-    pub fn parse(selectors: &str) -> Result<Self, ()> {
-        let mut parser = cssparser::Parser::new(selectors);
+
+    pub fn parse<'t, 'i>(
+        selectors: &'i str,
+    ) -> Result<Self, cssparser::ParseError<'t, SelectorParseErrorKind<'i>>> {
+        let mut _selectors = cssparser::ParserInput::new(selectors);
+        let mut parser = cssparser::Parser::new(&mut _selectors);
         parser::SelectorList::parse(&Parser, &mut parser).map(|list| Selector { selectors: list.0 })
     }
 
     /// Returns true if the element matches this selector.
     pub fn matches(&self, element: &ElementRef) -> bool {
-        let mut context = matching::MatchingContext::new(matching::MatchingMode::Normal, None);
+        let mut context = matching::MatchingContext::new(matching::MatchingMode::Normal, None, None, matching::QuirksMode::NoQuirks);
         self.selectors.iter().any(|s| {
-            matching::matches_selector(&s.inner, element, &mut context, &mut |_, _| {})
+            matching::matches_selector(&s, 0, None, element, &mut context, &mut |_, _| {})
         })
     }
 }
 
 /// An implementation of `Parser` for `selectors`
 struct Parser;
-impl parser::Parser for Parser {
+impl<'i> parser::Parser<'i> for Parser {
     type Impl = Simple;
+    type Error = SelectorParseErrorKind<'i>;
+
 }
 
 
@@ -58,13 +65,31 @@ impl parser::SelectorImpl for Simple {
 
     type NonTSPseudoClass = NonTSPseudoClass;
     type PseudoElement = PseudoElement;
+
+    // see: https://github.com/servo/servo/pull/19747#issuecomment-357106065
+    type ExtraMatchingData = String;
+
+    fn is_active_or_hover(pc: &NonTSPseudoClass) -> bool {
+        matches!(*pc, NonTSPseudoClass::Active | NonTSPseudoClass::Hover)
+    }
+
 }
 
 /// Non Tree-Structural Pseudo-Class.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum NonTSPseudoClass {}
+pub enum NonTSPseudoClass {
+    /// Unvisited links
+    Link,
+    /// Visited links
+    Visited,
+    /// user hovers
+    Hover,
+    /// active links
+    Active,
+}
 
-impl parser::SelectorMethods for NonTSPseudoClass {
+
+impl parser::Visit for NonTSPseudoClass {
     type Impl = Simple;
 
     fn visit<V>(&self, _visitor: &mut V) -> bool

@@ -143,6 +143,7 @@ extern crate ego_tree;
 extern crate html5ever;
 extern crate selectors;
 extern crate tendril;
+extern crate smallvec;
 
 pub use html::Html;
 pub use node::Node;

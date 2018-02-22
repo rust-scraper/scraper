@@ -1,5 +1,6 @@
-use selectors::Element;
-use selectors::attr::{AttrSelectorOperation, NamespaceConstraint};
+use selectors::{Element, OpaqueElement};
+use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
+use selectors::context::VisitedHandlingMode;
 use html5ever::{Namespace, LocalName};
 use selectors::matching;
 
@@ -55,18 +56,15 @@ impl<'a> Element for ElementRef<'a> {
     fn match_non_ts_pseudo_class<F>(
         &self,
         _pc: &NonTSPseudoClass,
-        _context: &mut matching::MatchingContext,
+        _context: &mut matching::MatchingContext<Self::Impl>,
+        _visited_handling: VisitedHandlingMode,
         _flags_setter: &mut F,
     ) -> bool {
         false
     }
 
-    fn get_id(&self) -> Option<LocalName> {
-        self.value().id.clone()
-    }
-
-    fn has_class(&self, name: &LocalName) -> bool {
-        self.value().classes.contains(name)
+    fn has_class(&self, name: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
+        self.value().has_class(name, case_sensitivity)
     }
 
     fn is_empty(&self) -> bool {
@@ -94,8 +92,27 @@ impl<'a> Element for ElementRef<'a> {
     fn match_pseudo_element(
         &self,
         _pe: &PseudoElement,
-        _context: &mut matching::MatchingContext,
+        _context: &mut matching::MatchingContext<Self::Impl>,
     ) -> bool {
         false
     }
+
+    fn is_link(&self) -> bool {
+        match self.value().attr("href") {
+            Some(_) => true,
+            None => false,
+        }
+    }
+
+    fn opaque(&self) -> OpaqueElement {
+        OpaqueElement::new(&self)
+    }
+
+    fn has_id(&self, id: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
+        match self.value().id {
+            Some(ref val) => case_sensitivity.eq(id.as_bytes(), val.as_bytes()),
+            None => false,
+        }
+    }
+
 }

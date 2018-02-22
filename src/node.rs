@@ -8,6 +8,8 @@ use std::collections::{hash_set, hash_map};
 use html5ever::{QualName, LocalName, Attribute};
 use html5ever::tendril::StrTendril;
 
+use selectors::attr::CaseSensitivity;
+
 /// An HTML node.
 #[derive(Clone, PartialEq, Eq)]
 pub enum Node {
@@ -244,8 +246,9 @@ impl Element {
     }
 
     /// Returns true if element has the class.
-    pub fn has_class(&self, class: &str) -> bool {
-        self.classes.contains(&LocalName::from(class))
+    pub fn has_class(&self, class: &str, case_sensitive: CaseSensitivity) -> bool {
+        self.classes()
+            .any(|c| case_sensitive.eq(c.as_bytes(), class.as_bytes()))
     }
 
     /// Returns an iterator over the element's classes.
