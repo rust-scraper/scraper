@@ -25,9 +25,9 @@ impl Selector {
 
     pub fn parse<'t, 'i>(
         selectors: &'i str,
-    ) -> Result<Self, cssparser::ParseError<'t, SelectorParseErrorKind<'i>>> {
-        let mut _selectors = cssparser::ParserInput::new(selectors);
-        let mut parser = cssparser::Parser::new(&mut _selectors);
+    ) -> Result<Self, cssparser::ParseError<'i, SelectorParseErrorKind<'i>>> {
+        let mut parser_input = cssparser::ParserInput::new(selectors);
+        let mut parser = cssparser::Parser::new(&mut parser_input);
         parser::SelectorList::parse(&Parser, &mut parser).map(|list| Selector { selectors: list.0 })
     }
 

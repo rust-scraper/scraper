@@ -98,10 +98,7 @@ impl<'a> Element for ElementRef<'a> {
     }
 
     fn is_link(&self) -> bool {
-        match self.value().attr("href") {
-            Some(_) => true,
-            None => false,
-        }
+        self.value().attr("href").is_some()
     }
 
     fn opaque(&self) -> OpaqueElement {
