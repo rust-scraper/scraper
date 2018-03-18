@@ -2,11 +2,13 @@
 
 use std::fmt;
 use std::ops::Deref;
-use std::collections::{HashSet, HashMap};
-use std::collections::{hash_set, hash_map};
+use std::collections::{HashMap, HashSet};
+use std::collections::{hash_map, hash_set};
 
-use html5ever::{QualName, LocalName, Attribute};
+use html5ever::{Attribute, LocalName, QualName};
 use html5ever::tendril::StrTendril;
+
+use selectors::attr::CaseSensitivity;
 
 /// An HTML node.
 #[derive(Clone, PartialEq, Eq)]
@@ -36,57 +38,90 @@ pub enum Node {
 impl Node {
     /// Returns true if node is the document root.
     pub fn is_document(&self) -> bool {
-        match *self { Node::Document => true, _ => false }
+        match *self {
+            Node::Document => true,
+            _ => false,
+        }
     }
 
     /// Returns true if node is the fragment root.
     pub fn is_fragment(&self) -> bool {
-        match *self { Node::Fragment => true, _ => false }
+        match *self {
+            Node::Fragment => true,
+            _ => false,
+        }
     }
 
     /// Returns true if node is a doctype.
     pub fn is_doctype(&self) -> bool {
-        match *self { Node::Doctype(_) => true, _ => false }
+        match *self {
+            Node::Doctype(_) => true,
+            _ => false,
+        }
     }
 
     /// Returns true if node is a comment.
     pub fn is_comment(&self) -> bool {
-        match *self { Node::Comment(_) => true, _ => false }
+        match *self {
+            Node::Comment(_) => true,
+            _ => false,
+        }
     }
 
     /// Returns true if node is text.
     pub fn is_text(&self) -> bool {
-        match *self { Node::Text(_) => true, _ => false }
+        match *self {
+            Node::Text(_) => true,
+            _ => false,
+        }
     }
 
     /// Returns true if node is an element.
     pub fn is_element(&self) -> bool {
-        match *self { Node::Element(_) => true, _ => false }
+        match *self {
+            Node::Element(_) => true,
+            _ => false,
+        }
     }
 
     /// Returns self as a doctype.
     pub fn as_doctype(&self) -> Option<&Doctype> {
-        match *self { Node::Doctype(ref d) => Some(d), _ => None }
+        match *self {
+            Node::Doctype(ref d) => Some(d),
+            _ => None,
+        }
     }
 
     /// Returns self as a comment.
     pub fn as_comment(&self) -> Option<&Comment> {
-        match *self { Node::Comment(ref c) => Some(c), _ => None }
+        match *self {
+            Node::Comment(ref c) => Some(c),
+            _ => None,
+        }
     }
 
     /// Returns self as text.
     pub fn as_text(&self) -> Option<&Text> {
-        match *self { Node::Text(ref t) => Some(t), _ => None }
+        match *self {
+            Node::Text(ref t) => Some(t),
+            _ => None,
+        }
     }
 
     /// Returns self as an element.
     pub fn as_element(&self) -> Option<&Element> {
-        match *self { Node::Element(ref e) => Some(e), _ => None }
+        match *self {
+            Node::Element(ref e) => Some(e),
+            _ => None,
+        }
     }
 
     /// Returns self as an element.
     pub fn as_processing_instruction(&self) -> Option<&ProcessingInstruction> {
-        match *self { Node::ProcessingInstruction(ref pi) => Some(pi), _ => None }
+        match *self {
+            Node::ProcessingInstruction(ref pi) => Some(pi),
+            _ => None,
+        }
     }
 }
 
@@ -208,11 +243,10 @@ pub struct Element {
 impl Element {
     #[doc(hidden)]
     pub fn new(name: QualName, attrs: Vec<Attribute>) -> Self {
-        let id = attrs.iter().find(|a| a.name.local.deref() == "id").map(
-            |a| {
-                LocalName::from(a.value.deref())
-            },
-        );
+        let id = attrs
+            .iter()
+            .find(|a| a.name.local.deref() == "id")
+            .map(|a| LocalName::from(a.value.deref()));
 
         let classes: HashSet<LocalName> = attrs
             .iter()
@@ -244,13 +278,16 @@ impl Element {
     }
 
     /// Returns true if element has the class.
-    pub fn has_class(&self, class: &str) -> bool {
-        self.classes.contains(&LocalName::from(class))
+    pub fn has_class(&self, class: &str, case_sensitive: CaseSensitivity) -> bool {
+        self.classes()
+            .any(|c| case_sensitive.eq(c.as_bytes(), class.as_bytes()))
     }
 
     /// Returns an iterator over the element's classes.
     pub fn classes(&self) -> Classes {
-        Classes { inner: self.classes.iter() }
+        Classes {
+            inner: self.classes.iter(),
+        }
     }
 
     /// Returns the value of an attribute.
@@ -261,7 +298,9 @@ impl Element {
 
     /// Returns an iterator over the element's attributes.
     pub fn attrs(&self) -> Attrs {
-        Attrs { inner: self.attrs.iter() }
+        Attrs {
+            inner: self.attrs.iter(),
+        }
     }
 }
 

@@ -15,9 +15,10 @@ repository = "https://github.com/programble/scraper"
 readme = "README.md"
 
 [dependencies]
-cssparser = "0.13"
+cssparser = "0.23.2"
 ego-tree = "0.2.0"
-html5ever = "0.21.0"
+html5ever = "0.22.0"
 matches = "0.1.6"
-selectors = "0.18.0"
+selectors = "0.19.0"
 tendril = "0.4.0"
+smallvec = "0.6.0"
