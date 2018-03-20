@@ -39,12 +39,14 @@ impl TreeSink for Html {
     //
     // Should never be called on a non-element node; feel free to panic!.
     fn elem_name(&self, target: &Self::Handle) -> ExpandedName {
-        self.tree.get(*target)
-            .value()
-            .as_element()
-            .unwrap()
-            .name
-            .expanded()
+        unsafe {
+            self.tree.get(*target)
+                .value()
+                .as_element()
+                .unwrap()
+                .name
+                .expanded()
+        }
     }
 
     // Create an element.
@@ -86,7 +88,7 @@ impl TreeSink for Html {
     //
     // The child node will not already have a parent.
     fn append(&mut self, parent: &Self::Handle, child: NodeOrText<Self::Handle>) {
-        let mut parent = self.tree.get_mut(*parent);
+        let mut parent = unsafe { self.tree.get_mut(*parent) };
 
         match child {
             NodeOrText::AppendNode(id) => {
@@ -124,10 +126,10 @@ impl TreeSink for Html {
         new_node: NodeOrText<Self::Handle>
     ) {
         if let NodeOrText::AppendNode(id) = new_node {
-            self.tree.get_mut(id).detach();
+            unsafe { self.tree.get_mut(id).detach(); }
         }
 
-        let mut sibling = self.tree.get_mut(*sibling);
+        let mut sibling = unsafe { self.tree.get_mut(*sibling) };
         if !sibling.parent().is_none() {
             match new_node {
                 NodeOrText::AppendNode(id) => unsafe {
@@ -156,7 +158,7 @@ impl TreeSink for Html {
 
     // Detach the given node from its parent.
     fn remove_from_parent(&mut self, target: &Self::Handle) {
-        self.tree.get_mut(*target).detach();
+        unsafe { self.tree.get_mut(*target).detach(); }
     }
 
     // Remove all the children from node and append them to new_parent.
@@ -167,7 +169,7 @@ impl TreeSink for Html {
     // Add each attribute to the given element, if no attribute with that name already exists. The
     // tree builder promises this will never be called with something else than an element.
     fn add_attrs_if_missing(&mut self, target: &Self::Handle, attrs: Vec<Attribute>) {
-        let mut node = self.tree.get_mut(*target);
+        let mut node = unsafe { self.tree.get_mut(*target) };
         let element = match *node.value() {
             Node::Element(ref mut e) => e,
             _ => unreachable!(),
@@ -205,7 +207,7 @@ impl TreeSink for Html {
         prev_element: &Self::Handle,
         child: NodeOrText<Self::Handle>,
     ) {
-        if self.tree.get(*element).parent().is_some() {
+        if unsafe { self.tree.get(*element).parent().is_some() } {
             self.append_before_sibling(element, child)
         } else {
             self.append(prev_element, child)
