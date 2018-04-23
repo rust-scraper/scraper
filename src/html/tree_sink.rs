@@ -11,7 +11,7 @@ use node::{Node, Doctype, Comment, Text, Element, ProcessingInstruction};
 /// Note: does not support the `<template>` element.
 impl TreeSink for Html {
     type Output = Self;
-    type Handle = NodeId<Node>;
+    type Handle = NodeId;
 
     fn finish(self) -> Self { self }
 
@@ -27,7 +27,7 @@ impl TreeSink for Html {
 
     // Get a handle to the Document node.
     fn get_document(&mut self) -> Self::Handle {
-        self.tree.root().id()
+        self.tree.root().id
     }
 
     // Do two handles refer to the same node?
@@ -39,14 +39,14 @@ impl TreeSink for Html {
     //
     // Should never be called on a non-element node; feel free to panic!.
     fn elem_name(&self, target: &Self::Handle) -> ExpandedName {
-        unsafe {
-            self.tree.get(*target)
-                .value()
-                .as_element()
-                .unwrap()
-                .name
-                .expanded()
-        }
+        self.tree
+            .get(*target)
+            .unwrap()
+            .value()
+            .as_element()
+            .unwrap()
+            .name
+            .expanded()
     }
 
     // Create an element.
@@ -60,12 +60,12 @@ impl TreeSink for Html {
         attrs: Vec<Attribute>,
         _flags: ElementFlags,
     ) -> Self::Handle {
-        self.tree.orphan(Node::Element(Element::new(name, attrs))).id()
+        self.tree.orphan(Node::Element(Element::new(name, attrs))).id
     }
 
     // Create a comment node.
     fn create_comment(&mut self, text: StrTendril) -> Self::Handle {
-        self.tree.orphan(Node::Comment(Comment { comment: text })).id()
+        self.tree.orphan(Node::Comment(Comment { comment: text })).id
     }
 
     // Append a DOCTYPE element to the Document node.
@@ -88,11 +88,11 @@ impl TreeSink for Html {
     //
     // The child node will not already have a parent.
     fn append(&mut self, parent: &Self::Handle, child: NodeOrText<Self::Handle>) {
-        let mut parent = unsafe { self.tree.get_mut(*parent) };
+        let mut parent = self.tree.get_mut(*parent).unwrap();
 
         match child {
             NodeOrText::AppendNode(id) => {
-                unsafe { parent.append_id(id); }
+                parent.append_id(id);
             },
 
             NodeOrText::AppendText(text) => {
@@ -126,13 +126,13 @@ impl TreeSink for Html {
         new_node: NodeOrText<Self::Handle>
     ) {
         if let NodeOrText::AppendNode(id) = new_node {
-            unsafe { self.tree.get_mut(id).detach(); }
+            self.tree.get_mut(id).unwrap().detach();
         }
 
-        let mut sibling = unsafe { self.tree.get_mut(*sibling) };
+        let mut sibling = self.tree.get_mut(*sibling).unwrap();
         if !sibling.parent().is_none() {
             match new_node {
-                NodeOrText::AppendNode(id) => unsafe {
+                NodeOrText::AppendNode(id) => {
                     sibling.insert_id_before(id);
                 },
 
@@ -158,18 +158,18 @@ impl TreeSink for Html {
 
     // Detach the given node from its parent.
     fn remove_from_parent(&mut self, target: &Self::Handle) {
-        unsafe { self.tree.get_mut(*target).detach(); }
+        self.tree.get_mut(*target).unwrap().detach();
     }
 
     // Remove all the children from node and append them to new_parent.
     fn reparent_children(&mut self, node: &Self::Handle, new_parent: &Self::Handle) {
-        unsafe { self.tree.get_mut(*new_parent).reparent_from_id_append(*node); }
+        self.tree.get_mut(*new_parent).unwrap().reparent_from_id_append(*node);
     }
 
     // Add each attribute to the given element, if no attribute with that name already exists. The
     // tree builder promises this will never be called with something else than an element.
     fn add_attrs_if_missing(&mut self, target: &Self::Handle, attrs: Vec<Attribute>) {
-        let mut node = unsafe { self.tree.get_mut(*target) };
+        let mut node = self.tree.get_mut(*target).unwrap();
         let element = match *node.value() {
             Node::Element(ref mut e) => e,
             _ => unreachable!(),
@@ -198,7 +198,7 @@ impl TreeSink for Html {
             .orphan(Node::ProcessingInstruction(
                 ProcessingInstruction { target, data },
             ))
-            .id()
+            .id
     }
 
     fn append_based_on_parent_node(
@@ -207,7 +207,7 @@ impl TreeSink for Html {
         prev_element: &Self::Handle,
         child: NodeOrText<Self::Handle>,
     ) {
-        if unsafe { self.tree.get(*element).parent().is_some() } {
+        if self.tree.get(*element).unwrap().parent().is_some() {
             self.append_before_sibling(element, child)
         } else {
             self.append(prev_element, child)
