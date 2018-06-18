@@ -51,16 +51,20 @@ impl TreeSink for Html {
 
     // Create an element.
     //
-    // When creating a template element (name == qualname!(html, "template")), an associated
-    // document fragment called the "template contents" should also be created. Later calls to
-    // self.get_template_contents() with that given element return it.
+    // When creating a template element (name.ns.expanded() == expanded_name!(html "template")), an
+    // associated document fragment called the "template contents" should also be created. Later
+    // calls to self.get_template_contents() with that given element return it.
     fn create_element(
         &mut self,
         name: QualName,
         attrs: Vec<Attribute>,
         _flags: ElementFlags,
     ) -> Self::Handle {
-        self.tree.orphan(Node::Element(Element::new(name, attrs))).id
+        let mut node = self.tree.orphan(Node::Element(Element::new(name.clone(), attrs)));
+        if name.expanded() == expanded_name!(html "template") {
+            node.append(Node::Fragment);
+        }
+        node.id
     }
 
     // Create a comment node.
@@ -184,8 +188,8 @@ impl TreeSink for Html {
     //
     // The tree builder promises this will never be called with something else than a template
     // element.
-    fn get_template_contents(&mut self, _target: &Self::Handle) -> Self::Handle {
-        unimplemented!()
+    fn get_template_contents(&mut self, target: &Self::Handle) -> Self::Handle {
+        self.tree.get(*target).unwrap().first_child().unwrap().id
     }
 
     // Mark a HTML <script> element as "already started".
