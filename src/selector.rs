@@ -71,15 +71,19 @@ impl parser::SelectorImpl for Simple {
 
     // see: https://github.com/servo/servo/pull/19747#issuecomment-357106065
     type ExtraMatchingData = String;
-
-    fn is_active_or_hover(_pc: &NonTSPseudoClass) -> bool {
-        false
-    }
 }
 
 /// Non Tree-Structural Pseudo-Class.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NonTSPseudoClass {}
+
+impl parser::NonTSPseudoClass for NonTSPseudoClass {
+    type Impl = Simple;
+
+    fn is_active_or_hover(&self) -> bool {
+        false
+    }
+}
 
 impl parser::Visit for NonTSPseudoClass {
     type Impl = Simple;

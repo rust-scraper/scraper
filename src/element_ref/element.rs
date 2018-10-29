@@ -1,6 +1,5 @@
 use selectors::{Element, OpaqueElement};
 use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
-use selectors::context::VisitedHandlingMode;
 use html5ever::{LocalName, Namespace};
 use selectors::matching;
 
@@ -11,21 +10,20 @@ use selector::{NonTSPseudoClass, PseudoElement, Simple};
 impl<'a> Element for ElementRef<'a> {
     type Impl = Simple;
 
+    fn opaque(&self) -> OpaqueElement {
+        OpaqueElement::new(&self)
+    }
+
     fn parent_element(&self) -> Option<Self> {
         self.parent().and_then(ElementRef::wrap)
     }
 
-    fn first_child_element(&self) -> Option<Self> {
-        self.children()
-            .find(|child| child.value().is_element())
-            .map(ElementRef::new)
+    fn parent_node_is_shadow_root(&self) -> bool {
+        false
     }
 
-    fn last_child_element(&self) -> Option<Self> {
-        self.children()
-            .rev()
-            .find(|child| child.value().is_element())
-            .map(ElementRef::new)
+    fn containing_shadow_host(&self) -> Option<Self> {
+        None
     }
 
     fn prev_sibling_element(&self) -> Option<Self> {
@@ -45,36 +43,12 @@ impl<'a> Element for ElementRef<'a> {
         self.value().name.ns == ns!(html)
     }
 
-    fn get_local_name(&self) -> &LocalName {
+    fn local_name(&self) -> &LocalName {
         &self.value().name.local
     }
 
-    fn get_namespace(&self) -> &Namespace {
+    fn namespace(&self) -> &Namespace {
         &self.value().name.ns
-    }
-
-    fn match_non_ts_pseudo_class<F>(
-        &self,
-        _pc: &NonTSPseudoClass,
-        _context: &mut matching::MatchingContext<Self::Impl>,
-        _visited_handling: VisitedHandlingMode,
-        _flags_setter: &mut F,
-    ) -> bool {
-        false
-    }
-
-    fn has_class(&self, name: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
-        self.value().has_class(name, case_sensitivity)
-    }
-
-    fn is_empty(&self) -> bool {
-        !self.children()
-            .any(|child| child.value().is_element() || child.value().is_text())
-    }
-
-    fn is_root(&self) -> bool {
-        self.parent()
-            .map_or(false, |parent| parent.value().is_document())
     }
 
     fn attr_matches(
@@ -89,6 +63,15 @@ impl<'a> Element for ElementRef<'a> {
         })
     }
 
+    fn match_non_ts_pseudo_class<F>(
+        &self,
+        _pc: &NonTSPseudoClass,
+        _context: &mut matching::MatchingContext<Self::Impl>,
+        _flags_setter: &mut F,
+    ) -> bool {
+        false
+    }
+
     fn match_pseudo_element(
         &self,
         _pe: &PseudoElement,
@@ -98,11 +81,11 @@ impl<'a> Element for ElementRef<'a> {
     }
 
     fn is_link(&self) -> bool {
-        self.value().attr("href").is_some()
+        self.value().name() == "link"
     }
 
-    fn opaque(&self) -> OpaqueElement {
-        OpaqueElement::new(&self)
+    fn is_html_slot_element(&self) -> bool {
+        true
     }
 
     fn has_id(&self, id: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
@@ -110,6 +93,20 @@ impl<'a> Element for ElementRef<'a> {
             Some(ref val) => case_sensitivity.eq(id.as_bytes(), val.as_bytes()),
             None => false,
         }
+    }
+
+    fn has_class(&self, name: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
+        self.value().has_class(name, case_sensitivity)
+    }
+
+    fn is_empty(&self) -> bool {
+        !self.children()
+            .any(|child| child.value().is_element() || child.value().is_text())
+    }
+
+    fn is_root(&self) -> bool {
+        self.parent()
+            .map_or(false, |parent| parent.value().is_document())
     }
 }
 
@@ -151,9 +148,9 @@ mod tests {
 
     #[test]
     fn test_is_link() {
-        let html = "<a href='https://www.example.com'>Example website</a>";
+        let html = "<link href='https://www.example.com'>";
         let fragment = Html::parse_fragment(html);
-        let sel = Selector::parse("a").unwrap();
+        let sel = Selector::parse("link").unwrap();
         let element = fragment.select(&sel).next().unwrap();
         assert_eq!(true, element.is_link());
 
