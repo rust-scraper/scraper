@@ -4,8 +4,9 @@ extern crate scraper;
 use getopts::Options;
 use scraper::{Html, Selector};
 use std::env;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{self, Read};
+use std::path::PathBuf;
 use std::process;
 
 enum Input {
@@ -61,6 +62,7 @@ fn main() {
     opts.optflag("n", "name", "output name of elements");
     opts.optflag("t", "text", "output text of elements");
     opts.optflag("h", "help", "this cruft");
+    opts.optopt("", "install-man-page", "install real documentation", "PATH");
 
     let args: Vec<String> = env::args().collect();
     let matches = match opts.parse(&args[1..]) {
@@ -69,6 +71,18 @@ fn main() {
     };
     if matches.opt_present("h") {
         print!("{}", opts.usage("Usage: scraper [options] SELECTOR [FILE ...]"));
+        return;
+    }
+
+    if let Some(path) = matches.opt_str("install-man-page") {
+        let mut path = PathBuf::from(path);
+        if !path.ends_with("man1") {
+            path.push("man1");
+        }
+        fs::create_dir_all(&path).unwrap();
+        path.push("scraper.1");
+        fs::write(&path, &include_bytes!("../scraper.1")[..]).unwrap();
+        return;
     }
 
     let input =
