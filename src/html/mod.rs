@@ -90,6 +90,12 @@ impl Html {
             selector: selector,
         }
     }
+
+    /// Get root element_ref `html`
+    pub fn root_element_ref(&self) -> ElementRef {
+        let root_node = self.tree.root().first_child().unwrap();
+        ElementRef::wrap(root_node).unwrap()
+    }
 }
 
 /// Iterator over elements matching a selector.
@@ -115,3 +121,5 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
 }
 
 mod tree_sink;
+#[cfg(test)]
+mod tests;
