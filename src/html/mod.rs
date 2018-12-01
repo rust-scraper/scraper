@@ -92,7 +92,7 @@ impl Html {
     }
 
     /// Get root element_ref `html`
-    pub fn root_element_ref(&self) -> ElementRef {
+    pub fn root_element(&self) -> ElementRef {
         let root_node = self.tree.root().first_child().unwrap();
         ElementRef::wrap(root_node).unwrap()
     }
@@ -121,5 +121,18 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
 }
 
 mod tree_sink;
+
 #[cfg(test)]
-mod tests;
+mod tests {
+    use super::Html;
+    use super::Selector;
+
+    #[test]
+    fn test_html_root_element() {
+        let html = Html::parse_fragment(r#"<a href="http://github.com">1</a>"#);
+        let root_ref = html.root_element();
+        let href = root_ref.select(&Selector::parse("a").unwrap()).next().unwrap();
+        assert_eq!(href.inner_html(), "1");
+        assert_eq!(href.value().attr("href").unwrap(), "http://github.com");
+    }
+}
