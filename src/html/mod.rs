@@ -91,7 +91,7 @@ impl Html {
         }
     }
 
-    /// Get root element_ref `html`
+    /// Returns the root `<html>` element.
     pub fn root_element(&self) -> ElementRef {
         let root_node = self.tree.root().first_child().unwrap();
         ElementRef::wrap(root_node).unwrap()
