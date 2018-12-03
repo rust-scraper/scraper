@@ -27,7 +27,7 @@ impl TreeSink for Html {
 
     // Get a handle to the Document node.
     fn get_document(&mut self) -> Self::Handle {
-        self.tree.root().id
+        self.tree.root().id()
     }
 
     // Do two handles refer to the same node?
@@ -64,12 +64,12 @@ impl TreeSink for Html {
         if name.expanded() == expanded_name!(html "template") {
             node.append(Node::Fragment);
         }
-        node.id
+        node.id()
     }
 
     // Create a comment node.
     fn create_comment(&mut self, text: StrTendril) -> Self::Handle {
-        self.tree.orphan(Node::Comment(Comment { comment: text })).id
+        self.tree.orphan(Node::Comment(Comment { comment: text })).id()
     }
 
     // Append a DOCTYPE element to the Document node.
@@ -189,7 +189,7 @@ impl TreeSink for Html {
     // The tree builder promises this will never be called with something else than a template
     // element.
     fn get_template_contents(&mut self, target: &Self::Handle) -> Self::Handle {
-        self.tree.get(*target).unwrap().first_child().unwrap().id
+        self.tree.get(*target).unwrap().first_child().unwrap().id()
     }
 
     // Mark a HTML <script> element as "already started".
@@ -202,7 +202,7 @@ impl TreeSink for Html {
             .orphan(Node::ProcessingInstruction(
                 ProcessingInstruction { target, data },
             ))
-            .id
+            .id()
     }
 
     fn append_based_on_parent_node(
