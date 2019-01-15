@@ -336,9 +336,9 @@ impl<'a> Iterator for Attrs<'a> {
 
 impl fmt::Debug for Element {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        try!(write!(f, "<{}", self.name()));
+        r#try!(write!(f, "<{}", self.name()));
         for (key, value) in self.attrs() {
-            try!(write!(f, " {}={:?}", key, value));
+            r#try!(write!(f, " {}={:?}", key, value));
         }
         write!(f, ">")
     }

@@ -9,7 +9,7 @@ use cssparser;
 use selectors::{matching, parser, visitor};
 use selectors::parser::SelectorParseErrorKind;
 
-use ElementRef;
+use crate::ElementRef;
 
 /// Wrapper around CSS selectors.
 ///

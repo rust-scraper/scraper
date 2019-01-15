@@ -3,7 +3,7 @@ use std::io::Error;
 use ego_tree::iter::Edge;
 use html5ever::serialize::{Serialize, Serializer, TraversalScope};
 
-use {ElementRef, Node};
+use crate::{ElementRef, Node};
 
 
 impl<'a> Serialize for ElementRef<'a> {
@@ -21,17 +21,17 @@ impl<'a> Serialize for ElementRef<'a> {
 
                     match *node.value() {
                         Node::Doctype(ref doctype) => {
-                            try!(serializer.write_doctype(doctype.name()));
+                            r#try!(serializer.write_doctype(doctype.name()));
                         },
                         Node::Comment(ref comment) => {
-                            try!(serializer.write_comment(comment));
+                            r#try!(serializer.write_comment(comment));
                         },
                         Node::Text(ref text) => {
-                            try!(serializer.write_text(text));
+                            r#try!(serializer.write_text(text));
                         },
                         Node::Element(ref elem) => {
                             let attrs = elem.attrs.iter().map(|(k, v)| (k, &v[..]));
-                            try!(serializer.start_elem(elem.name.clone(), attrs));
+                            r#try!(serializer.start_elem(elem.name.clone(), attrs));
                         },
                         _ => (),
                     }
@@ -43,7 +43,7 @@ impl<'a> Serialize for ElementRef<'a> {
                     }
 
                     if let Some(elem) = node.value().as_element() {
-                        try!(serializer.end_elem(elem.name.clone()));
+                        r#try!(serializer.end_elem(elem.name.clone()));
                     }
                 },
             }

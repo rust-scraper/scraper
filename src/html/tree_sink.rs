@@ -6,7 +6,7 @@ use html5ever::Attribute;
 use html5ever::{QualName, ExpandedName};
 use html5ever::tendril::StrTendril;
 use super::Html;
-use node::{Node, Doctype, Comment, Text, Element, ProcessingInstruction};
+use crate::node::{Node, Doctype, Comment, Text, Element, ProcessingInstruction};
 
 /// Note: does not support the `<template>` element.
 impl TreeSink for Html {

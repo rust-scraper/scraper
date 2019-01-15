@@ -137,10 +137,10 @@ extern crate selectors;
 extern crate smallvec;
 extern crate tendril;
 
-pub use html::Html;
-pub use node::Node;
-pub use element_ref::ElementRef;
-pub use selector::Selector;
+pub use crate::html::Html;
+pub use crate::node::Node;
+pub use crate::element_ref::ElementRef;
+pub use crate::selector::Selector;
 
 pub mod html;
 pub mod node;

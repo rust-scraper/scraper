@@ -6,8 +6,8 @@ use ego_tree::NodeRef;
 use ego_tree::iter::{Traverse, Edge};
 use html5ever::serialize::{serialize, SerializeOpts, TraversalScope};
 
-use {Node, Selector};
-use node::Element;
+use crate::{Node, Selector};
+use crate::node::Element;
 
 /// Wrapper around a reference to an element node.
 ///

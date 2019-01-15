@@ -4,7 +4,7 @@ use html5ever::{LocalName, Namespace};
 use selectors::matching;
 
 use super::ElementRef;
-use selector::{NonTSPseudoClass, PseudoElement, Simple};
+use crate::selector::{NonTSPseudoClass, PseudoElement, Simple};
 
 /// Note: will never match against non-tree-structure pseudo-classes.
 impl<'a> Element for ElementRef<'a> {
@@ -112,8 +112,8 @@ impl<'a> Element for ElementRef<'a> {
 
 #[cfg(test)]
 mod tests {
-    use html::Html;
-    use selector::Selector;
+    use crate::html::Html;
+    use crate::selector::Selector;
     use selectors::Element;
     use selectors::attr::CaseSensitivity;
 

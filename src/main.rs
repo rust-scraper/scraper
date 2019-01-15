@@ -35,7 +35,7 @@ fn query<T: Read>(input: &Input, output: &Output, selector: &Selector, file: &mu
 
     let mut matched = false;
     for element in html.select(selector) {
-        use Output::*;
+        use crate::Output::*;
         match *output {
             Html => println!("{}", element.html()),
             InnerHtml => println!("{}", element.inner_html()),

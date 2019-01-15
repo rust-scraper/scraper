@@ -9,8 +9,8 @@ use html5ever::tree_builder::QuirksMode;
 use html5ever::QualName;
 use tendril::TendrilSink;
 
-use {Node, ElementRef};
-use selector::Selector;
+use crate::{Node, ElementRef};
+use crate::selector::Selector;
 
 /// An HTML tree.
 ///
