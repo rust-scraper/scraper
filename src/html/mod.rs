@@ -93,7 +93,12 @@ impl Html {
 
     /// Returns the root `<html>` element.
     pub fn root_element(&self) -> ElementRef {
-        let root_node = self.tree.root().first_child().unwrap();
+        let root_node = self
+            .tree
+            .root()
+            .children()
+            .find(|child| child.value().is_element())
+            .expect("html node missing");
         ElementRef::wrap(root_node).unwrap()
     }
 }
@@ -128,11 +133,27 @@ mod tests {
     use super::Selector;
 
     #[test]
-    fn test_html_root_element() {
+    fn root_element_fragment() {
         let html = Html::parse_fragment(r#"<a href="http://github.com">1</a>"#);
         let root_ref = html.root_element();
         let href = root_ref.select(&Selector::parse("a").unwrap()).next().unwrap();
         assert_eq!(href.inner_html(), "1");
         assert_eq!(href.value().attr("href").unwrap(), "http://github.com");
+    }
+
+    #[test]
+    fn root_element_document_doctype() {
+        let html = Html::parse_document("<!DOCTYPE html>\n<title>abc</title>");
+        let root_ref = html.root_element();
+        let title = root_ref.select(&Selector::parse("title").unwrap()).next().unwrap();
+        assert_eq!(title.inner_html(), "abc");
+    }
+
+    #[test]
+    fn root_element_document_comment() {
+        let html = Html::parse_document("<!-- comment --><title>abc</title>");
+        let root_ref = html.root_element();
+        let title = root_ref.select(&Selector::parse("title").unwrap()).next().unwrap();
+        assert_eq!(title.inner_html(), "abc");
     }
 }
