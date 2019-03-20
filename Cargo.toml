@@ -17,9 +17,21 @@ readme = "README.md"
 [dependencies]
 cssparser = "0.24.1"
 ego-tree = "0.6.0"
-getopts = "0.2.18"
 html5ever = "0.22.0"
 matches = "0.1.6"
 selectors = "0.20.0"
 smallvec = "0.6.0"
 tendril = "0.4.0"
+
+[dependencies.getopts]
+version = "0.2.18"
+optional = true
+
+[features]
+default = ["main"]
+main = ["getopts"]
+
+[[bin]]
+name = "scraper"
+path = "src/main.rs"
+required-features = ["main"]
