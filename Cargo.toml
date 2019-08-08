@@ -17,7 +17,7 @@ readme = "README.md"
 [dependencies]
 cssparser = "0.25.3"
 ego-tree = "0.6.0"
-html5ever = "0.22.0"
+html5ever = "0.24.0"
 matches = "0.1.6"
 selectors = "0.21.0"
 smallvec = "0.6.0"
