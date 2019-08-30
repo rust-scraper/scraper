@@ -7,6 +7,7 @@ use ego_tree::NodeRef;
 use html5ever::serialize::{serialize, SerializeOpts, TraversalScope};
 
 use node::Element;
+use selectors::parser::SelectorParseErrorKind;
 use {Node, Selector};
 
 /// Wrapper around a reference to an element node.
@@ -46,6 +47,18 @@ impl<'a> ElementRef<'a> {
             inner: inner,
             selector: selector,
         }
+    }
+
+    /// Returns an iterator over descendent elements matching a selector.
+    pub fn try_select<'s>(
+        &self,
+        selector: &'s str,
+    ) -> Result<SelectOwned<'_>, cssparser::ParseError<'s, SelectorParseErrorKind<'s>>> {
+        let mut inner = self.traverse();
+        inner.next(); // Skip Edge::Open(self).
+        let selector = Selector::parse(selector)?;
+
+        Ok(SelectOwned { inner, selector })
     }
 
     fn serialize(&self, traversal_scope: TraversalScope) -> String {
@@ -92,6 +105,30 @@ pub struct Select<'a, 'b> {
 }
 
 impl<'a, 'b> Iterator for Select<'a, 'b> {
+    type Item = ElementRef<'a>;
+
+    fn next(&mut self) -> Option<ElementRef<'a>> {
+        for edge in &mut self.inner {
+            if let Edge::Open(node) = edge {
+                if let Some(element) = ElementRef::wrap(node) {
+                    if self.selector.matches(&element) {
+                        return Some(element);
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+/// Iterator over descendent elements matching a selector.
+#[derive(Debug, Clone)]
+pub struct SelectOwned<'a> {
+    inner: Traverse<'a, Node>,
+    selector: Selector,
+}
+
+impl<'a> Iterator for SelectOwned<'a> {
     type Item = ElementRef<'a>;
 
     fn next(&mut self) -> Option<ElementRef<'a>> {

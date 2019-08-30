@@ -23,9 +23,9 @@ pub struct Selector {
 impl Selector {
     /// Parses a CSS selector group.
 
-    pub fn parse<'t, 'i>(
-        selectors: &'i str,
-    ) -> Result<Self, cssparser::ParseError<'i, SelectorParseErrorKind<'i>>> {
+    pub fn parse(
+        selectors: &str,
+    ) -> Result<Self, cssparser::ParseError<'_, SelectorParseErrorKind<'_>>> {
         let mut parser_input = cssparser::ParserInput::new(selectors);
         let mut parser = cssparser::Parser::new(&mut parser_input);
         parser::SelectorList::parse(&Parser, &mut parser).map(|list| Selector { selectors: list.0 })

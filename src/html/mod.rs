@@ -10,6 +10,7 @@ use html5ever::QualName;
 use tendril::TendrilSink;
 
 use selector::Selector;
+use selectors::parser::SelectorParseErrorKind;
 use {ElementRef, Node};
 
 /// An HTML tree.
@@ -91,6 +92,19 @@ impl Html {
         }
     }
 
+    /// Returns an iterator over elements matching a selector.
+    pub fn try_select<'a, 's>(
+        &'a self,
+        selector: &'s str,
+    ) -> Result<SelectOwned<'a>, cssparser::ParseError<'s, SelectorParseErrorKind<'s>>> {
+        let selector = Selector::parse(selector)?;
+
+        Ok(SelectOwned {
+            inner: self.tree.nodes(),
+            selector,
+        })
+    }
+
     /// Returns the root `<html>` element.
     pub fn root_element(&self) -> ElementRef {
         let root_node = self
@@ -111,6 +125,28 @@ pub struct Select<'a, 'b> {
 }
 
 impl<'a, 'b> Iterator for Select<'a, 'b> {
+    type Item = ElementRef<'a>;
+
+    fn next(&mut self) -> Option<ElementRef<'a>> {
+        for node in self.inner.by_ref() {
+            if let Some(element) = ElementRef::wrap(node) {
+                if element.parent().is_some() && self.selector.matches(&element) {
+                    return Some(element);
+                }
+            }
+        }
+        None
+    }
+}
+
+/// Iterator over elements matching a owned selector.
+#[derive(Debug)]
+pub struct SelectOwned<'a> {
+    inner: Nodes<'a, Node>,
+    selector: Selector,
+}
+
+impl<'a> Iterator for SelectOwned<'a> {
     type Item = ElementRef<'a>;
 
     fn next(&mut self) -> Option<ElementRef<'a>> {
