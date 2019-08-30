@@ -1,12 +1,12 @@
 //! HTML nodes.
 
+use std::collections::{hash_map, hash_set};
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::ops::Deref;
-use std::collections::{HashMap, HashSet};
-use std::collections::{hash_map, hash_set};
 
-use html5ever::{Attribute, LocalName, QualName};
 use html5ever::tendril::StrTendril;
+use html5ever::{Attribute, LocalName, QualName};
 
 use selectors::attr::CaseSensitivity;
 

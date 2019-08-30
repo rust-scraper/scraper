@@ -123,9 +123,17 @@
 //! assert_eq!(vec!["Hello, ", "world!"], text);
 //! ```
 
-#![warn(missing_docs, missing_debug_implementations, missing_copy_implementations, trivial_casts,
-        trivial_numeric_casts, unused_extern_crates, unused_import_braces, unused_qualifications,
-        variant_size_differences)]
+#![warn(
+    missing_docs,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces,
+    unused_qualifications,
+    variant_size_differences
+)]
 
 extern crate cssparser;
 extern crate ego_tree;
@@ -137,12 +145,12 @@ extern crate selectors;
 extern crate smallvec;
 extern crate tendril;
 
+pub use element_ref::ElementRef;
 pub use html::Html;
 pub use node::Node;
-pub use element_ref::ElementRef;
 pub use selector::Selector;
 
+pub mod element_ref;
 pub mod html;
 pub mod node;
-pub mod element_ref;
 pub mod selector;

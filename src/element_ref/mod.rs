@@ -2,12 +2,12 @@
 
 use std::ops::Deref;
 
+use ego_tree::iter::{Edge, Traverse};
 use ego_tree::NodeRef;
-use ego_tree::iter::{Traverse, Edge};
 use html5ever::serialize::{serialize, SerializeOpts, TraversalScope};
 
-use {Node, Selector};
 use node::Element;
+use {Node, Selector};
 
 /// Wrapper around a reference to an element node.
 ///
@@ -71,13 +71,17 @@ impl<'a> ElementRef<'a> {
 
     /// Returns an iterator over descendent text nodes.
     pub fn text(&self) -> Text<'a> {
-        Text { inner: self.traverse() }
+        Text {
+            inner: self.traverse(),
+        }
     }
 }
 
 impl<'a> Deref for ElementRef<'a> {
     type Target = NodeRef<'a, Node>;
-    fn deref(&self) -> &NodeRef<'a, Node> { &self.node }
+    fn deref(&self) -> &NodeRef<'a, Node> {
+        &self.node
+    }
 }
 
 /// Iterator over descendent elements matching a selector.
