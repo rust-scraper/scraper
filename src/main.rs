@@ -35,12 +35,15 @@ fn query<T: Read>(input: &Input, output: &Output, selector: &Selector, file: &mu
 
     let mut matched = false;
     for element in html.select(selector) {
-        use Output::*;
+        use crate::Output::*;
         match *output {
             Html => println!("{}", element.html()),
             InnerHtml => println!("{}", element.inner_html()),
             Attr(ref attr) => println!("{}", element.value().attr(attr).unwrap_or("")),
-            Classes => println!("{}", element.value().classes().collect::<Vec<_>>().join(" ")),
+            Classes => println!(
+                "{}",
+                element.value().classes().collect::<Vec<_>>().join(" ")
+            ),
             Id => println!("{}", element.value().id().unwrap_or("")),
             Name => println!("{}", element.value().name()),
             Text => println!("{}", element.text().collect::<String>()),
@@ -70,7 +73,10 @@ fn main() {
         Err(f) => panic!(f.to_string()),
     };
     if matches.opt_present("h") {
-        print!("{}", opts.usage("Usage: scraper [options] SELECTOR [FILE ...]"));
+        print!(
+            "{}",
+            opts.usage("Usage: scraper [options] SELECTOR [FILE ...]")
+        );
         return;
     }
 
@@ -85,45 +91,43 @@ fn main() {
         return;
     }
 
-    let input =
-        if matches.opt_present("f") {
-            Input::Fragment
-        } else {
-            Input::Document
-        };
+    let input = if matches.opt_present("f") {
+        Input::Fragment
+    } else {
+        Input::Document
+    };
 
-    let output =
-        if matches.opt_present("I") {
-            Output::InnerHtml
-        } else if matches.opt_present("a") {
-            Output::Attr(matches.opt_str("a").unwrap())
-        } else if matches.opt_present("c") {
-            Output::Classes
-        } else if matches.opt_present("i") {
-            Output::Id
-        } else if matches.opt_present("n") {
-            Output::Name
-        } else if matches.opt_present("t") {
-            Output::Text
-        } else {
-            Output::Html
-        };
+    let output = if matches.opt_present("I") {
+        Output::InnerHtml
+    } else if matches.opt_present("a") {
+        Output::Attr(matches.opt_str("a").unwrap())
+    } else if matches.opt_present("c") {
+        Output::Classes
+    } else if matches.opt_present("i") {
+        Output::Id
+    } else if matches.opt_present("n") {
+        Output::Name
+    } else if matches.opt_present("t") {
+        Output::Text
+    } else {
+        Output::Html
+    };
 
     let selector = matches.free.first().expect("missing selector");
     let files = &matches.free[1..];
 
     let selector = Selector::parse(selector).unwrap();
 
-    let matched =
-        if files.is_empty() {
-            query(&input, &output, &selector, &mut io::stdin())
-        } else {
-            files.into_iter()
-                .map(File::open)
-                .map(Result::unwrap)
-                .map(|mut f| query(&input, &output, &selector, &mut f))
-                .fold(false, |a, m| a || m)
-        };
+    let matched = if files.is_empty() {
+        query(&input, &output, &selector, &mut io::stdin())
+    } else {
+        files
+            .into_iter()
+            .map(File::open)
+            .map(Result::unwrap)
+            .map(|mut f| query(&input, &output, &selector, &mut f))
+            .fold(false, |a, m| a || m)
+    };
 
     process::exit(if matched { 0 } else { 1 });
 }

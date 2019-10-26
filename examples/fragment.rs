@@ -2,7 +2,7 @@ extern crate scraper;
 
 use std::io::{self, Read, Write};
 
-use scraper::{Selector, Html};
+use scraper::{Html, Selector};
 
 fn main() {
     let mut input = String::new();

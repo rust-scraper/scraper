@@ -1,10 +1,10 @@
-use selectors::{Element, OpaqueElement};
-use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use html5ever::{LocalName, Namespace};
+use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use selectors::matching;
+use selectors::{Element, OpaqueElement};
 
 use super::ElementRef;
-use selector::{NonTSPseudoClass, PseudoElement, Simple};
+use crate::selector::{NonTSPseudoClass, PseudoElement, Simple};
 
 /// Note: will never match against non-tree-structure pseudo-classes.
 impl<'a> Element for ElementRef<'a> {
@@ -59,7 +59,8 @@ impl<'a> Element for ElementRef<'a> {
     ) -> bool {
         self.value().attrs.iter().any(|(key, value)| {
             !matches!(*ns, NamespaceConstraint::Specific(url) if *url != key.ns)
-                && *local_name == key.local && operation.eval_str(value)
+                && *local_name == key.local
+                && operation.eval_str(value)
         })
     }
 
@@ -100,7 +101,8 @@ impl<'a> Element for ElementRef<'a> {
     }
 
     fn is_empty(&self) -> bool {
-        !self.children()
+        !self
+            .children()
             .any(|child| child.value().is_element() || child.value().is_text())
     }
 
@@ -112,10 +114,10 @@ impl<'a> Element for ElementRef<'a> {
 
 #[cfg(test)]
 mod tests {
-    use html::Html;
-    use selector::Selector;
-    use selectors::Element;
+    use crate::html::Html;
+    use crate::selector::Selector;
     use selectors::attr::CaseSensitivity;
+    use selectors::Element;
 
     #[test]
     fn test_has_id() {
@@ -182,5 +184,4 @@ mod tests {
             element.has_class(&LocalName::from("my_class"), CaseSensitivity::CaseSensitive)
         );
     }
-
 }

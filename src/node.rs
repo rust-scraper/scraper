@@ -1,12 +1,12 @@
 //! HTML nodes.
 
+use std::collections::{hash_map, hash_set};
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::ops::Deref;
-use std::collections::{HashMap, HashSet};
-use std::collections::{hash_map, hash_set};
 
-use html5ever::{Attribute, LocalName, QualName};
 use html5ever::tendril::StrTendril;
+use html5ever::{Attribute, LocalName, QualName};
 
 use selectors::attr::CaseSensitivity;
 
@@ -336,9 +336,9 @@ impl<'a> Iterator for Attrs<'a> {
 
 impl fmt::Debug for Element {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        try!(write!(f, "<{}", self.name()));
+        write!(f, "<{}", self.name())?;
         for (key, value) in self.attrs() {
-            try!(write!(f, " {}={:?}", key, value));
+            write!(f, " {}={:?}", key, value)?;
         }
         write!(f, ">")
     }

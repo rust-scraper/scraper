@@ -3,8 +3,7 @@ use std::io::Error;
 use ego_tree::iter::Edge;
 use html5ever::serialize::{Serialize, Serializer, TraversalScope};
 
-use {ElementRef, Node};
-
+use crate::{ElementRef, Node};
 
 impl<'a> Serialize for ElementRef<'a> {
     fn serialize<S: Serializer>(
@@ -21,21 +20,21 @@ impl<'a> Serialize for ElementRef<'a> {
 
                     match *node.value() {
                         Node::Doctype(ref doctype) => {
-                            try!(serializer.write_doctype(doctype.name()));
-                        },
+                            serializer.write_doctype(doctype.name())?;
+                        }
                         Node::Comment(ref comment) => {
-                            try!(serializer.write_comment(comment));
-                        },
+                            serializer.write_comment(comment)?;
+                        }
                         Node::Text(ref text) => {
-                            try!(serializer.write_text(text));
-                        },
+                            serializer.write_text(text)?;
+                        }
                         Node::Element(ref elem) => {
                             let attrs = elem.attrs.iter().map(|(k, v)| (k, &v[..]));
-                            try!(serializer.start_elem(elem.name.clone(), attrs));
-                        },
+                            serializer.start_elem(elem.name.clone(), attrs)?;
+                        }
                         _ => (),
                     }
-                },
+                }
 
                 Edge::Close(node) => {
                     if node == **self && traversal_scope == TraversalScope::ChildrenOnly(None) {
@@ -43,9 +42,9 @@ impl<'a> Serialize for ElementRef<'a> {
                     }
 
                     if let Some(elem) = node.value().as_element() {
-                        try!(serializer.end_elem(elem.name.clone()));
+                        serializer.end_elem(elem.name.clone())?;
                     }
-                },
+                }
             }
         }
 

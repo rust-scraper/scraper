@@ -4,12 +4,12 @@ use std::fmt;
 
 use smallvec::SmallVec;
 
-use html5ever::{LocalName, Namespace};
 use cssparser;
-use selectors::{matching, parser, visitor};
+use html5ever::{LocalName, Namespace};
 use selectors::parser::SelectorParseErrorKind;
+use selectors::{matching, parser, visitor};
 
-use ElementRef;
+use crate::ElementRef;
 
 /// Wrapper around CSS selectors.
 ///
