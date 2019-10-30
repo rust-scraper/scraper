@@ -2,15 +2,15 @@
 
 use std::borrow::Cow;
 
-use ego_tree::Tree;
 use ego_tree::iter::Nodes;
+use ego_tree::Tree;
 use html5ever::driver;
 use html5ever::tree_builder::QuirksMode;
 use html5ever::QualName;
 use tendril::TendrilSink;
 
-use {Node, ElementRef};
-use selector::Selector;
+use crate::selector::Selector;
+use crate::{ElementRef, Node};
 
 /// An HTML tree.
 ///
@@ -136,7 +136,10 @@ mod tests {
     fn root_element_fragment() {
         let html = Html::parse_fragment(r#"<a href="http://github.com">1</a>"#);
         let root_ref = html.root_element();
-        let href = root_ref.select(&Selector::parse("a").unwrap()).next().unwrap();
+        let href = root_ref
+            .select(&Selector::parse("a").unwrap())
+            .next()
+            .unwrap();
         assert_eq!(href.inner_html(), "1");
         assert_eq!(href.value().attr("href").unwrap(), "http://github.com");
     }
@@ -145,7 +148,10 @@ mod tests {
     fn root_element_document_doctype() {
         let html = Html::parse_document("<!DOCTYPE html>\n<title>abc</title>");
         let root_ref = html.root_element();
-        let title = root_ref.select(&Selector::parse("title").unwrap()).next().unwrap();
+        let title = root_ref
+            .select(&Selector::parse("title").unwrap())
+            .next()
+            .unwrap();
         assert_eq!(title.inner_html(), "abc");
     }
 
@@ -153,7 +159,10 @@ mod tests {
     fn root_element_document_comment() {
         let html = Html::parse_document("<!-- comment --><title>abc</title>");
         let root_ref = html.root_element();
-        let title = root_ref.select(&Selector::parse("title").unwrap()).next().unwrap();
+        let title = root_ref
+            .select(&Selector::parse("title").unwrap())
+            .next()
+            .unwrap();
         assert_eq!(title.inner_html(), "abc");
     }
 }
