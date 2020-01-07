@@ -1,3 +1,7 @@
+**This project is looking for maintainer(s): [#36](https://github.com/programble/scraper/issues/36)**
+
+---
+
 # scraper
 
 HTML parsing and querying with CSS selectors.
