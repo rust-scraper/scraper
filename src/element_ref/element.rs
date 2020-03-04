@@ -26,6 +26,26 @@ impl<'a> Element for ElementRef<'a> {
         None
     }
 
+    fn is_pseudo_element(&self) -> bool {
+        false
+    }
+
+    fn is_part(&self, _name: &LocalName) -> bool {
+        false
+    }
+
+    fn is_same_type(&self, other: &Self) -> bool {
+        self.value().name == other.value().name
+    }
+
+    fn exported_part(&self, _: &LocalName) -> Option<LocalName> {
+        None
+    }
+
+    fn imported_part(&self, _: &LocalName) -> Option<LocalName> {
+        None
+    }
+
     fn prev_sibling_element(&self) -> Option<Self> {
         self.prev_siblings()
             .find(|sibling| sibling.value().is_element())
@@ -43,12 +63,12 @@ impl<'a> Element for ElementRef<'a> {
         self.value().name.ns == ns!(html)
     }
 
-    fn local_name(&self) -> &LocalName {
-        &self.value().name.local
+    fn has_local_name(&self, name: &LocalName) -> bool {
+        &self.value().name.local == name
     }
 
-    fn namespace(&self) -> &Namespace {
-        &self.value().name.ns
+    fn has_namespace(&self, namespace: &Namespace) -> bool {
+        &self.value().name.ns == namespace
     }
 
     fn attr_matches(

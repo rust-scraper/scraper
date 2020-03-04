@@ -60,6 +60,7 @@ impl parser::SelectorImpl for Simple {
     type AttrValue = String;
     type Identifier = LocalName;
     type ClassName = LocalName;
+    type PartName = LocalName;
     type LocalName = LocalName;
     type NamespacePrefix = LocalName;
     type NamespaceUrl = Namespace;
@@ -81,6 +82,14 @@ impl parser::NonTSPseudoClass for NonTSPseudoClass {
     type Impl = Simple;
 
     fn is_active_or_hover(&self) -> bool {
+        false
+    }
+
+    fn is_user_action_state(&self) -> bool {
+        false
+    }
+
+    fn has_zero_specificity(&self) -> bool {
         false
     }
 }
