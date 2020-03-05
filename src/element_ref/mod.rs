@@ -20,7 +20,7 @@ pub struct ElementRef<'a> {
 
 impl<'a> ElementRef<'a> {
     fn new(node: NodeRef<'a, Node>) -> Self {
-        ElementRef { node: node }
+        ElementRef { node }
     }
 
     /// Wraps a `NodeRef` only if it references a `Node::Element`.
@@ -42,16 +42,13 @@ impl<'a> ElementRef<'a> {
         let mut inner = self.traverse();
         inner.next(); // Skip Edge::Open(self).
 
-        Select {
-            inner: inner,
-            selector: selector,
-        }
+        Select { inner, selector }
     }
 
     fn serialize(&self, traversal_scope: TraversalScope) -> String {
         let opts = SerializeOpts {
             scripting_enabled: false, // It's not clear what this does.
-            traversal_scope: traversal_scope,
+            traversal_scope,
             create_missing_parent: false,
         };
         let mut buf = Vec::new();
@@ -120,7 +117,7 @@ impl<'a> Iterator for Text<'a> {
     fn next(&mut self) -> Option<&'a str> {
         for edge in &mut self.inner {
             if let Edge::Open(node) = edge {
-                if let &Node::Text(ref text) = node.value() {
+                if let Node::Text(ref text) = node.value() {
                     return Some(&*text);
                 }
             }

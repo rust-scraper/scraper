@@ -87,7 +87,7 @@ impl Html {
     pub fn select<'a, 'b>(&'a self, selector: &'b Selector) -> Select<'a, 'b> {
         Select {
             inner: self.tree.nodes(),
-            selector: selector,
+            selector,
         }
     }
 

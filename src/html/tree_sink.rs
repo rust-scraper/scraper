@@ -86,9 +86,9 @@ impl TreeSink for Html {
         system_id: StrTendril,
     ) {
         let doctype = Doctype {
-            name: name,
-            public_id: public_id,
-            system_id: system_id,
+            name,
+            public_id,
+            system_id,
         };
         self.tree.root_mut().append(Node::Doctype(doctype));
     }
@@ -117,7 +117,7 @@ impl TreeSink for Html {
                         _ => unreachable!(),
                     }
                 } else {
-                    parent.append(Node::Text(Text { text: text }));
+                    parent.append(Node::Text(Text { text }));
                 }
             }
         }
@@ -141,7 +141,7 @@ impl TreeSink for Html {
         }
 
         let mut sibling = self.tree.get_mut(*sibling).unwrap();
-        if !sibling.parent().is_none() {
+        if sibling.parent().is_some() {
             match new_node {
                 NodeOrText::AppendNode(id) => {
                     sibling.insert_id_before(id);
@@ -159,7 +159,7 @@ impl TreeSink for Html {
                             _ => unreachable!(),
                         }
                     } else {
-                        sibling.insert_before(Node::Text(Text { text: text }));
+                        sibling.insert_before(Node::Text(Text { text }));
                     }
                 }
             }

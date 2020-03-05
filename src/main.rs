@@ -122,11 +122,11 @@ fn main() {
         query(&input, &output, &selector, &mut io::stdin())
     } else {
         files
-            .into_iter()
+            .iter()
             .map(File::open)
             .map(Result::unwrap)
             .map(|mut f| query(&input, &output, &selector, &mut f))
-            .fold(false, |a, m| a || m)
+            .any(|m| m)
     };
 
     process::exit(if matched { 0 } else { 1 });
