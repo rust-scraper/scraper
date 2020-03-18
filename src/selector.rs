@@ -1,5 +1,6 @@
 //! CSS selectors.
 
+use std::convert::TryFrom;
 use std::fmt;
 
 use smallvec::SmallVec;
@@ -127,5 +128,35 @@ impl cssparser::ToCss for PseudoElement {
         W: fmt::Write,
     {
         dest.write_str("")
+    }
+}
+
+impl<'i> TryFrom<&'i str> for Selector {
+    type Error = cssparser::ParseError<'i, SelectorParseErrorKind<'i>>;
+
+    fn try_from(s: &'i str) -> Result<Self, Self::Error> {
+        Selector::parse(s)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::convert::TryInto;
+
+    #[test]
+    fn selector_conversions() {
+        let s = "#testid.testclass";
+        let _sel: Selector = s.try_into().unwrap();
+
+        let s = s.to_owned();
+        let _sel: Selector = (*s).try_into().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_selector_conversions() {
+        let s = "<failing selector>";
+        let _sel: Selector = s.try_into().unwrap();
     }
 }
