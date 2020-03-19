@@ -11,7 +11,7 @@ impl<'a> Element for ElementRef<'a> {
     type Impl = Simple;
 
     fn opaque(&self) -> OpaqueElement {
-        OpaqueElement::new(&self)
+        OpaqueElement::new(self.node.value())
     }
 
     fn parent_element(&self) -> Option<Self> {

@@ -42,7 +42,11 @@ impl<'a> ElementRef<'a> {
         let mut inner = self.traverse();
         inner.next(); // Skip Edge::Open(self).
 
-        Select { inner, selector }
+        Select {
+            scope: self.clone(),
+            inner,
+            selector,
+        }
     }
 
     fn serialize(&self, traversal_scope: TraversalScope) -> String {
@@ -84,6 +88,7 @@ impl<'a> Deref for ElementRef<'a> {
 /// Iterator over descendent elements matching a selector.
 #[derive(Debug, Clone)]
 pub struct Select<'a, 'b> {
+    scope: ElementRef<'a>,
     inner: Traverse<'a, Node>,
     selector: &'b Selector,
 }
@@ -95,7 +100,7 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
         for edge in &mut self.inner {
             if let Edge::Open(node) = edge {
                 if let Some(element) = ElementRef::wrap(node) {
-                    if self.selector.matches(&element) {
+                    if self.selector.matches_with_scope(&element, Some(self.scope)) {
                         return Some(element);
                     }
                 }
@@ -128,3 +133,29 @@ impl<'a> Iterator for Text<'a> {
 
 mod element;
 mod serializable;
+
+#[cfg(test)]
+mod tests {
+    use crate::html::Html;
+    use crate::selector::Selector;
+
+    #[test]
+    fn test_scope() {
+        let html = r"
+            <div>
+                <b>1</b>
+                <span>
+                    <span><b>2</b></span>
+                    <b>3</b>
+                </span>
+            </div>
+        ";
+        let fragment = Html::parse_fragment(html);
+        let sel1 = Selector::parse("div > span").unwrap();
+        let sel2 = Selector::parse(":scope > b").unwrap();
+
+        let element1 = fragment.select(&sel1).next().unwrap();
+        let element2 = element1.select(&sel2).next().unwrap();
+        assert_eq!(element2.inner_html(), "3");
+    }
+}

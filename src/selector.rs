@@ -33,12 +33,20 @@ impl Selector {
 
     /// Returns true if the element matches this selector.
     pub fn matches(&self, element: &ElementRef) -> bool {
+        self.matches_with_scope(element, None)
+    }
+
+    /// Returns true if the element matches this selector.
+    /// The optional `scope` argument is used to specify which element has `:scope` pseudo-class.
+    /// When it is `None`, `:scope` will match the root element.
+    pub fn matches_with_scope(&self, element: &ElementRef, scope: Option<ElementRef>) -> bool {
         let mut context = matching::MatchingContext::new(
             matching::MatchingMode::Normal,
             None,
             None,
             matching::QuirksMode::NoQuirks,
         );
+        context.scope_element = scope.map(|x| selectors::Element::opaque(&x));
         self.selectors
             .iter()
             .any(|s| matching::matches_selector(&s, 0, None, element, &mut context, &mut |_, _| {}))
