@@ -327,7 +327,7 @@ impl<'a> Iterator for Classes<'a> {
     }
 }
 
-/// An iterator over node attributes.
+/// An iterator over a node's attributes.
 #[cfg(feature = "deterministic")]
 pub type AttributesIter<'a> = indexmap::map::Iter<'a, QualName, StrTendril>;
 
