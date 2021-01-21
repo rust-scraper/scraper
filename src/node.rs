@@ -228,7 +228,7 @@ impl fmt::Debug for Text {
 #[cfg(feature = "deterministic")]
 pub type Attributes = indexmap::IndexMap<QualName, StrTendril>;
 
-/// A Map of attributes that doesn't preserve the order.
+/// A Map of attributes that doesn't preserve the order of the attributes.
 #[cfg(not(feature = "deterministic"))]
 pub type Attributes = HashMap<QualName, StrTendril>;
 
