@@ -224,7 +224,7 @@ impl fmt::Debug for Text {
     }
 }
 
-/// A Map of attributes that does preserve the order.
+/// A Map of attributes that preserves the order of the attributes.
 #[cfg(feature = "deterministic")]
 pub type Attributes = indexmap::IndexMap<QualName, StrTendril>;
 
