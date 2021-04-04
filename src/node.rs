@@ -224,6 +224,14 @@ impl fmt::Debug for Text {
     }
 }
 
+/// A Map of attributes that preserves the order of the attributes.
+#[cfg(feature = "deterministic")]
+pub type Attributes = indexmap::IndexMap<QualName, StrTendril>;
+
+/// A Map of attributes that doesn't preserve the order of the attributes.
+#[cfg(not(feature = "deterministic"))]
+pub type Attributes = HashMap<QualName, StrTendril>;
+
 /// An HTML element.
 #[derive(Clone, PartialEq, Eq)]
 pub struct Element {
@@ -237,7 +245,7 @@ pub struct Element {
     pub classes: HashSet<LocalName>,
 
     /// The element attributes.
-    pub attrs: HashMap<QualName, StrTendril>,
+    pub attrs: Attributes,
 }
 
 impl Element {
@@ -319,11 +327,19 @@ impl<'a> Iterator for Classes<'a> {
     }
 }
 
+/// An iterator over a node's attributes.
+#[cfg(feature = "deterministic")]
+pub type AttributesIter<'a> = indexmap::map::Iter<'a, QualName, StrTendril>;
+
+/// An iterator over a node's attributes.
+#[cfg(not(feature = "deterministic"))]
+pub type AttributesIter<'a> = hash_map::Iter<'a, QualName, StrTendril>;
+
 /// Iterator over attributes.
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Attrs<'a> {
-    inner: hash_map::Iter<'a, QualName, StrTendril>,
+    inner: AttributesIter<'a>,
 }
 
 impl<'a> Iterator for Attrs<'a> {
