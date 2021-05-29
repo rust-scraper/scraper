@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  format_and_lint:
+    name: Format and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            override: true
+            components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v1
+      - name: Check formating
+        run: cargo fmt -- --check
+      - name: Lint
+        run: cargo clippy -- -D warnings
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust_version: [1.36.0, stable, beta, nightly]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: ${{matrix.rust_version}}
+            override: true
+      - uses: Swatinem/rust-cache@v1
+      - name: Test
+        run: cargo test
