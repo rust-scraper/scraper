@@ -49,7 +49,7 @@ impl Selector {
         context.scope_element = scope.map(|x| selectors::Element::opaque(&x));
         self.selectors
             .iter()
-            .any(|s| matching::matches_selector(&s, 0, None, element, &mut context, &mut |_, _| {}))
+            .any(|s| matching::matches_selector(s, 0, None, element, &mut context, &mut |_, _| {}))
     }
 }
 

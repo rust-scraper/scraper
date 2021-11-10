@@ -38,50 +38,32 @@ pub enum Node {
 impl Node {
     /// Returns true if node is the document root.
     pub fn is_document(&self) -> bool {
-        match *self {
-            Node::Document => true,
-            _ => false,
-        }
+        matches!(*self, Node::Document)
     }
 
     /// Returns true if node is the fragment root.
     pub fn is_fragment(&self) -> bool {
-        match *self {
-            Node::Fragment => true,
-            _ => false,
-        }
+        matches!(*self, Node::Fragment)
     }
 
     /// Returns true if node is a doctype.
     pub fn is_doctype(&self) -> bool {
-        match *self {
-            Node::Doctype(_) => true,
-            _ => false,
-        }
+        matches!(*self, Node::Doctype(_))
     }
 
     /// Returns true if node is a comment.
     pub fn is_comment(&self) -> bool {
-        match *self {
-            Node::Comment(_) => true,
-            _ => false,
-        }
+        matches!(*self, Node::Comment(_))
     }
 
     /// Returns true if node is text.
     pub fn is_text(&self) -> bool {
-        match *self {
-            Node::Text(_) => true,
-            _ => false,
-        }
+        matches!(*self, Node::Text(_))
     }
 
     /// Returns true if node is an element.
     pub fn is_element(&self) -> bool {
-        match *self {
-            Node::Element(_) => true,
-            _ => false,
-        }
+        matches!(*self, Node::Element(_))
     }
 
     /// Returns self as a doctype.
@@ -285,7 +267,7 @@ impl Element {
 
     /// Returns the element ID.
     pub fn id(&self) -> Option<&str> {
-        self.id.as_ref().map(Deref::deref)
+        self.id.as_deref()
     }
 
     /// Returns true if element has the class.
