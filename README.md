@@ -1,8 +1,7 @@
-**This project is looking for maintainer(s): [#36](https://github.com/programble/scraper/issues/36)**
-
----
-
 # scraper
+
+[![crates.io package](https://repology.org/badge/version-for-repo/crates_io/rust:scraper.svg)](https://repology.org/project/rust:scraper/versions)
+![test](https://github.com/causal-agent/scraper/actions/workflows/test.yml/badge.svg)
 
 HTML parsing and querying with CSS selectors.
 
@@ -128,5 +127,9 @@ let text = h1.text().collect::<Vec<_>>();
 
 assert_eq!(vec!["Hello, ", "world!"], text);
 ```
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/causal-agent/scraper.svg)](https://starchart.cc/causal-agent/scraper)
 
 License: ISC
