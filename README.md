@@ -131,6 +131,6 @@ assert_eq!(vec!["Hello, ", "world!"], text);
 
 Please feel free to open pull requests. If you're planning on implementing
 something big (i.e. not fixing a typo, a small bug fix, minor refactor, etc)
-then pleas open an issue first.
+then please open an issue first.
 
 License: ISC
