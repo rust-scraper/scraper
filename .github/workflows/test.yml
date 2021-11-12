@@ -7,31 +7,39 @@ on:
       - "master"
 
 jobs:
-  format_and_lint:
-    name: Format and lint
+  format:
+    name: Format code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install latest nightly
+      - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
             override: true
-            components: rustfmt, clippy
+            components: rustfmt
       - uses: Swatinem/rust-cache@v1
-      - name: Check formating
+      - name: Check formatting
         run: cargo fmt -- --check
-      - name: Lint
-        run: cargo clippy -- -D warnings
+  clippy_check:
+    name: Clippy check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: rustup component add clippy
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust_version: [1.36.0, stable, beta, nightly]
+        rust_version: [stable, beta, nightly]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
-      - name: Install latest nightly
+      - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
             toolchain: ${{matrix.rust_version}}
