@@ -2,6 +2,7 @@
 
 [![crates.io package](https://repology.org/badge/version-for-repo/crates_io/rust:scraper.svg)](https://repology.org/project/rust:scraper/versions)
 ![test](https://github.com/causal-agent/scraper/actions/workflows/test.yml/badge.svg)
+[![Join the chat at https://gitter.im/scraper-rs/community](https://badges.gitter.im/scraper-rs/community.svg)](https://gitter.im/scraper-rs/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 HTML parsing and querying with CSS selectors.
 
@@ -127,6 +128,12 @@ let text = h1.text().collect::<Vec<_>>();
 
 assert_eq!(vec!["Hello, ", "world!"], text);
 ```
+
+## Contributing
+
+Please feel free to open pull requests. If you're planning on implementing
+something big (i.e. not fixing a typo, a small bug fix, minor refactor, etc)
+then please open an issue first.
 
 ## Stargazers over time
 
