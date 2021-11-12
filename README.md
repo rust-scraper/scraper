@@ -1,7 +1,3 @@
-**This project is looking for maintainer(s): [#36](https://github.com/programble/scraper/issues/36)**
-
----
-
 # scraper
 
 [![Join the chat at https://gitter.im/scraper-rs/community](https://badges.gitter.im/scraper-rs/community.svg)](https://gitter.im/scraper-rs/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -130,5 +126,11 @@ let text = h1.text().collect::<Vec<_>>();
 
 assert_eq!(vec!["Hello, ", "world!"], text);
 ```
+
+# Contributing
+
+Please feel free to open pull requests. If you're planning on implementing
+something big (i.e. not fixing a typo, a small bug fix, minor refactor, etc)
+then please open an issue first.
 
 License: ISC
