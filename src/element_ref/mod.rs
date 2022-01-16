@@ -43,7 +43,7 @@ impl<'a> ElementRef<'a> {
         inner.next(); // Skip Edge::Open(self).
 
         Select {
-            scope: self.clone(),
+            scope: *self,
             inner,
             selector,
         }
