@@ -8,7 +8,7 @@ use std::ops::Deref;
 use html5ever::tendril::StrTendril;
 use html5ever::{Attribute, LocalName, QualName};
 
-use selectors::attr::CaseSensitivity;
+pub use selectors::attr::CaseSensitivity;
 
 /// An HTML node.
 #[derive(Clone, PartialEq, Eq)]
