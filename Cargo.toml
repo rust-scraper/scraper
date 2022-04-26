@@ -7,12 +7,12 @@ description = "HTML parsing and querying with CSS selectors"
 keywords = ["html", "css", "selector", "scraping"]
 
 authors = [
-    "Curtis McEnroe <june@causal.agency>",
+    "June McEnroe <june@causal.agency>",
     "Vivek Kushwaha <yoursvivek@gmail.com>",
 ]
 license = "ISC"
 
-repository = "https://github.com/programble/scraper"
+repository = "https://github.com/causal-agent/scraper"
 readme = "README.md"
 
 [dependencies]
