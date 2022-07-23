@@ -149,3 +149,6 @@ pub mod element_ref;
 pub mod html;
 pub mod node;
 pub mod selector;
+
+#[cfg(test)]
+mod test;
