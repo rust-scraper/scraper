@@ -123,7 +123,7 @@ impl<'a> Iterator for Text<'a> {
         for edge in &mut self.inner {
             if let Edge::Open(node) = edge {
                 if let Node::Text(ref text) = node.value() {
-                    return Some(&*text);
+                    return Some(&**text);
                 }
             }
         }

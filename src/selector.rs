@@ -14,7 +14,7 @@ use crate::ElementRef;
 /// Wrapper around CSS selectors.
 ///
 /// Represents a "selector group", i.e. a comma-separated list of selectors.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Selector {
     /// The CSS selectors.
     pub selectors: SmallVec<[parser::Selector<Simple>; 1]>,
