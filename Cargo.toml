@@ -8,7 +8,6 @@ keywords = ["html", "css", "selector", "scraping"]
 
 authors = [
     "June McEnroe <june@causal.agency>",
-    "Vivek Kushwaha <yoursvivek@gmail.com>",
 ]
 license = "ISC"
 
@@ -17,16 +16,16 @@ readme = "README.md"
 
 [dependencies]
 cssparser = "0.27"
-ego-tree = "0.6"
+ego-tree = "0.6.2"
 html5ever = "0.26"
-matches = "0.1.6"
-selectors = "0.22"
-smallvec = "1"
-tendril = "0.4"
-indexmap = { version = "1.6.1", optional = true }
+matches = "0.1.9"
+selectors = "0.22.0"
+smallvec = "1.9.0"
+tendril = "0.4.3"
+indexmap = { version = "1.9.1", optional = true }
 
 [dependencies.getopts]
-version = "0.2.18"
+version = "0.2.21"
 optional = true
 
 [features]
