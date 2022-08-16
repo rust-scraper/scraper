@@ -360,3 +360,5 @@ impl Deref for ProcessingInstruction {
         self.data.deref()
     }
 }
+
+pub(crate) mod serializable;
