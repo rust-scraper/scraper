@@ -4,9 +4,10 @@ use std::borrow::Cow;
 
 use ego_tree::iter::Nodes;
 use ego_tree::Tree;
-use html5ever::driver;
+use html5ever::serialize::SerializeOpts;
 use html5ever::tree_builder::QuirksMode;
 use html5ever::QualName;
+use html5ever::{driver, serialize};
 use tendril::TendrilSink;
 
 use crate::selector::Selector;
@@ -101,6 +102,18 @@ impl Html {
             .expect("html node missing");
         ElementRef::wrap(root_node).unwrap()
     }
+
+    /// Serialize entire document into HTML.
+    pub fn html(&self) -> String {
+        let opts = SerializeOpts {
+            scripting_enabled: false, // It's not clear what this does.
+            traversal_scope: html5ever::serialize::TraversalScope::IncludeNode,
+            create_missing_parent: false,
+        };
+        let mut buf = Vec::new();
+        serialize(&mut buf, self, opts).unwrap();
+        String::from_utf8(buf).unwrap()
+    }
 }
 
 /// Iterator over elements matching a selector.
@@ -125,6 +138,7 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     }
 }
 
+mod serializable;
 mod tree_sink;
 
 #[cfg(test)]
