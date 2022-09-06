@@ -17,7 +17,7 @@ use crate::ElementRef;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Selector {
     /// The CSS selectors.
-    pub selectors: SmallVec<[parser::Selector<Simple>; 1]>,
+    selectors: SmallVec<[parser::Selector<Simple>; 1]>,
 }
 
 impl Selector {
