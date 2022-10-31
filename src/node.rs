@@ -1,7 +1,7 @@
 //! HTML nodes.
 
+use fnv::{FnvHashMap as HashMap, FnvHashSet as HashSet};
 use std::collections::{hash_map, hash_set};
-use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::ops::Deref;
 
@@ -223,10 +223,10 @@ pub struct Element {
     pub name: QualName,
 
     /// The element ID.
-    pub id: Option<LocalName>,
+    pub id: Option<String>,
 
     /// The element classes.
-    pub classes: HashSet<LocalName>,
+    pub classes: HashSet<String>,
 
     /// The element attributes.
     pub attrs: Attributes,
@@ -238,16 +238,16 @@ impl Element {
         let id = attrs
             .iter()
             .find(|a| a.name.local.deref() == "id")
-            .map(|a| LocalName::from(a.value.deref()));
+            .map(|a| String::from(a.value.deref()));
 
-        let classes: HashSet<LocalName> = attrs
+        let classes: HashSet<String> = attrs
             .iter()
             .find(|a| a.name.local.deref() == "class")
-            .map_or(HashSet::new(), |a| {
+            .map_or(HashSet::default(), |a| {
                 a.value
                     .deref()
                     .split_whitespace()
-                    .map(LocalName::from)
+                    .map(String::from)
                     .collect()
             });
 
@@ -300,7 +300,7 @@ impl Element {
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Classes<'a> {
-    inner: hash_set::Iter<'a, LocalName>,
+    inner: hash_set::Iter<'a, String>,
 }
 
 impl<'a> Iterator for Classes<'a> {

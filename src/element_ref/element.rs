@@ -30,22 +30,6 @@ impl<'a> Element for ElementRef<'a> {
         false
     }
 
-    fn is_part(&self, _name: &LocalName) -> bool {
-        false
-    }
-
-    fn is_same_type(&self, other: &Self) -> bool {
-        self.value().name == other.value().name
-    }
-
-    fn exported_part(&self, _: &LocalName) -> Option<LocalName> {
-        None
-    }
-
-    fn imported_part(&self, _: &LocalName) -> Option<LocalName> {
-        None
-    }
-
     fn prev_sibling_element(&self) -> Option<Self> {
         self.prev_siblings()
             .find(|sibling| sibling.value().is_element())
@@ -69,6 +53,10 @@ impl<'a> Element for ElementRef<'a> {
 
     fn has_namespace(&self, namespace: &Namespace) -> bool {
         &self.value().name.ns == namespace
+    }
+
+    fn is_same_type(&self, other: &Self) -> bool {
+        self.value().name == other.value().name
     }
 
     fn attr_matches(
@@ -118,6 +106,18 @@ impl<'a> Element for ElementRef<'a> {
 
     fn has_class(&self, name: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
         self.value().has_class(name, case_sensitivity)
+    }
+
+    fn exported_part(&self, _: &LocalName) -> Option<LocalName> {
+        None
+    }
+
+    fn imported_part(&self, _: &LocalName) -> Option<LocalName> {
+        None
+    }
+
+    fn is_part(&self, _name: &LocalName) -> bool {
+        false
     }
 
     fn is_empty(&self) -> bool {

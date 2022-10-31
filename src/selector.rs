@@ -65,21 +65,21 @@ impl<'i> parser::Parser<'i> for Parser {
 pub struct Simple;
 
 impl parser::SelectorImpl for Simple {
+    // see: https://github.com/servo/servo/pull/19747#issuecomment-357106065
+    type ExtraMatchingData = String;
     type AttrValue = String;
     type Identifier = LocalName;
     type ClassName = LocalName;
     type PartName = LocalName;
     type LocalName = LocalName;
-    type NamespacePrefix = LocalName;
     type NamespaceUrl = Namespace;
+    type NamespacePrefix = LocalName;
     type BorrowedNamespaceUrl = Namespace;
+
     type BorrowedLocalName = LocalName;
-
     type NonTSPseudoClass = NonTSPseudoClass;
-    type PseudoElement = PseudoElement;
 
-    // see: https://github.com/servo/servo/pull/19747#issuecomment-357106065
-    type ExtraMatchingData = String;
+    type PseudoElement = PseudoElement;
 }
 
 /// Non Tree-Structural Pseudo-Class.
