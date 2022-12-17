@@ -1,6 +1,8 @@
 //! Custom error types for diagnostics
 //! Includes re-exported error types from dependencies
 
+mod utils;
+
 use std::fmt::Display;
 
 use cssparser::{BasicParseErrorKind, ParseErrorKind, Token};
