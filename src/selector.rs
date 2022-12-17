@@ -9,6 +9,7 @@ use html5ever::{LocalName, Namespace};
 use selectors::parser::SelectorParseErrorKind;
 use selectors::{matching, parser, visitor};
 
+use crate::error::SelectorErrorKind;
 use crate::ElementRef;
 
 /// Wrapper around CSS selectors.
@@ -23,12 +24,15 @@ pub struct Selector {
 impl Selector {
     /// Parses a CSS selector group.
 
-    pub fn parse(
-        selectors: &'_ str,
-    ) -> Result<Self, cssparser::ParseError<'_, SelectorParseErrorKind<'_>>> {
+    pub fn parse(selectors: &'_ str) -> Result<Self, SelectorErrorKind> {
         let mut parser_input = cssparser::ParserInput::new(selectors);
         let mut parser = cssparser::Parser::new(&mut parser_input);
-        parser::SelectorList::parse(&Parser, &mut parser).map(|list| Selector { selectors: list.0 })
+        match parser::SelectorList::parse(&Parser, &mut parser)
+            .map(|list| Selector { selectors: list.0 })
+        {
+            Ok(selected) => Ok(selected),
+            Err(err) => Err(SelectorErrorKind::from(err)),
+        }
     }
 
     /// Returns true if the element matches this selector.
@@ -140,7 +144,7 @@ impl cssparser::ToCss for PseudoElement {
 }
 
 impl<'i> TryFrom<&'i str> for Selector {
-    type Error = cssparser::ParseError<'i, SelectorParseErrorKind<'i>>;
+    type Error = SelectorErrorKind<'i>;
 
     fn try_from(s: &'i str) -> Result<Self, Self::Error> {
         Selector::parse(s)
