@@ -3,7 +3,7 @@
 
 mod utils;
 
-use std::fmt::Display;
+use std::{error::Error, fmt::Display};
 
 use cssparser::{BasicParseErrorKind, ParseErrorKind, Token};
 use selectors::parser::SelectorParseErrorKind;
@@ -102,5 +102,20 @@ impl<'a> Display for SelectorErrorKind<'a> {
                 ),
             }
         )
+    }
+}
+
+impl<'a> Error for SelectorErrorKind<'a> {
+    fn description(&self) -> &str {
+        match self {
+            Self::UnexpectedToken(_) => "Token was not expected",
+            Self::EndOfLine => "Unexpected EOL",
+            Self::InvalidAtRule(_) => "Invalid @-rule",
+            Self::InvalidAtRuleBody => "The body of an @-rule was invalid",
+            Self::QualRuleInvalid => "The qualified name was invalid",
+            Self::ExpectedColonOnPseudoElement(_) => "Missing colon character on pseudoelement",
+            Self::ExpectedIdentityOnPseudoElement(_) => "Missing pseudoelement identity",
+            Self::UnexpectedSelectorParseError(_) => "Unexpected error",
+        }
     }
 }
