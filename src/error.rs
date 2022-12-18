@@ -38,30 +38,39 @@ pub enum SelectorErrorKind<'a> {
 
 impl<'a> From<cssparser::ParseError<'a, SelectorParseErrorKind<'a>>> for SelectorErrorKind<'a> {
     fn from(original: cssparser::ParseError<'a, SelectorParseErrorKind<'a>>) -> Self {
-        // To anyone who dares to read this code
-        // I commend you, i guess. I'm so sorry
-        // for the abomination that is casting
-        // stuff into this one enum
-
+        // NOTE: This could be improved, but I dont
+        // exactly know how
         match original.kind {
-            ParseErrorKind::Basic(err) => match err {
-                BasicParseErrorKind::UnexpectedToken(token) => Self::UnexpectedToken(token),
-                BasicParseErrorKind::EndOfInput => Self::EndOfLine,
-                BasicParseErrorKind::AtRuleInvalid(rule) => {
-                    Self::InvalidAtRule(rule.clone().to_string())
-                }
-                BasicParseErrorKind::AtRuleBodyInvalid => Self::InvalidAtRuleBody,
-                BasicParseErrorKind::QualifiedRuleInvalid => Self::QualRuleInvalid,
-            },
-            ParseErrorKind::Custom(err) => match err {
-                SelectorParseErrorKind::PseudoElementExpectedColon(token) => {
-                    Self::ExpectedColonOnPseudoElement(token)
-                }
-                SelectorParseErrorKind::PseudoElementExpectedIdent(token) => {
-                    Self::ExpectedIdentityOnPseudoElement(token)
-                }
-                other => Self::UnexpectedSelectorParseError(other),
-            },
+            ParseErrorKind::Basic(err) => SelectorErrorKind::from(err),
+            ParseErrorKind::Custom(err) => SelectorErrorKind::from(err),
+        }
+    }
+}
+
+impl<'a> From<BasicParseErrorKind<'a>> for SelectorErrorKind<'a> {
+    fn from(err: BasicParseErrorKind<'a>) -> Self {
+        match err {
+            BasicParseErrorKind::UnexpectedToken(token) => Self::UnexpectedToken(token),
+            BasicParseErrorKind::EndOfInput => Self::EndOfLine,
+            BasicParseErrorKind::AtRuleInvalid(rule) => {
+                Self::InvalidAtRule(rule.clone().to_string())
+            }
+            BasicParseErrorKind::AtRuleBodyInvalid => Self::InvalidAtRuleBody,
+            BasicParseErrorKind::QualifiedRuleInvalid => Self::QualRuleInvalid,
+        }
+    }
+}
+
+impl<'a> From<SelectorParseErrorKind<'a>> for SelectorErrorKind<'a> {
+    fn from(err: SelectorParseErrorKind<'a>) -> Self {
+        match err {
+            SelectorParseErrorKind::PseudoElementExpectedColon(token) => {
+                Self::ExpectedColonOnPseudoElement(token)
+            }
+            SelectorParseErrorKind::PseudoElementExpectedIdent(token) => {
+                Self::ExpectedIdentityOnPseudoElement(token)
+            }
+            other => Self::UnexpectedSelectorParseError(other),
         }
     }
 }
