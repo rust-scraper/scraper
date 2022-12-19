@@ -64,7 +64,7 @@ fn render_number(signed: bool, num: f32, token: &Token) -> String {
     let num = render_int(signed, num);
 
     match token {
-        Token::Number { .. } => num.to_string(),
+        Token::Number { .. } => num,
         Token::Percentage { .. } => format!("{}%", num),
         _ => panic!("render_number is not supposed to be called on a non-numerical token"),
     }
