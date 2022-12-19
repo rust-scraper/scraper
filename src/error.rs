@@ -84,10 +84,10 @@ impl<'a> Display for SelectorErrorKind<'a> {
                 Self::UnexpectedToken(token) => {
                     format!("Token {:?} was not expected", utils::render_token(token))
                 }
-                Self::EndOfLine => format!("Unexpected EOL"),
+                Self::EndOfLine => "Unexpected EOL".to_string(),
                 Self::InvalidAtRule(rule) => format!("Invalid @-rule {:?}", rule),
-                Self::InvalidAtRuleBody => format!("The body of an @-rule was invalid"),
-                Self::QualRuleInvalid => format!("The qualified name was invalid"),
+                Self::InvalidAtRuleBody => "The body of an @-rule was invalid".to_string(),
+                Self::QualRuleInvalid => "The qualified name was invalid".to_string(),
                 Self::ExpectedColonOnPseudoElement(token) => format!(
                     "Expected a ':' token for pseudoelement, got {:?} instead",
                     utils::render_token(token)

@@ -1,8 +1,7 @@
 use cssparser::Token;
 
-pub(crate) fn render_token<'a>(token: &Token<'a>) -> String {
+pub(crate) fn render_token(token: &Token<'_>) -> String {
     // THIS TOOK FOREVER TO IMPLEMENT
-    // TODO: Make this easier to read, I guess
 
     match token {
         // TODO: Give these guys some better names
@@ -19,7 +18,7 @@ pub(crate) fn render_token<'a>(token: &Token<'a>) -> String {
             has_sign: signed,
             unit_value: num,
             int_value: _,
-        } => render_number(*signed, *num, &token),
+        } => render_number(*signed, *num, token),
         Token::Dimension {
             has_sign: signed,
             value: num,
@@ -27,12 +26,12 @@ pub(crate) fn render_token<'a>(token: &Token<'a>) -> String {
             unit,
         } => format!("{}{}", render_int(*signed, *num), unit),
         Token::WhiteSpace(_) => String::from(" "),
-        Token::Comment(comment) => format!("/* {} */", comment.clone()),
+        Token::Comment(comment) => format!("/* {} */", &(*comment).clone()),
         Token::Function(name) => format!("{}()", name.clone()),
         Token::BadString(string) => format!("<Bad String {:?}>", string.clone()),
         Token::BadUrl(url) => format!("<Bad URL {:?}>", url.clone()),
         // Single-character token
-        sc_token => render_single_char_token(&sc_token),
+        sc_token => render_single_char_token(sc_token),
     }
 }
 
@@ -65,7 +64,7 @@ fn render_number(signed: bool, num: f32, token: &Token) -> String {
     let num = render_int(signed, num);
 
     match token {
-        Token::Number { .. } => format!("{}", num),
+        Token::Number { .. } => num.to_string(),
         Token::Percentage { .. } => format!("{}%", num),
         _ => panic!("render_number is not supposed to be called on a non-numerical token"),
     }

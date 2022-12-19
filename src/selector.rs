@@ -30,7 +30,7 @@ impl Selector {
 
         parser::SelectorList::parse(&Parser, &mut parser)
             .map(|list| Selector { selectors: list.0 })
-            .map_err(|e| SelectorErrorKind::from(e))
+            .map_err(SelectorErrorKind::from)
     }
 
     /// Returns true if the element matches this selector.
