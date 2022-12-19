@@ -138,6 +138,19 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     }
 }
 
+impl<'a, 'b> DoubleEndedIterator for Select<'a, 'b> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        for node in self.inner.by_ref().rev() {
+            if let Some(element) = ElementRef::wrap(node) {
+                if element.parent().is_some() && self.selector.matches(&element) {
+                    return Some(element);
+                }
+            }
+        }
+        None
+    }
+}
+
 mod serializable;
 mod tree_sink;
 
@@ -178,5 +191,17 @@ mod tests {
             .next()
             .unwrap();
         assert_eq!(title.inner_html(), "abc");
+    }
+
+    #[test]
+    fn select_is_reversible() {
+        let html = Html::parse_document("<p>element1</p><p>element2</p><p>element3</p>");
+        let selector = Selector::parse("p").unwrap();
+        let result: Vec<_> = html
+            .select(&selector)
+            .rev()
+            .map(|e| e.inner_html())
+            .collect();
+        assert_eq!(result, vec!["element3", "element2", "element1"]);
     }
 }
