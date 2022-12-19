@@ -97,7 +97,7 @@ impl<'a> Display for SelectorErrorKind<'a> {
                     utils::render_token(token)
                 ),
                 Self::UnexpectedSelectorParseError(err) => format!(
-                    "Unexpected error occurred. PLEASE REPORT THIS TO THE DEVELOPER\n{:#?}",
+                    "Unexpected error occurred. Please report this to the developer\n{:#?}",
                     err
                 ),
             }
