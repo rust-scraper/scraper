@@ -26,7 +26,7 @@ pub(crate) fn render_token(token: &Token<'_>) -> String {
             unit,
         } => format!("{}{}", render_int(*signed, *num), unit),
         Token::WhiteSpace(_) => String::from(" "),
-        Token::Comment(comment) => format!("/* {} */", &(*comment).clone()),
+        Token::Comment(comment) => format!("/* {} */", comment.clone()),
         Token::Function(name) => format!("{}()", name.clone()),
         Token::BadString(string) => format!("<Bad String {:?}>", string.clone()),
         Token::BadUrl(url) => format!("<Bad URL {:?}>", url.clone()),
