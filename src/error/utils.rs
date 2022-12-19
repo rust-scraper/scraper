@@ -27,10 +27,10 @@ pub(crate) fn render_token<'a>(token: &Token<'a>) -> String {
             unit,
         } => format!("{}{}", render_int(*signed, *num), unit),
         Token::WhiteSpace(_) => String::from(" "),
-        Token::Comment(comment) => format!("/* {} */", comment),
-        Token::Function(name) => format!("{}()", name),
-        Token::BadString(string) => format!("<Bad String {:?}>", string),
-        Token::BadUrl(url) => format!("<Bad URL {:?}>", url),
+        Token::Comment(comment) => format!("/* {} */", comment.clone()),
+        Token::Function(name) => format!("{}()", name.clone()),
+        Token::BadString(string) => format!("<Bad String {:?}>", string.clone()),
+        Token::BadUrl(url) => format!("<Bad URL {:?}>", url.clone()),
         // Single-character token
         sc_token => render_single_char_token(&sc_token),
     }
