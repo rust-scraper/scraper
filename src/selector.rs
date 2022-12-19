@@ -27,12 +27,10 @@ impl Selector {
     pub fn parse(selectors: &'_ str) -> Result<Self, SelectorErrorKind> {
         let mut parser_input = cssparser::ParserInput::new(selectors);
         let mut parser = cssparser::Parser::new(&mut parser_input);
-        match parser::SelectorList::parse(&Parser, &mut parser)
+
+        parser::SelectorList::parse(&Parser, &mut parser)
             .map(|list| Selector { selectors: list.0 })
-        {
-            Ok(selected) => Ok(selected),
-            Err(err) => Err(SelectorErrorKind::from(err)),
-        }
+            .map_err(|e| SelectorErrorKind::from(e))
     }
 
     /// Returns true if the element matches this selector.
