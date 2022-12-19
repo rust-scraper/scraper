@@ -82,6 +82,14 @@ pub(crate) fn render_token<'a>(token: &Token<'a>) -> String {
     }
 }
 
+fn render_int(signed: bool, number: f32) -> String {
+    if signed {
+        render_int_signed(num)
+    } else {
+        render_int_unsigned(num)
+    }
+}
+
 fn render_int_signed(num: f32) -> String {
     if num > 0.0 {
         format!("+{}", num)
