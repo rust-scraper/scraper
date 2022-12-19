@@ -146,6 +146,7 @@ pub use crate::node::Node;
 pub use crate::selector::Selector;
 
 pub mod element_ref;
+pub mod error;
 pub mod html;
 pub mod node;
 pub mod selector;
