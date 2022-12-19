@@ -14,43 +14,18 @@ pub(crate) fn render_token<'a>(token: &Token<'a>) -> String {
             has_sign: signed,
             value: num,
             int_value: _,
-        } => {
-            if *signed {
-                render_int_signed(*num)
-            } else {
-                render_int_unsigned(*num)
-            }
         }
-        Token::Percentage {
+        | Token::Percentage {
             has_sign: signed,
             unit_value: num,
             int_value: _,
-        } => {
-            format!(
-                "{}%",
-                if *signed {
-                    render_int_signed(*num)
-                } else {
-                    render_int_unsigned(*num)
-                }
-            )
-        }
+        } => render_number(*signed, *num, &token),
         Token::Dimension {
             has_sign: signed,
             value: num,
             int_value: _,
             unit,
-        } => {
-            format!(
-                "{}{}",
-                if *signed {
-                    render_int_signed(*num)
-                } else {
-                    render_int_unsigned(*num)
-                },
-                unit
-            )
-        }
+        } => format!("{}{}", render_int(*signed, *num), unit),
         Token::WhiteSpace(_) => String::from(" "),
         Token::Comment(comment) => format!("/* {} */", comment),
         Token::Function(name) => format!("{}()", name),
@@ -82,7 +57,17 @@ pub(crate) fn render_token<'a>(token: &Token<'a>) -> String {
     }
 }
 
-fn render_int(signed: bool, number: f32) -> String {
+fn render_number(signed: bool, num: f32, token: &Token) -> String {
+    let num = render_int(signed, num);
+
+    match token {
+        Token::Number { .. } => format!("{}", num),
+        Token::Percentage { .. } => format!("{}%", num),
+        _ => panic!("render_number is not supposed to be called on a non-numerical token"),
+    }
+}
+
+fn render_int(signed: bool, num: f32) -> String {
     if signed {
         render_int_signed(num)
     } else {
