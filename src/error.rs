@@ -52,9 +52,7 @@ impl<'a> From<BasicParseErrorKind<'a>> for SelectorErrorKind<'a> {
         match err {
             BasicParseErrorKind::UnexpectedToken(token) => Self::UnexpectedToken(token),
             BasicParseErrorKind::EndOfInput => Self::EndOfLine,
-            BasicParseErrorKind::AtRuleInvalid(rule) => {
-                Self::InvalidAtRule(rule.clone().to_string())
-            }
+            BasicParseErrorKind::AtRuleInvalid(rule) => Self::InvalidAtRule(rule.to_string()),
             BasicParseErrorKind::AtRuleBodyInvalid => Self::InvalidAtRuleBody,
             BasicParseErrorKind::QualifiedRuleInvalid => Self::QualRuleInvalid,
         }
