@@ -129,5 +129,5 @@ fn main() {
             .any(|m| m)
     };
 
-    process::exit(if matched { 0 } else { 1 });
+    process::exit(i32::from(!matched));
 }
