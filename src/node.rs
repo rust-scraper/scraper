@@ -1,7 +1,8 @@
 //! HTML nodes.
 
-use std::collections::{hash_map, hash_set};
-use std::collections::{HashMap, HashSet};
+#[cfg(not(feature = "deterministic"))]
+use std::collections::{hash_map, HashMap};
+use std::collections::{hash_set, HashSet};
 use std::fmt;
 use std::ops::Deref;
 
@@ -11,6 +12,9 @@ use html5ever::{Attribute, LocalName, QualName};
 use selectors::attr::CaseSensitivity;
 
 /// An HTML node.
+// `Element` is usally the most common variant and hence boxing it
+// will most likely not improve performance overall.
+#[allow(variant_size_differences)]
 #[derive(Clone, PartialEq, Eq)]
 pub enum Node {
     /// The document root.
