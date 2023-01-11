@@ -12,6 +12,9 @@ use html5ever::{Attribute, LocalName, QualName};
 use selectors::attr::CaseSensitivity;
 
 /// An HTML node.
+// `Element` is usally the most common variant and hence boxing it
+// will most likely not improve performance overall.
+#[allow(variant_size_differences)]
 #[derive(Clone, PartialEq, Eq)]
 pub enum Node {
     /// The document root.
