@@ -1,6 +1,6 @@
 //! HTML nodes.
 
-use fnv::{FnvHashMap as HashMap, FnvHashSet as HashSet};
+use ahash::{HashMap, HashSet};
 use std::collections::{hash_map, hash_set};
 use std::fmt;
 use std::ops::Deref;
