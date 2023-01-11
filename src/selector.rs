@@ -7,8 +7,9 @@ use smallvec::SmallVec;
 
 use html5ever::{LocalName, Namespace};
 use selectors::parser::SelectorParseErrorKind;
-use selectors::{matching, parser, visitor};
+use selectors::{matching, parser};
 
+use crate::error::SelectorErrorKind;
 use crate::ElementRef;
 
 /// Wrapper around CSS selectors.
@@ -23,12 +24,13 @@ pub struct Selector {
 impl Selector {
     /// Parses a CSS selector group.
 
-    pub fn parse(
-        selectors: &'_ str,
-    ) -> Result<Self, cssparser::ParseError<'_, SelectorParseErrorKind<'_>>> {
+    pub fn parse(selectors: &'_ str) -> Result<Self, SelectorErrorKind> {
         let mut parser_input = cssparser::ParserInput::new(selectors);
         let mut parser = cssparser::Parser::new(&mut parser_input);
-        parser::SelectorList::parse(&Parser, &mut parser).map(|list| Selector { selectors: list.0 })
+
+        parser::SelectorList::parse(&Parser, &mut parser)
+            .map(|list| Selector { selectors: list.0 })
+            .map_err(SelectorErrorKind::from)
     }
 
     /// Returns true if the element matches this selector.
@@ -67,19 +69,60 @@ pub struct Simple;
 impl parser::SelectorImpl for Simple {
     // see: https://github.com/servo/servo/pull/19747#issuecomment-357106065
     type ExtraMatchingData = String;
-    type AttrValue = String;
-    type Identifier = LocalName;
-    type ClassName = LocalName;
-    type PartName = LocalName;
-    type LocalName = LocalName;
+    type AttrValue = CssString;
+    type Identifier = CssLocalName;
+    type LocalName = CssLocalName;
+    type NamespacePrefix = CssLocalName;
     type NamespaceUrl = Namespace;
-    type NamespacePrefix = LocalName;
     type BorrowedNamespaceUrl = Namespace;
-
-    type BorrowedLocalName = LocalName;
+    type BorrowedLocalName = CssLocalName;
     type NonTSPseudoClass = NonTSPseudoClass;
 
     type PseudoElement = PseudoElement;
+}
+
+/// Wraps [`String`] so that it can be used with [`selectors`]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CssString(pub String);
+
+impl<'a> From<&'a str> for CssString {
+    fn from(val: &'a str) -> Self {
+        Self(val.to_owned())
+    }
+}
+
+impl AsRef<str> for CssString {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl cssparser::ToCss for CssString {
+    fn to_css<W>(&self, dest: &mut W) -> fmt::Result
+    where
+        W: fmt::Write,
+    {
+        cssparser::serialize_string(&self.0, dest)
+    }
+}
+
+/// Wraps [`LocalName`] so that it can be used with [`selectors`]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct CssLocalName(pub LocalName);
+
+impl<'a> From<&'a str> for CssLocalName {
+    fn from(val: &'a str) -> Self {
+        Self(val.into())
+    }
+}
+
+impl cssparser::ToCss for CssLocalName {
+    fn to_css<W>(&self, dest: &mut W) -> fmt::Result
+    where
+        W: fmt::Write,
+    {
+        dest.write_str(&self.0)
+    }
 }
 
 /// Non Tree-Structural Pseudo-Class.
@@ -95,21 +138,6 @@ impl parser::NonTSPseudoClass for NonTSPseudoClass {
 
     fn is_user_action_state(&self) -> bool {
         false
-    }
-
-    fn has_zero_specificity(&self) -> bool {
-        false
-    }
-}
-
-impl parser::Visit for NonTSPseudoClass {
-    type Impl = Simple;
-
-    fn visit<V>(&self, _visitor: &mut V) -> bool
-    where
-        V: visitor::SelectorVisitor<Impl = Self::Impl>,
-    {
-        true
     }
 }
 
@@ -140,7 +168,7 @@ impl cssparser::ToCss for PseudoElement {
 }
 
 impl<'i> TryFrom<&'i str> for Selector {
-    type Error = cssparser::ParseError<'i, SelectorParseErrorKind<'i>>;
+    type Error = SelectorErrorKind<'i>;
 
     fn try_from(s: &'i str) -> Result<Self, Self::Error> {
         Selector::parse(s)

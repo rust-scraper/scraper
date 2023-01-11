@@ -1,10 +1,10 @@
-use html5ever::{LocalName, Namespace};
+use html5ever::Namespace;
 use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use selectors::matching;
 use selectors::{Element, OpaqueElement};
 
 use super::ElementRef;
-use crate::selector::{NonTSPseudoClass, PseudoElement, Simple};
+use crate::selector::{CssLocalName, CssString, NonTSPseudoClass, PseudoElement, Simple};
 
 /// Note: will never match against non-tree-structure pseudo-classes.
 impl<'a> Element for ElementRef<'a> {
@@ -30,6 +30,18 @@ impl<'a> Element for ElementRef<'a> {
         false
     }
 
+    fn is_part(&self, _name: &CssLocalName) -> bool {
+        false
+    }
+
+    fn is_same_type(&self, other: &Self) -> bool {
+        self.value().name == other.value().name
+    }
+
+    fn imported_part(&self, _: &CssLocalName) -> Option<CssLocalName> {
+        None
+    }
+
     fn prev_sibling_element(&self) -> Option<Self> {
         self.prev_siblings()
             .find(|sibling| sibling.value().is_element())
@@ -47,27 +59,23 @@ impl<'a> Element for ElementRef<'a> {
         self.value().name.ns == ns!(html)
     }
 
-    fn has_local_name(&self, name: &LocalName) -> bool {
-        &self.value().name.local == name
+    fn has_local_name(&self, name: &CssLocalName) -> bool {
+        self.value().name.local == name.0
     }
 
     fn has_namespace(&self, namespace: &Namespace) -> bool {
         &self.value().name.ns == namespace
     }
 
-    fn is_same_type(&self, other: &Self) -> bool {
-        self.value().name == other.value().name
-    }
-
     fn attr_matches(
         &self,
         ns: &NamespaceConstraint<&Namespace>,
-        local_name: &LocalName,
-        operation: &AttrSelectorOperation<&String>,
+        local_name: &CssLocalName,
+        operation: &AttrSelectorOperation<&CssString>,
     ) -> bool {
         self.value().attrs.iter().any(|(key, value)| {
             !matches!(*ns, NamespaceConstraint::Specific(url) if *url != key.ns)
-                && *local_name == key.local
+                && local_name.0 == key.local
                 && operation.eval_str(value)
         })
     }
@@ -97,27 +105,15 @@ impl<'a> Element for ElementRef<'a> {
         true
     }
 
-    fn has_id(&self, id: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
+    fn has_id(&self, id: &CssLocalName, case_sensitivity: CaseSensitivity) -> bool {
         match self.value().id {
-            Some(ref val) => case_sensitivity.eq(id.as_bytes(), val.as_bytes()),
+            Some(ref val) => case_sensitivity.eq(id.0.as_bytes(), val.as_bytes()),
             None => false,
         }
     }
 
-    fn has_class(&self, name: &LocalName, case_sensitivity: CaseSensitivity) -> bool {
-        self.value().has_class(name, case_sensitivity)
-    }
-
-    fn exported_part(&self, _: &LocalName) -> Option<LocalName> {
-        None
-    }
-
-    fn imported_part(&self, _: &LocalName) -> Option<LocalName> {
-        None
-    }
-
-    fn is_part(&self, _name: &LocalName) -> bool {
-        false
+    fn has_class(&self, name: &CssLocalName, case_sensitivity: CaseSensitivity) -> bool {
+        self.value().has_class(&name.0, case_sensitivity)
     }
 
     fn is_empty(&self) -> bool {
@@ -135,14 +131,12 @@ impl<'a> Element for ElementRef<'a> {
 #[cfg(test)]
 mod tests {
     use crate::html::Html;
-    use crate::selector::Selector;
+    use crate::selector::{CssLocalName, Selector};
     use selectors::attr::CaseSensitivity;
     use selectors::Element;
 
     #[test]
     fn test_has_id() {
-        use html5ever::LocalName;
-
         let html = "<p id='link_id_456'>hey there</p>";
         let fragment = Html::parse_fragment(html);
         let sel = Selector::parse("p").unwrap();
@@ -151,7 +145,7 @@ mod tests {
         assert_eq!(
             true,
             element.has_id(
-                &LocalName::from("link_id_456"),
+                &CssLocalName::from("link_id_456"),
                 CaseSensitivity::CaseSensitive
             )
         );
@@ -162,7 +156,7 @@ mod tests {
         assert_eq!(
             false,
             element.has_id(
-                &LocalName::from("any_link_id"),
+                &CssLocalName::from("any_link_id"),
                 CaseSensitivity::CaseSensitive
             )
         );
@@ -185,14 +179,16 @@ mod tests {
 
     #[test]
     fn test_has_class() {
-        use html5ever::LocalName;
         let html = "<p class='my_class'>hey there</p>";
         let fragment = Html::parse_fragment(html);
         let sel = Selector::parse("p").unwrap();
         let element = fragment.select(&sel).next().unwrap();
         assert_eq!(
             true,
-            element.has_class(&LocalName::from("my_class"), CaseSensitivity::CaseSensitive)
+            element.has_class(
+                &CssLocalName::from("my_class"),
+                CaseSensitivity::CaseSensitive
+            )
         );
 
         let html = "<p>hey there</p>";
@@ -201,7 +197,10 @@ mod tests {
         let element = fragment.select(&sel).next().unwrap();
         assert_eq!(
             false,
-            element.has_class(&LocalName::from("my_class"), CaseSensitivity::CaseSensitive)
+            element.has_class(
+                &CssLocalName::from("my_class"),
+                CaseSensitivity::CaseSensitive
+            )
         );
     }
 }
