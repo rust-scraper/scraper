@@ -9,9 +9,9 @@ use std::collections::hash_set;
 use std::fmt;
 use std::ops::Deref;
 
-use crate::StrTendril;
+use crate::{CaseSensitivity, StrTendril};
 use html5ever::{Attribute, LocalName, QualName};
-use selectors::attr::CaseSensitivity;
+use once_cell::unsync::OnceCell;
 
 /// An HTML node.
 // `Element` is usally the most common variant and hence boxing it
@@ -228,14 +228,13 @@ pub struct Element {
     /// The element name.
     pub name: QualName,
 
-    /// The element ID.
-    pub id: Option<LocalName>,
-
     /// The element classes.
     pub classes: HashSet<LocalName>,
 
     /// The element attributes.
     pub attrs: Attributes,
+
+    id: OnceCell<Option<StrTendril>>,
 }
 
 impl Element {
@@ -243,25 +242,18 @@ impl Element {
     pub fn new(name: QualName, attributes: Vec<Attribute>) -> Self {
         let mut classes: HashSet<LocalName> = HashSet::new();
         let mut attrs = Attributes::with_capacity(attributes.len());
-        let mut id: Option<LocalName> = None;
 
         for a in attributes {
-            match a.name.local.deref() {
-                "id" => {
-                    id = Some(LocalName::from(a.value.deref()));
-                }
-                "class" => {
-                    classes.extend(a.value.deref().split_whitespace().map(LocalName::from));
-                }
-                _ => (),
-            };
+            if a.name.local.deref() == "class" {
+                classes.extend(a.value.deref().split_whitespace().map(LocalName::from));
+            }
             attrs.insert(a.name, crate::tendril_util::make(a.value));
         }
 
         Element {
             attrs,
             name,
-            id,
+            id: OnceCell::new(),
             classes,
         }
     }
@@ -273,7 +265,14 @@ impl Element {
 
     /// Returns the element ID.
     pub fn id(&self) -> Option<&str> {
-        self.id.as_deref()
+        self.id
+            .get_or_init(|| {
+                self.attrs
+                    .iter()
+                    .find(|(name, _)| name.local.as_ref() == "id")
+                    .map(|(_, value)| value.clone())
+            })
+            .as_deref()
     }
 
     /// Returns true if element has the class.
