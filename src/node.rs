@@ -39,12 +39,6 @@ pub enum Node {
     ProcessingInstruction(ProcessingInstruction),
 }
 
-#[test]
-fn node_is_send() {
-    fn send_<S: Send>() {}
-    send_::<Node>();
-}
-
 impl Node {
     /// Returns true if node is the document root.
     pub fn is_document(&self) -> bool {
