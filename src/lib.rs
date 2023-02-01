@@ -153,5 +153,31 @@ pub mod html;
 pub mod node;
 pub mod selector;
 
+#[cfg(feature = "atomic")]
+pub(crate) mod tendril_util {
+    use html5ever::tendril;
+    /// Atomic equivalent to the default `StrTendril` type.
+    pub type StrTendril = tendril::Tendril<tendril::fmt::UTF8, tendril::Atomic>;
+
+    /// Convert a standard tendril into an atomic one.
+    pub fn make(s: tendril::StrTendril) -> StrTendril {
+        s.into_send().into()
+    }
+}
+
+#[cfg(not(feature = "atomic"))]
+pub(crate) mod tendril_util {
+    use html5ever::tendril;
+    /// Primary string tendril type.
+    pub type StrTendril = tendril::StrTendril;
+
+    /// Return unaltered.
+    pub fn make(s: StrTendril) -> StrTendril {
+        s
+    }
+}
+
+pub use tendril_util::StrTendril;
+
 #[cfg(test)]
 mod test;

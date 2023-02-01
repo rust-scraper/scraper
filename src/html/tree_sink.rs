@@ -1,12 +1,12 @@
-use std::borrow::Cow;
-
 use super::Html;
 use crate::node::{Comment, Doctype, Element, Node, ProcessingInstruction, Text};
+use crate::tendril_util::make as make_tendril;
 use ego_tree::NodeId;
 use html5ever::tendril::StrTendril;
 use html5ever::tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use html5ever::Attribute;
 use html5ever::{ExpandedName, QualName};
+use std::borrow::Cow;
 
 /// Note: does not support the `<template>` element.
 impl TreeSink for Html {
@@ -74,7 +74,9 @@ impl TreeSink for Html {
     // Create a comment node.
     fn create_comment(&mut self, text: StrTendril) -> Self::Handle {
         self.tree
-            .orphan(Node::Comment(Comment { comment: text }))
+            .orphan(Node::Comment(Comment {
+                comment: make_tendril(text),
+            }))
             .id()
     }
 
@@ -85,6 +87,9 @@ impl TreeSink for Html {
         public_id: StrTendril,
         system_id: StrTendril,
     ) {
+        let name = make_tendril(name);
+        let public_id = make_tendril(public_id);
+        let system_id = make_tendril(system_id);
         let doctype = Doctype {
             name,
             public_id,
@@ -106,6 +111,7 @@ impl TreeSink for Html {
             }
 
             NodeOrText::AppendText(text) => {
+                let text = make_tendril(text);
                 let can_concat = parent
                     .last_child()
                     .map_or(false, |mut n| n.value().is_text());
@@ -148,6 +154,7 @@ impl TreeSink for Html {
                 }
 
                 NodeOrText::AppendText(text) => {
+                    let text = make_tendril(text);
                     let can_concat = sibling
                         .prev_sibling()
                         .map_or(false, |mut n| n.value().is_text());
@@ -189,7 +196,10 @@ impl TreeSink for Html {
         };
 
         for attr in attrs {
-            element.attrs.entry(attr.name).or_insert(attr.value);
+            element
+                .attrs
+                .entry(attr.name)
+                .or_insert_with(|| make_tendril(attr.value));
         }
     }
 
@@ -206,6 +216,8 @@ impl TreeSink for Html {
 
     // Create Processing Instruction.
     fn create_pi(&mut self, target: StrTendril, data: StrTendril) -> Self::Handle {
+        let target = make_tendril(target);
+        let data = make_tendril(data);
         self.tree
             .orphan(Node::ProcessingInstruction(ProcessingInstruction {
                 target,

@@ -32,6 +32,7 @@ optional = true
 default = ["main"]
 deterministic = ["indexmap"]
 main = ["getopts"]
+atomic = []
 
 [[bin]]
 name = "scraper"

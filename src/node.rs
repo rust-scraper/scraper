@@ -6,7 +6,7 @@ use std::collections::{hash_set, HashSet};
 use std::fmt;
 use std::ops::Deref;
 
-use html5ever::tendril::StrTendril;
+use crate::StrTendril;
 use html5ever::{Attribute, LocalName, QualName};
 
 use selectors::attr::CaseSensitivity;
@@ -37,6 +37,12 @@ pub enum Node {
 
     /// A processing instruction.
     ProcessingInstruction(ProcessingInstruction),
+}
+
+#[test]
+fn node_is_send() {
+    fn send_<S: Send>() {}
+    send_::<Node>();
 }
 
 impl Node {
@@ -256,7 +262,10 @@ impl Element {
             });
 
         Element {
-            attrs: attrs.into_iter().map(|a| (a.name, a.value)).collect(),
+            attrs: attrs
+                .into_iter()
+                .map(|a| (a.name, crate::tendril_util::make(a.value)))
+                .collect(),
             name,
             id,
             classes,
