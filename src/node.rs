@@ -247,7 +247,7 @@ impl Element {
         let classes: HashSet<LocalName> = attrs
             .iter()
             .find(|a| a.name.local.deref() == "class")
-            .map_or(HashSet::new(), |a| {
+            .map_or_else(|| HashSet::new(), |a| {
                 a.value
                     .deref()
                     .split_whitespace()
