@@ -1,6 +1,6 @@
 [package]
 name = "scraper"
-version = "0.14.0"
+version = "0.14.1"
 edition = "2021"
 
 description = "HTML parsing and querying with CSS selectors"
@@ -15,14 +15,14 @@ repository = "https://github.com/causal-agent/scraper"
 readme = "README.md"
 
 [dependencies]
-cssparser = "0.28"
+cssparser = "0.29.6"
 ego-tree = "0.6.2"
 html5ever = "0.26"
-matches = "0.1.9"
-selectors = "0.23.0"
-smallvec = "1.9.0"
+matches = "0.1.10"
+selectors = "0.24.0"
+smallvec = "1.10.0"
 tendril = "0.4.3"
-indexmap = { version = "1.9.1", optional = true }
+indexmap = { version = "1.9.2", optional = true }
 
 [dependencies.getopts]
 version = "0.2.21"
