@@ -247,16 +247,13 @@ impl Element {
         let classes: HashSet<LocalName> = attrs
             .iter()
             .find(|a| a.name.local.deref() == "class")
-            .map_or_else(
-                || HashSet::new(),
-                |a| {
-                    a.value
-                        .deref()
-                        .split_whitespace()
-                        .map(LocalName::from)
-                        .collect()
-                },
-            );
+            .map_or_else(HashSet::new, |a| {
+                a.value
+                    .deref()
+                    .split_whitespace()
+                    .map(LocalName::from)
+                    .collect()
+            });
 
         Element {
             attrs: attrs.into_iter().map(|a| (a.name, a.value)).collect(),
