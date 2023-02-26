@@ -243,15 +243,15 @@ impl Element {
         let mut id: Option<LocalName> = None;
 
         for a in attributes {
-            let name_local = a.name.local.deref();
-
-            if name_local == "id" {
-                id = Some(LocalName::from(a.value.deref()));
-            }
-            if name_local == "class" {
-                classes.extend(a.value.deref().split_whitespace().map(LocalName::from));
-            }
-
+            match a.name.local.deref() {
+                "id" => {
+                    id = Some(LocalName::from(a.value.deref()));
+                }
+                "class" => {
+                    classes.extend(a.value.deref().split_whitespace().map(LocalName::from));
+                }
+                _ => (),
+            };
             attrs.insert(a.name, a.value);
         }
 
