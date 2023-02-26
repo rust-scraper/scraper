@@ -243,11 +243,18 @@ impl Element {
         let mut attrs = Attributes::with_capacity(attributes.len());
 
         for a in attributes {
-            if a.name.local.deref() == "id" {
-                id = Some(LocalName::from(a.value.deref()));
+            let name_local = a.name.local.deref();
+            let mut value = "";
+
+            if name_local == "id" {
+                value = a.value.deref();
+                id = Some(LocalName::from(value));
             }
-            if a.name.local.deref() == "class" {
-                classes.extend(a.value.deref().split_whitespace().map(LocalName::from));
+            if name_local == "class" {
+                if value.is_empty() {
+                    value = a.value.deref();
+                }
+                classes.extend(value.split_whitespace().map(LocalName::from));
             }
 
             attrs.insert(a.name, a.value);
