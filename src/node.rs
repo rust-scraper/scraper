@@ -239,8 +239,8 @@ impl Element {
     #[doc(hidden)]
     pub fn new(name: QualName, attributes: Vec<Attribute>) -> Self {
         let mut classes: HashSet<LocalName> = HashSet::new();
-        let mut id: Option<LocalName> = Option::default();
         let mut attrs = Attributes::with_capacity(attributes.len());
+        let mut id: Option<LocalName> = None;
 
         for a in attributes {
             let name_local = a.name.local.deref();
