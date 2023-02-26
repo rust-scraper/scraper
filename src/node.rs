@@ -8,7 +8,6 @@ use std::ops::Deref;
 
 use html5ever::tendril::StrTendril;
 use html5ever::{Attribute, LocalName, QualName};
-
 use selectors::attr::CaseSensitivity;
 
 /// An HTML node.
@@ -238,25 +237,24 @@ pub struct Element {
 
 impl Element {
     #[doc(hidden)]
-    pub fn new(name: QualName, attrs: Vec<Attribute>) -> Self {
-        let id = attrs
-            .iter()
-            .find(|a| a.name.local.deref() == "id")
-            .map(|a| LocalName::from(a.value.deref()));
+    pub fn new(name: QualName, attributes: Vec<Attribute>) -> Self {
+        let mut classes: HashSet<LocalName> = HashSet::new();
+        let mut id: Option<LocalName> = Option::default();
+        let mut attrs = Attributes::with_capacity(attributes.len());
 
-        let classes: HashSet<LocalName> = attrs
-            .iter()
-            .find(|a| a.name.local.deref() == "class")
-            .map_or_else(HashSet::new, |a| {
-                a.value
-                    .deref()
-                    .split_whitespace()
-                    .map(LocalName::from)
-                    .collect()
-            });
+        for a in attributes {
+            if a.name.local.deref() == "id" {
+                id = Some(LocalName::from(a.value.deref()));
+            }
+            if a.name.local.deref() == "class" {
+                classes.extend(a.value.deref().split_whitespace().map(LocalName::from));
+            }
+
+            attrs.insert(a.name, a.value);
+        }
 
         Element {
-            attrs: attrs.into_iter().map(|a| (a.name, a.value)).collect(),
+            attrs,
             name,
             id,
             classes,
