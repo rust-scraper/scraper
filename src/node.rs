@@ -247,7 +247,8 @@ impl Element {
 
             if name_local == "id" {
                 id = Some(LocalName::from(a.value.deref()));
-            } else if name_local == "class" {
+            }
+            if name_local == "class" {
                 classes.extend(a.value.deref().split_whitespace().map(LocalName::from));
             }
 
