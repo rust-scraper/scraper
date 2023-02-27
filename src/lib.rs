@@ -145,7 +145,7 @@ pub use crate::html::Html;
 pub use crate::node::Node;
 pub use crate::selector::Selector;
 
-pub use selectors::Element;
+pub use selectors::{attr::CaseSensitivity, Element};
 
 pub mod element_ref;
 pub mod error;
