@@ -204,4 +204,11 @@ mod tests {
             .collect();
         assert_eq!(result, vec!["element3", "element2", "element1"]);
     }
+
+    #[cfg(feature = "atomic")]
+    #[test]
+    fn html_is_send() {
+        fn send_sync<S: Send>() {}
+        send_sync::<Html>();
+    }
 }

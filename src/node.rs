@@ -6,7 +6,7 @@ use std::collections::{hash_set, HashSet};
 use std::fmt;
 use std::ops::Deref;
 
-use html5ever::tendril::StrTendril;
+use crate::StrTendril;
 use html5ever::{Attribute, LocalName, QualName};
 use selectors::attr::CaseSensitivity;
 
@@ -252,7 +252,7 @@ impl Element {
                 }
                 _ => (),
             };
-            attrs.insert(a.name, a.value);
+            attrs.insert(a.name, crate::tendril_util::make(a.value));
         }
 
         Element {
