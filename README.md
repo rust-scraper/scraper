@@ -67,6 +67,27 @@ for element in fragment.select(&selector) {
 }
 ```
 
+### Collecting elements
+
+```rust
+use scraper::{Html, Selector};
+
+let html = r#"
+    <ul>
+        <li>Foo</li>
+        <li>Bar</li>
+        <li>Baz</li>
+    </ul>
+"#;
+
+let fragment = Html::parse_fragment(html);
+let selector = Selector::parse("li").unwrap();
+
+for element in fragment.matches(&selector) {
+    assert_eq!("li", element.value().name());
+}
+```
+
 ### Selecting descendent elements
 
 ```rust
