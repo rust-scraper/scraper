@@ -93,20 +93,16 @@ impl Html {
     }
 
     /// Fast select open edges that match selector into vector of elements
-    pub fn matches<'a, 'b>(&'a self, selector: &'b Selector) -> Vec<ElementRef> {
-        self.tree
-            .root()
-            .traverse()
-            .filter_map(|node| match node {
-                ego_tree::iter::Edge::Open(node_ref) => match ElementRef::wrap(node_ref) {
-                    Some(element) if element.parent().is_some() && selector.matches(&element) => {
-                        Some(element)
-                    }
-                    _ => None,
-                },
+    pub fn matches<'a>(&'a self, selector: &'a Selector) -> impl Iterator<Item = ElementRef> + 'a {
+        self.tree.root().traverse().filter_map(|node| match node {
+            ego_tree::iter::Edge::Open(node_ref) => match ElementRef::wrap(node_ref) {
+                Some(element) if element.parent().is_some() && selector.matches(&element) => {
+                    Some(element)
+                }
                 _ => None,
-            })
-            .collect()
+            },
+            _ => None,
+        })
     }
 
     /// Returns the root `<html>` element.
@@ -226,12 +222,7 @@ mod tests {
     fn root_matches() {
         let html = Html::parse_document("<p>element1</p><p>element2</p><p>element3</p>");
         let selector = Selector::parse("p").unwrap();
-        let result: Vec<_> = html
-            .matches(&selector)
-            .iter()
-            .rev()
-            .map(|e| e.inner_html())
-            .collect();
+        let result: Vec<_> = html.matches(&selector).map(|e| e.inner_html()).collect();
         assert_eq!(result, vec!["element3", "element2", "element1"]);
     }
 
