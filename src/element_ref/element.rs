@@ -106,8 +106,8 @@ impl<'a> Element for ElementRef<'a> {
     }
 
     fn has_id(&self, id: &CssLocalName, case_sensitivity: CaseSensitivity) -> bool {
-        match self.value().id {
-            Some(ref val) => case_sensitivity.eq(id.0.as_bytes(), val.as_bytes()),
+        match self.value().id() {
+            Some(val) => case_sensitivity.eq(id.0.as_bytes(), val.as_bytes()),
             None => false,
         }
     }

@@ -527,6 +527,7 @@ dependencies = [
  "html5ever",
  "indexmap",
  "matches",
+ "once_cell",
  "selectors",
  "smallvec",
  "tendril",
