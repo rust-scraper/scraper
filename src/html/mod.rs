@@ -140,6 +140,12 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
         }
         None
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let (_lower, upper) = self.inner.size_hint();
+
+        (0, upper)
+    }
 }
 
 impl<'a, 'b> DoubleEndedIterator for Select<'a, 'b> {
@@ -207,6 +213,15 @@ mod tests {
             .map(|e| e.inner_html())
             .collect();
         assert_eq!(result, vec!["element3", "element2", "element1"]);
+    }
+
+    #[test]
+    fn select_has_a_size_hint() {
+        let html = Html::parse_document("<p>element1</p><p>element2</p><p>element3</p>");
+        let selector = Selector::parse("p").unwrap();
+        let (lower, upper) = html.select(&selector).size_hint();
+        assert_eq!(lower, 0);
+        assert_eq!(upper, Some(10));
     }
 
     #[cfg(feature = "atomic")]
