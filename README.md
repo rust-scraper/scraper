@@ -1,19 +1,18 @@
 # scraper
 
-
-![crates.io](https://img.shields.io/crates/v/scraper?color=dark-green)
-![downloads](https://img.shields.io/crates/d/scraper)
-![test](https://github.com/causal-agent/scraper/actions/workflows/test.yml/badge.svg)
+[![crates.io](https://img.shields.io/crates/v/scraper?color=dark-green)][crate]
+[![downloads](https://img.shields.io/crates/d/scraper)][crate]
+[![test](https://github.com/causal-agent/scraper/actions/workflows/test.yml/badge.svg)][tests]
 
 HTML parsing and querying with CSS selectors.
 
 `scraper` is on [Crates.io][crate] and [GitHub][github].
 
 [crate]: https://crates.io/crates/scraper
-[github]: https://github.com/programble/scraper
+[github]: https://github.com/causal-agent/scraper
+[tests]: https://github.com/causal-agent/scraper/actions/workflows/test.yml
 
-Scraper provides an interface to Servo's `html5ever` and `selectors` crates, for browser-grade
-parsing and querying.
+Scraper provides an interface to Servo's `html5ever` and `selectors` crates, for browser-grade parsing and querying.
 
 ## Examples
 
