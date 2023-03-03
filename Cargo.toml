@@ -22,6 +22,7 @@ matches = "0.1.10"
 selectors = "0.24.0"
 smallvec = "1.10.0"
 tendril = "0.4.3"
+ahash = "0.8"
 indexmap = { version = "1.9.2", optional = true }
 
 [dependencies.getopts]

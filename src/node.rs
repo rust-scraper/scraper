@@ -1,8 +1,11 @@
 //! HTML nodes.
 
 #[cfg(not(feature = "deterministic"))]
-use std::collections::{hash_map, HashMap};
-use std::collections::{hash_set, HashSet};
+use ahash::AHashMap as HashMap;
+use ahash::AHashSet as HashSet;
+#[cfg(not(feature = "deterministic"))]
+use std::collections::hash_map;
+use std::collections::hash_set;
 use std::fmt;
 use std::ops::Deref;
 
