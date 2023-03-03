@@ -29,10 +29,11 @@ version = "0.2.21"
 optional = true
 
 [features]
-default = ["main"]
+default = ["main", "errors"]
 deterministic = ["indexmap"]
 main = ["getopts"]
 atomic = []
+errors = []
 
 [[bin]]
 name = "scraper"

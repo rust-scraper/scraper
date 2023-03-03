@@ -19,7 +19,10 @@ impl TreeSink for Html {
 
     // Signal a parse error.
     fn parse_error(&mut self, msg: Cow<'static, str>) {
+        #[cfg(feature = "errors")]
         self.errors.push(msg);
+        #[cfg(not(feature = "errors"))]
+        let _ = msg;
     }
 
     // Set the document's quirks mode.

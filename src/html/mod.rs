@@ -1,5 +1,6 @@
 //! HTML documents and fragments.
 
+#[cfg(feature = "errors")]
 use std::borrow::Cow;
 
 use ego_tree::iter::Nodes;
@@ -21,6 +22,7 @@ use crate::{ElementRef, Node};
 /// Implements the `TreeSink` trait from the `html5ever` crate, which allows HTML to be parsed.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Html {
+    #[cfg(feature = "errors")]
     /// Parse errors.
     pub errors: Vec<Cow<'static, str>>,
 
@@ -35,6 +37,7 @@ impl Html {
     /// Creates an empty HTML document.
     pub fn new_document() -> Self {
         Html {
+            #[cfg(feature = "errors")]
             errors: Vec::new(),
             quirks_mode: QuirksMode::NoQuirks,
             tree: Tree::new(Node::Document),
@@ -44,6 +47,7 @@ impl Html {
     /// Creates an empty HTML fragment.
     pub fn new_fragment() -> Self {
         Html {
+            #[cfg(feature = "errors")]
             errors: Vec::new(),
             quirks_mode: QuirksMode::NoQuirks,
             tree: Tree::new(Node::Fragment),
