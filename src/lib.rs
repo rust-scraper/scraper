@@ -137,8 +137,6 @@
 
 #[macro_use]
 extern crate html5ever;
-#[macro_use]
-extern crate matches;
 
 pub use crate::element_ref::ElementRef;
 pub use crate::html::Html;
