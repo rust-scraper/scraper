@@ -45,5 +45,7 @@ jobs:
             toolchain: ${{matrix.rust_version}}
             override: true
       - uses: Swatinem/rust-cache@v1
+      - name: Update
+        run: cargo update
       - name: Test
         run: cargo test
