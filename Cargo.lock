@@ -62,6 +62,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cssparser"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c18bf42b9ab91d1d7ce0192f5b432c9ab6a5728206f25ab6cb0eb61fea25bccc"
+dependencies = [
+ "cssparser-macros",
+ "dtoa-short",
+ "itoa",
+ "phf 0.10.1",
+ "proc-macro2",
+ "quote",
+ "smallvec",
+ "syn",
+]
+
+[[package]]
 name = "cssparser-macros"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -518,10 +534,10 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "scraper"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "ahash",
- "cssparser",
+ "cssparser 0.31.0",
  "ego-tree",
  "getopts",
  "html5ever",
@@ -539,7 +555,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c37578180969d00692904465fb7f6b3d50b9a2b952b87c23d0e2e5cb5013416"
 dependencies = [
  "bitflags",
- "cssparser",
+ "cssparser 0.29.6",
  "derive_more",
  "fxhash",
  "log",
