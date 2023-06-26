@@ -1,6 +1,5 @@
 //! CSS selectors.
 
-use std::cell::RefCell;
 use std::convert::TryFrom;
 use std::fmt;
 
@@ -10,7 +9,6 @@ use html5ever::{LocalName, Namespace};
 use selectors::{
     matching,
     parser::{self, ParseRelative, SelectorParseErrorKind},
-    NthIndexCache,
 };
 
 use crate::error::SelectorErrorKind;
@@ -46,25 +44,19 @@ impl Selector {
     /// The optional `scope` argument is used to specify which element has `:scope` pseudo-class.
     /// When it is `None`, `:scope` will match the root element.
     pub fn matches_with_scope(&self, element: &ElementRef, scope: Option<ElementRef>) -> bool {
-        thread_local! {
-            static NTH_INDEX_CACHE: RefCell<NthIndexCache> = Default::default();
-        }
-
-        NTH_INDEX_CACHE.with(|nth_index_cache| {
-            let mut nth_index_cache = nth_index_cache.borrow_mut();
-            let mut context = matching::MatchingContext::new(
-                matching::MatchingMode::Normal,
-                None,
-                &mut nth_index_cache,
-                matching::QuirksMode::NoQuirks,
-                matching::NeedsSelectorFlags::No,
-                matching::IgnoreNthChildForInvalidation::No,
-            );
-            context.scope_element = scope.map(|x| selectors::Element::opaque(&x));
-            self.selectors
-                .iter()
-                .any(|s| matching::matches_selector(s, 0, None, element, &mut context))
-        })
+        let mut nth_index_cache = Default::default();
+        let mut context = matching::MatchingContext::new(
+            matching::MatchingMode::Normal,
+            None,
+            &mut nth_index_cache,
+            matching::QuirksMode::NoQuirks,
+            matching::NeedsSelectorFlags::No,
+            matching::IgnoreNthChildForInvalidation::No,
+        );
+        context.scope_element = scope.map(|x| selectors::Element::opaque(&x));
+        self.selectors
+            .iter()
+            .any(|s| matching::matches_selector(s, 0, None, element, &mut context))
     }
 }
 
