@@ -1,7 +1,8 @@
 use html5ever::Namespace;
-use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
-use selectors::matching;
-use selectors::{Element, OpaqueElement};
+use selectors::{
+    attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint},
+    matching, Element, OpaqueElement,
+};
 
 use super::ElementRef;
 use crate::selector::{CssLocalName, CssString, NonTSPseudoClass, PseudoElement, Simple};
@@ -54,6 +55,12 @@ impl<'a> Element for ElementRef<'a> {
             .map(ElementRef::new)
     }
 
+    fn first_element_child(&self) -> Option<Self> {
+        self.children()
+            .find(|child| child.value().is_element())
+            .map(ElementRef::new)
+    }
+
     fn is_html_element_in_html_document(&self) -> bool {
         // FIXME: Is there more to this?
         self.value().name.ns == ns!(html)
@@ -80,11 +87,10 @@ impl<'a> Element for ElementRef<'a> {
         })
     }
 
-    fn match_non_ts_pseudo_class<F>(
+    fn match_non_ts_pseudo_class(
         &self,
         _pc: &NonTSPseudoClass,
-        _context: &mut matching::MatchingContext<Self::Impl>,
-        _flags_setter: &mut F,
+        _context: &mut matching::MatchingContext<'_, Self::Impl>,
     ) -> bool {
         false
     }
@@ -126,6 +132,8 @@ impl<'a> Element for ElementRef<'a> {
         self.parent()
             .map_or(false, |parent| parent.value().is_document())
     }
+
+    fn apply_selector_flags(&self, _flags: matching::ElementSelectorFlags) {}
 }
 
 #[cfg(test)]
