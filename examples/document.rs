@@ -14,7 +14,7 @@ fn main() {
     stdin.read_line(&mut input).unwrap();
     let selector = Selector::parse(&input).unwrap();
 
-    write!(stdout, "HTML document:\n").unwrap();
+    writeln!(stdout, "HTML document:").unwrap();
     stdout.flush().unwrap();
     input.clear();
     stdin.read_to_string(&mut input).unwrap();
