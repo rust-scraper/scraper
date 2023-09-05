@@ -129,6 +129,22 @@ let text = h1.text().collect::<Vec<_>>();
 assert_eq!(vec!["Hello, ", "world!"], text);
 ```
 
+### Manipulating the DOM
+
+```rust
+use html5ever::tree_builder::TreeSink;
+use scraper::{Html, Selector};
+
+let html = "<html><body>hello<p class=\"hello\">REMOVE ME</p></body></html>";
+let selector = Selector::parse(".hello").unwrap();
+let mut document = Html::parse_document(html);
+let node_ids: Vec<_> = document.select(&selector).map(|x| x.id()).collect();
+for id in node_ids {
+    document.remove_from_parent(&id);
+}
+assert_eq!(document.html(), "<html><head></head><body>hello</body></html>");
+```
+
 ## Contributing
 
 Please feel free to open pull requests. If you're planning on implementing
