@@ -11,41 +11,37 @@ jobs:
     name: Format code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install latest stable
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-            toolchain: stable
-            override: true
             components: rustfmt
-      - uses: Swatinem/rust-cache@v1
-      - name: Check formatting
-        run: cargo fmt -- --check
-  clippy_check:
+      - run: cargo fmt -- --check
+
+  clippy:
     name: Clippy check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - run: rustup component add clippy
-      - uses: actions-rs/clippy-check@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-targets --all-features
+            components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --all-targets --all-features -- --deny warnings
+
   test:
+    name: Test code
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust_version: [stable, beta, nightly]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
         with:
             toolchain: ${{matrix.rust_version}}
-            override: true
-      - uses: Swatinem/rust-cache@v1
-      - name: Update
-        run: cargo update
-      - name: Test
-        run: cargo test
+      - uses: Swatinem/rust-cache@v2
+        with:
+            key: ${{matrix.rust_version}}
+      - run: cargo update
+      - run: cargo test --all-features
