@@ -61,7 +61,8 @@ impl Selector {
 }
 
 /// An implementation of `Parser` for `selectors`
-struct Parser;
+#[derive(Clone, Copy, Debug)]
+pub struct Parser;
 impl<'i> parser::Parser<'i> for Parser {
     type Impl = Simple;
     type Error = SelectorParseErrorKind<'i>;
