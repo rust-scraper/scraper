@@ -8,7 +8,7 @@ use std::fmt;
 use std::ops::Deref;
 use std::slice::Iter as SliceIter;
 
-use crate::{CaseSensitivity, StrTendril};
+use crate::{selectors::attr::CaseSensitivity, StrTendril};
 use html5ever::{Attribute, LocalName, QualName};
 use once_cell::unsync::OnceCell;
 
