@@ -136,7 +136,13 @@
 )]
 
 #[macro_use]
-extern crate html5ever;
+pub extern crate html5ever;
+
+pub use cssparser;
+pub use ego_tree;
+pub use selectors;
+pub use smallvec;
+pub use tendril;
 
 pub use crate::element_ref::ElementRef;
 pub use crate::html::Html;
