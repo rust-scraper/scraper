@@ -3,12 +3,11 @@
 use std::convert::TryFrom;
 use std::fmt;
 
-use smallvec::SmallVec;
-
+pub use cssparser::ToCss;
 use html5ever::{LocalName, Namespace};
 use selectors::{
     matching,
-    parser::{self, ParseRelative, SelectorParseErrorKind},
+    parser::{self, ParseRelative, SelectorList, SelectorParseErrorKind},
 };
 
 use crate::error::SelectorErrorKind;
@@ -20,18 +19,17 @@ use crate::ElementRef;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Selector {
     /// The CSS selectors.
-    selectors: SmallVec<[parser::Selector<Simple>; 1]>,
+    selectors: SelectorList<Simple>,
 }
 
 impl Selector {
     /// Parses a CSS selector group.
-
     pub fn parse(selectors: &'_ str) -> Result<Self, SelectorErrorKind> {
         let mut parser_input = cssparser::ParserInput::new(selectors);
         let mut parser = cssparser::Parser::new(&mut parser_input);
 
-        parser::SelectorList::parse(&Parser, &mut parser, ParseRelative::No)
-            .map(|list| Selector { selectors: list.0 })
+        SelectorList::parse(&Parser, &mut parser, ParseRelative::No)
+            .map(|selectors| Self { selectors })
             .map_err(SelectorErrorKind::from)
     }
 
@@ -55,8 +53,18 @@ impl Selector {
         );
         context.scope_element = scope.map(|x| selectors::Element::opaque(&x));
         self.selectors
+            .0
             .iter()
             .any(|s| matching::matches_selector(s, 0, None, element, &mut context))
+    }
+}
+
+impl ToCss for Selector {
+    fn to_css<W>(&self, dest: &mut W) -> fmt::Result
+    where
+        W: fmt::Write,
+    {
+        self.selectors.to_css(dest)
     }
 }
 
@@ -103,7 +111,7 @@ impl AsRef<str> for CssString {
     }
 }
 
-impl cssparser::ToCss for CssString {
+impl ToCss for CssString {
     fn to_css<W>(&self, dest: &mut W) -> fmt::Result
     where
         W: fmt::Write,
@@ -122,7 +130,7 @@ impl<'a> From<&'a str> for CssLocalName {
     }
 }
 
-impl cssparser::ToCss for CssLocalName {
+impl ToCss for CssLocalName {
     fn to_css<W>(&self, dest: &mut W) -> fmt::Result
     where
         W: fmt::Write,
@@ -147,7 +155,7 @@ impl parser::NonTSPseudoClass for NonTSPseudoClass {
     }
 }
 
-impl cssparser::ToCss for NonTSPseudoClass {
+impl ToCss for NonTSPseudoClass {
     fn to_css<W>(&self, dest: &mut W) -> fmt::Result
     where
         W: fmt::Write,
@@ -164,7 +172,7 @@ impl parser::PseudoElement for PseudoElement {
     type Impl = Simple;
 }
 
-impl cssparser::ToCss for PseudoElement {
+impl ToCss for PseudoElement {
     fn to_css<W>(&self, dest: &mut W) -> fmt::Result
     where
         W: fmt::Write,
