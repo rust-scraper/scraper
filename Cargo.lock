@@ -424,7 +424,6 @@ dependencies = [
  "indexmap",
  "once_cell",
  "selectors",
- "smallvec",
  "tendril",
 ]
 
