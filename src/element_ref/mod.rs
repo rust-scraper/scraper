@@ -71,7 +71,7 @@ impl<'a> ElementRef<'a> {
     }
 
     /// Returns the value of an attribute.
-    pub fn attr(&self, attr: &str) -> Option<&str> {
+    pub fn attr(&self, attr: &str) -> Option<&'a str> {
         self.value().attr(attr)
     }
 
