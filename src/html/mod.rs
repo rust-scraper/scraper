@@ -2,6 +2,7 @@
 
 #[cfg(feature = "errors")]
 use std::borrow::Cow;
+use std::iter::FusedIterator;
 
 use ego_tree::iter::Nodes;
 use ego_tree::Tree;
@@ -160,6 +161,8 @@ impl<'a, 'b> DoubleEndedIterator for Select<'a, 'b> {
         None
     }
 }
+
+impl FusedIterator for Select<'_, '_> {}
 
 mod serializable;
 mod tree_sink;

@@ -1,5 +1,6 @@
 //! Element references.
 
+use std::iter::FusedIterator;
 use std::ops::Deref;
 
 use ego_tree::iter::{Edge, Traverse};
@@ -114,6 +115,8 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
         None
     }
 }
+
+impl FusedIterator for Select<'_, '_> {}
 
 /// Iterator over descendent text nodes.
 #[derive(Debug, Clone)]
