@@ -149,6 +149,7 @@ pub mod element_ref;
 pub mod error;
 pub mod html;
 pub mod node;
+pub mod selectable;
 pub mod selector;
 
 #[cfg(feature = "atomic")]
