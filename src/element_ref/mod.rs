@@ -81,6 +81,36 @@ impl<'a> ElementRef<'a> {
             inner: self.traverse(),
         }
     }
+
+    /// Iterate over all child nodes which are elements
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use scraper::Html;
+    /// let fragment = Html::parse_fragment("foo<span>bar</span><a>baz</a>qux");
+    ///
+    /// let children = fragment.root_element().child_elements().map(|element| element.value().name()).collect::<Vec<_>>();
+    /// assert_eq!(children, ["span", "a"]);
+    /// ```
+    pub fn child_elements(&self) -> impl Iterator<Item = ElementRef<'a>> {
+        self.children().filter_map(ElementRef::wrap)
+    }
+
+    /// Iterate over all descendent nodes which are elements
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use scraper::Html;
+    /// let fragment = Html::parse_fragment("foo<span><b>bar</b></span><a><i>baz</i></a>qux");
+    ///
+    /// let descendants = fragment.root_element().descendent_elements().map(|element| element.value().name()).collect::<Vec<_>>();
+    /// assert_eq!(descendants, ["html", "span", "b", "a", "i"]);
+    /// ```
+    pub fn descendent_elements(&self) -> impl Iterator<Item = ElementRef<'a>> {
+        self.descendants().filter_map(ElementRef::wrap)
+    }
 }
 
 impl<'a> Deref for ElementRef<'a> {
