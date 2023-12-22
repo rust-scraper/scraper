@@ -2,14 +2,15 @@
 
 #[cfg(feature = "errors")]
 use std::borrow::Cow;
+use std::fmt;
 use std::iter::FusedIterator;
 
 use ego_tree::iter::Nodes;
 use ego_tree::Tree;
 use html5ever::serialize::SerializeOpts;
 use html5ever::tree_builder::QuirksMode;
-use html5ever::QualName;
-use html5ever::{driver, serialize};
+use html5ever::{driver, serialize, QualName};
+use selectors::NthIndexCache;
 use tendril::TendrilSink;
 
 use crate::selector::Selector;
@@ -94,6 +95,7 @@ impl Html {
         Select {
             inner: self.tree.nodes(),
             selector,
+            nth_index_cache: NthIndexCache::default(),
         }
     }
 
@@ -122,10 +124,30 @@ impl Html {
 }
 
 /// Iterator over elements matching a selector.
-#[derive(Debug)]
 pub struct Select<'a, 'b> {
     inner: Nodes<'a, Node>,
     selector: &'b Selector,
+    nth_index_cache: NthIndexCache,
+}
+
+impl fmt::Debug for Select<'_, '_> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_struct("Select")
+            .field("inner", &self.inner)
+            .field("selector", &self.selector)
+            .field("nth_index_cache", &"..")
+            .finish()
+    }
+}
+
+impl Clone for Select<'_, '_> {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            selector: self.selector,
+            nth_index_cache: NthIndexCache::default(),
+        }
+    }
 }
 
 impl<'a, 'b> Iterator for Select<'a, 'b> {
@@ -134,7 +156,13 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     fn next(&mut self) -> Option<ElementRef<'a>> {
         for node in self.inner.by_ref() {
             if let Some(element) = ElementRef::wrap(node) {
-                if element.parent().is_some() && self.selector.matches(&element) {
+                if element.parent().is_some()
+                    && self.selector.matches_with_scope_and_cache(
+                        &element,
+                        None,
+                        &mut self.nth_index_cache,
+                    )
+                {
                     return Some(element);
                 }
             }
@@ -153,7 +181,13 @@ impl<'a, 'b> DoubleEndedIterator for Select<'a, 'b> {
     fn next_back(&mut self) -> Option<Self::Item> {
         for node in self.inner.by_ref().rev() {
             if let Some(element) = ElementRef::wrap(node) {
-                if element.parent().is_some() && self.selector.matches(&element) {
+                if element.parent().is_some()
+                    && self.selector.matches_with_scope_and_cache(
+                        &element,
+                        None,
+                        &mut self.nth_index_cache,
+                    )
+                {
                     return Some(element);
                 }
             }

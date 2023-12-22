@@ -1,11 +1,13 @@
 //! Element references.
 
+use std::fmt;
 use std::iter::FusedIterator;
 use std::ops::Deref;
 
 use ego_tree::iter::{Edge, Traverse};
 use ego_tree::NodeRef;
 use html5ever::serialize::{serialize, SerializeOpts, TraversalScope};
+use selectors::NthIndexCache;
 
 use crate::node::Element;
 use crate::{Node, Selector};
@@ -47,6 +49,7 @@ impl<'a> ElementRef<'a> {
             scope: *self,
             inner,
             selector,
+            nth_index_cache: NthIndexCache::default(),
         }
     }
 
@@ -122,11 +125,33 @@ impl<'a> Deref for ElementRef<'a> {
 }
 
 /// Iterator over descendent elements matching a selector.
-#[derive(Debug, Clone)]
 pub struct Select<'a, 'b> {
     scope: ElementRef<'a>,
     inner: Traverse<'a, Node>,
     selector: &'b Selector,
+    nth_index_cache: NthIndexCache,
+}
+
+impl fmt::Debug for Select<'_, '_> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_struct("Select")
+            .field("scope", &self.scope)
+            .field("inner", &self.inner)
+            .field("selector", &self.selector)
+            .field("nth_index_cache", &"..")
+            .finish()
+    }
+}
+
+impl Clone for Select<'_, '_> {
+    fn clone(&self) -> Self {
+        Self {
+            scope: self.scope,
+            inner: self.inner.clone(),
+            selector: self.selector,
+            nth_index_cache: NthIndexCache::default(),
+        }
+    }
 }
 
 impl<'a, 'b> Iterator for Select<'a, 'b> {
@@ -136,7 +161,11 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
         for edge in &mut self.inner {
             if let Edge::Open(node) = edge {
                 if let Some(element) = ElementRef::wrap(node) {
-                    if self.selector.matches_with_scope(&element, Some(self.scope)) {
+                    if self.selector.matches_with_scope_and_cache(
+                        &element,
+                        Some(self.scope),
+                        &mut self.nth_index_cache,
+                    ) {
                         return Some(element);
                     }
                 }
@@ -168,6 +197,8 @@ impl<'a> Iterator for Text<'a> {
         None
     }
 }
+
+impl FusedIterator for Text<'_> {}
 
 mod element;
 mod serializable;
