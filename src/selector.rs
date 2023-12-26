@@ -8,6 +8,7 @@ use html5ever::{LocalName, Namespace};
 use selectors::{
     matching,
     parser::{self, ParseRelative, SelectorList, SelectorParseErrorKind},
+    NthIndexCache,
 };
 
 use crate::error::SelectorErrorKind;
@@ -42,11 +43,22 @@ impl Selector {
     /// The optional `scope` argument is used to specify which element has `:scope` pseudo-class.
     /// When it is `None`, `:scope` will match the root element.
     pub fn matches_with_scope(&self, element: &ElementRef, scope: Option<ElementRef>) -> bool {
-        let mut nth_index_cache = Default::default();
+        self.matches_with_scope_and_cache(element, scope, &mut NthIndexCache::default())
+    }
+
+    // The `nth_index_cache` must not be used after `self` is dropped
+    // to avoid incorrect results (even though no undefined behaviour is possible)
+    // due to the usage of selector memory addresses as cache keys.
+    pub(crate) fn matches_with_scope_and_cache(
+        &self,
+        element: &ElementRef,
+        scope: Option<ElementRef>,
+        nth_index_cache: &mut NthIndexCache,
+    ) -> bool {
         let mut context = matching::MatchingContext::new(
             matching::MatchingMode::Normal,
             None,
-            &mut nth_index_cache,
+            nth_index_cache,
             matching::QuirksMode::NoQuirks,
             matching::NeedsSelectorFlags::No,
             matching::IgnoreNthChildForInvalidation::No,
