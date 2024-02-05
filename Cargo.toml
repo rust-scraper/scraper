@@ -19,7 +19,7 @@ html5ever = "0.26"
 selectors = "0.25.0"
 tendril = "0.4.3"
 ahash = "0.8"
-indexmap = { version = "2.2.1", optional = true }
+indexmap = { version = "2.2.2", optional = true }
 once_cell = "1.19"
 
 [dependencies.getopts]
