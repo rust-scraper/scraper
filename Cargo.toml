@@ -13,7 +13,7 @@ repository = "https://github.com/causal-agent/scraper"
 readme = "README.md"
 
 [dependencies]
-cssparser = "0.31.0"
+cssparser = "0.34.0"
 ego-tree = "0.6.2"
 html5ever = "0.27"
 selectors = "0.25.0"
