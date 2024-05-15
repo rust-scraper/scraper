@@ -114,7 +114,7 @@ impl Html {
     pub fn html(&self) -> String {
         let opts = SerializeOpts {
             scripting_enabled: false, // It's not clear what this does.
-            traversal_scope: html5ever::serialize::TraversalScope::IncludeNode,
+            traversal_scope: serialize::TraversalScope::IncludeNode,
             create_missing_parent: false,
         };
         let mut buf = Vec::new();
