@@ -175,8 +175,6 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     }
 }
 
-impl FusedIterator for Select<'_, '_> {}
-
 /// Iterator over descendent text nodes.
 #[derive(Debug, Clone)]
 pub struct Text<'a> {
