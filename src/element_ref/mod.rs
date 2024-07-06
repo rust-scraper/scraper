@@ -1,7 +1,6 @@
 //! Element references.
 
 use std::fmt;
-use std::iter::FusedIterator;
 use std::ops::Deref;
 
 use ego_tree::iter::{Edge, Traverse};
@@ -195,8 +194,6 @@ impl<'a> Iterator for Text<'a> {
         None
     }
 }
-
-impl FusedIterator for Text<'_> {}
 
 mod element;
 mod serializable;
