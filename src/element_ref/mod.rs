@@ -1,7 +1,6 @@
 //! Element references.
 
 use std::fmt;
-use std::iter::FusedIterator;
 use std::ops::Deref;
 
 use ego_tree::iter::{Edge, Traverse};
@@ -175,8 +174,6 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     }
 }
 
-impl FusedIterator for Select<'_, '_> {}
-
 /// Iterator over descendent text nodes.
 #[derive(Debug, Clone)]
 pub struct Text<'a> {
@@ -197,8 +194,6 @@ impl<'a> Iterator for Text<'a> {
         None
     }
 }
-
-impl FusedIterator for Text<'_> {}
 
 mod element;
 mod serializable;
