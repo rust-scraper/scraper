@@ -86,6 +86,14 @@ pub struct Parser;
 impl<'i> parser::Parser<'i> for Parser {
     type Impl = Simple;
     type Error = SelectorParseErrorKind<'i>;
+
+    fn parse_is_and_where(&self) -> bool {
+        true
+    }
+
+    fn parse_has(&self) -> bool {
+        true
+    }
 }
 
 /// A simple implementation of `SelectorImpl` with no pseudo-classes or pseudo-elements.
@@ -220,6 +228,24 @@ mod tests {
     #[should_panic]
     fn invalid_selector_conversions() {
         let s = "<failing selector>";
+        let _sel: Selector = s.try_into().unwrap();
+    }
+
+    #[test]
+    fn has_selector() {
+        let s = ":has(a)";
+        let _sel: Selector = s.try_into().unwrap();
+    }
+
+    #[test]
+    fn is_selector() {
+        let s = ":is(a)";
+        let _sel: Selector = s.try_into().unwrap();
+    }
+
+    #[test]
+    fn where_selector() {
+        let s = ":where(a)";
         let _sel: Selector = s.try_into().unwrap();
     }
 }
