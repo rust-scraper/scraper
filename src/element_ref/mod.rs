@@ -41,8 +41,7 @@ impl<'a> ElementRef<'a> {
 
     /// Returns an iterator over descendent elements matching a selector.
     pub fn select<'b>(&self, selector: &'b Selector) -> Select<'a, 'b> {
-        let mut inner = self.traverse();
-        inner.next(); // Skip Edge::Open(self).
+        let inner = self.traverse();
 
         Select {
             scope: *self,
@@ -221,5 +220,19 @@ mod tests {
         let element1 = fragment.select(&sel1).next().unwrap();
         let element2 = element1.select(&sel2).next().unwrap();
         assert_eq!(element2.inner_html(), "3");
+    }
+
+    #[test]
+    fn test_root() {
+        let html = "<div><b>1</b><span><b>2</b></span></div>";
+        let fragment = Html::parse_fragment(html);
+        let sel = Selector::parse("div").unwrap();
+
+        let el1 = fragment.select(&sel).next().unwrap();
+        assert_eq!(el1.value().name(), "div");
+
+        let el2 = el1.select(&sel).next().unwrap();
+        assert_eq!(el2.value().name(), "div");
+        assert_eq!(el1, el2);
     }
 }
