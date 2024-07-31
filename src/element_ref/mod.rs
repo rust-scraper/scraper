@@ -1,6 +1,6 @@
 //! Element references.
 
-use std::fmt;
+use std::fmt::{self, Debug};
 use std::ops::Deref;
 
 use ego_tree::iter::{Edge, Traverse};
@@ -15,7 +15,7 @@ use crate::{Node, Selector};
 ///
 /// This wrapper implements the `Element` trait from the `selectors` crate, which allows it to be
 /// matched against CSS selectors.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ElementRef<'a> {
     node: NodeRef<'a, Node>,
 }
@@ -116,6 +116,12 @@ impl<'a> ElementRef<'a> {
     }
 }
 
+impl<'a> Debug for ElementRef<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Debug::fmt(self.value(), f)
+    }
+}
+
 impl<'a> Deref for ElementRef<'a> {
     type Target = NodeRef<'a, Node>;
     fn deref(&self) -> &NodeRef<'a, Node> {
@@ -131,7 +137,7 @@ pub struct Select<'a, 'b> {
     nth_index_cache: NthIndexCache,
 }
 
-impl fmt::Debug for Select<'_, '_> {
+impl Debug for Select<'_, '_> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("Select")
             .field("scope", &self.scope)
