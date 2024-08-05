@@ -1,6 +1,6 @@
 [package]
 name = "scraper"
-version = "0.19.1"
+version = "0.20.0"
 edition = "2021"
 
 description = "HTML parsing and querying with CSS selectors"
