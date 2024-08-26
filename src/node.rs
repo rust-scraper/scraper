@@ -10,7 +10,7 @@ use std::slice::Iter as SliceIter;
 
 use crate::{CaseSensitivity, StrTendril};
 use html5ever::{Attribute, LocalName, QualName};
-use once_cell::unsync::OnceCell;
+use std::cell::OnceCell;
 
 /// An HTML node.
 // `Element` is usally the most common variant and hence boxing it
