@@ -1,0 +1,38 @@
+[package]
+name = "scraper"
+version = "0.20.0"
+edition = "2021"
+
+description = "HTML parsing and querying with CSS selectors"
+keywords = ["html", "css", "selector", "scraping"]
+
+authors = ["June McEnroe <june@causal.agency>"]
+license = "ISC"
+
+repository = "https://github.com/causal-agent/scraper"
+readme = "README.md"
+
+[dependencies]
+cssparser = "0.31.0"
+ego-tree = "0.7.0"
+html5ever = "0.27"
+selectors = "0.25.0"
+tendril = "0.4.3"
+ahash = "0.8"
+indexmap = { version = "2.4.0", optional = true }
+
+[dependencies.getopts]
+version = "0.2.21"
+optional = true
+
+[features]
+default = ["main", "errors"]
+deterministic = ["indexmap"]
+main = ["getopts"]
+atomic = []
+errors = []
+
+[[bin]]
+name = "scraper"
+path = "src/main.rs"
+required-features = ["main"]
