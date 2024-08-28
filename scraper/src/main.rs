@@ -87,7 +87,7 @@ fn main() {
         }
         fs::create_dir_all(&path).unwrap();
         path.push("scraper.1");
-        fs::write(&path, &include_bytes!("../../scraper.1")[..]).unwrap();
+        fs::write(&path, &include_bytes!("../scraper.1")[..]).unwrap();
         return;
     }
 
