@@ -1,4 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["scraper"]
+members = ["scraper", "scraper_proc_macros"]
+
+[workspace.dependencies]
+scraper = { path = "./scraper" }
