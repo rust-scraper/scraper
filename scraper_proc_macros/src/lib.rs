@@ -4,9 +4,9 @@ use syn::{parse_macro_input, LitStr};
 
 #[proc_macro]
 pub fn selector(input: TokenStream) -> TokenStream {
-    let selector = parse_macro_input!(input as LitStr).value();
+    let selector = parse_macro_input!(input as LitStr);
     
-    match scraper::Selector::parse(&selector) {
+    match scraper::Selector::parse(&selector.value()) {
         Ok(_) => quote!(
             ::scraper::Selector::parse(#selector).unwrap()
         ).into(),
