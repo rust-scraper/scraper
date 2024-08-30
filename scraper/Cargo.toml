@@ -31,7 +31,6 @@ deterministic = ["indexmap"]
 main = ["getopts"]
 atomic = []
 errors = []
-macros = []
 
 [[bin]]
 name = "scraper"
