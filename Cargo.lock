@@ -90,9 +90,9 @@ dependencies = [
 
 [[package]]
 name = "ego-tree"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0a1c26db6cdc3076a84e511b708f85d5c7167a8c65c25fc2279a6315d34777c"
+checksum = "7c6ba7d4eec39eaa9ab24d44a0e73a7949a1095a8b3f3abb11eddf27dbb56a53"
 
 [[package]]
 name = "equivalent"
