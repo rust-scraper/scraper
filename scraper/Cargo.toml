@@ -15,7 +15,7 @@ readme = "README.md"
 [dependencies]
 cssparser = "0.31.0"
 ego-tree = "0.9.0"
-html5ever = "0.27"
+html5ever = "0.28"
 selectors = "0.25.0"
 tendril = "0.4.3"
 ahash = "0.8"
