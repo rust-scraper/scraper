@@ -19,7 +19,7 @@ html5ever = "0.27"
 selectors = "0.25.0"
 tendril = "0.4.3"
 ahash = "0.8"
-indexmap = { version = "2.4.0", optional = true }
+indexmap = { version = "2.5.0", optional = true }
 
 [dependencies.getopts]
 version = "0.2.21"
