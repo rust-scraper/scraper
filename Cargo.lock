@@ -435,6 +435,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "scraper_proc_macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "scraper",
+ "syn",
+]
+
+[[package]]
 name = "selectors"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
