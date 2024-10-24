@@ -139,7 +139,7 @@
 extern crate html5ever;
 
 pub use crate::element_ref::ElementRef;
-pub use crate::html::Html;
+pub use crate::html::{Html, HtmlTreeSink};
 pub use crate::node::Node;
 pub use crate::selector::Selector;
 

@@ -16,6 +16,8 @@ use tendril::TendrilSink;
 use crate::selector::Selector;
 use crate::{ElementRef, Node};
 
+pub use tree_sink::HtmlTreeSink;
+
 /// An HTML tree.
 ///
 /// Parsing does not fail hard. Instead, the `quirks_mode` is set and errors are added to the
@@ -67,22 +69,23 @@ impl Html {
     /// # fn main() {
     /// # let document = "";
     /// use html5ever::driver::{self, ParseOpts};
-    /// use scraper::Html;
+    /// use scraper::{Html, HtmlTreeSink};
     /// use tendril::TendrilSink;
     ///
-    /// let parser = driver::parse_document(Html::new_document(), ParseOpts::default());
+    /// let parser = driver::parse_document(HtmlTreeSink::new(Html::new_document()), ParseOpts::default());
     /// let html = parser.one(document);
     /// # }
     /// ```
     pub fn parse_document(document: &str) -> Self {
-        let parser = driver::parse_document(Self::new_document(), Default::default());
+        let parser =
+            driver::parse_document(HtmlTreeSink::new(Self::new_document()), Default::default());
         parser.one(document)
     }
 
     /// Parses a string of HTML as a fragment.
     pub fn parse_fragment(fragment: &str) -> Self {
         let parser = driver::parse_fragment(
-            Self::new_fragment(),
+            HtmlTreeSink::new(Self::new_fragment()),
             Default::default(),
             QualName::new(None, ns!(html), local_name!("body")),
             Vec::new(),

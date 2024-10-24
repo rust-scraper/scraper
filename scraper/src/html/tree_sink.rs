@@ -5,34 +5,47 @@ use ego_tree::NodeId;
 use html5ever::tendril::StrTendril;
 use html5ever::tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use html5ever::Attribute;
-use html5ever::{ExpandedName, QualName};
+use html5ever::QualName;
 use std::borrow::Cow;
+use std::cell::{Ref, RefCell};
+
+/// Wraps `Html` instances as sinks to drive parsing
+#[derive(Debug)]
+pub struct HtmlTreeSink(RefCell<Html>);
+
+impl HtmlTreeSink {
+    /// Wrap a `Html`instance as a sink to drive parsing
+    pub fn new(html: Html) -> Self {
+        Self(RefCell::new(html))
+    }
+}
 
 /// Note: does not support the `<template>` element.
-impl TreeSink for Html {
-    type Output = Self;
+impl TreeSink for HtmlTreeSink {
+    type Output = Html;
     type Handle = NodeId;
+    type ElemName<'a> = Ref<'a, QualName>;
 
-    fn finish(self) -> Self {
-        self
+    fn finish(self) -> Html {
+        self.0.into_inner()
     }
 
     // Signal a parse error.
-    fn parse_error(&mut self, msg: Cow<'static, str>) {
+    fn parse_error(&self, msg: Cow<'static, str>) {
         #[cfg(feature = "errors")]
-        self.errors.push(msg);
+        self.0.borrow_mut().errors.push(msg);
         #[cfg(not(feature = "errors"))]
         let _ = msg;
     }
 
     // Set the document's quirks mode.
-    fn set_quirks_mode(&mut self, mode: QuirksMode) {
-        self.quirks_mode = mode;
+    fn set_quirks_mode(&self, mode: QuirksMode) {
+        self.0.borrow_mut().quirks_mode = mode;
     }
 
     // Get a handle to the Document node.
-    fn get_document(&mut self) -> Self::Handle {
-        self.tree.root().id()
+    fn get_document(&self) -> Self::Handle {
+        self.0.borrow().tree.root().id()
     }
 
     // Do two handles refer to the same node?
@@ -43,15 +56,17 @@ impl TreeSink for Html {
     // What is the name of this element?
     //
     // Should never be called on a non-element node; feel free to panic!.
-    fn elem_name(&self, target: &Self::Handle) -> ExpandedName {
-        self.tree
-            .get(*target)
-            .unwrap()
-            .value()
-            .as_element()
-            .unwrap()
-            .name
-            .expanded()
+    fn elem_name<'a>(&'a self, target: &Self::Handle) -> Ref<'a, QualName> {
+        Ref::map(self.0.borrow(), |this| {
+            &this
+                .tree
+                .get(*target)
+                .unwrap()
+                .value()
+                .as_element()
+                .unwrap()
+                .name
+        })
     }
 
     // Create an element.
@@ -60,14 +75,15 @@ impl TreeSink for Html {
     // associated document fragment called the "template contents" should also be created. Later
     // calls to self.get_template_contents() with that given element return it.
     fn create_element(
-        &mut self,
+        &self,
         name: QualName,
         attrs: Vec<Attribute>,
         _flags: ElementFlags,
     ) -> Self::Handle {
         let fragment = name.expanded() == expanded_name!(html "template");
 
-        let mut node = self.tree.orphan(Node::Element(Element::new(name, attrs)));
+        let mut this = self.0.borrow_mut();
+        let mut node = this.tree.orphan(Node::Element(Element::new(name, attrs)));
 
         if fragment {
             node.append(Node::Fragment);
@@ -77,8 +93,10 @@ impl TreeSink for Html {
     }
 
     // Create a comment node.
-    fn create_comment(&mut self, text: StrTendril) -> Self::Handle {
-        self.tree
+    fn create_comment(&self, text: StrTendril) -> Self::Handle {
+        self.0
+            .borrow_mut()
+            .tree
             .orphan(Node::Comment(Comment {
                 comment: make_tendril(text),
             }))
@@ -87,7 +105,7 @@ impl TreeSink for Html {
 
     // Append a DOCTYPE element to the Document node.
     fn append_doctype_to_document(
-        &mut self,
+        &self,
         name: StrTendril,
         public_id: StrTendril,
         system_id: StrTendril,
@@ -100,15 +118,20 @@ impl TreeSink for Html {
             public_id,
             system_id,
         };
-        self.tree.root_mut().append(Node::Doctype(doctype));
+        self.0
+            .borrow_mut()
+            .tree
+            .root_mut()
+            .append(Node::Doctype(doctype));
     }
 
     // Append a node as the last child of the given node. If this would produce adjacent sibling
     // text nodes, it should concatenate the text instead.
     //
     // The child node will not already have a parent.
-    fn append(&mut self, parent: &Self::Handle, child: NodeOrText<Self::Handle>) {
-        let mut parent = self.tree.get_mut(*parent).unwrap();
+    fn append(&self, parent: &Self::Handle, child: NodeOrText<Self::Handle>) {
+        let mut this = self.0.borrow_mut();
+        let mut parent = this.tree.get_mut(*parent).unwrap();
 
         match child {
             NodeOrText::AppendNode(id) => {
@@ -141,16 +164,14 @@ impl TreeSink for Html {
     // also a text node, the two should be merged, as in the behavior of append.
     //
     // NB: new_node may have an old parent, from which it should be removed.
-    fn append_before_sibling(
-        &mut self,
-        sibling: &Self::Handle,
-        new_node: NodeOrText<Self::Handle>,
-    ) {
+    fn append_before_sibling(&self, sibling: &Self::Handle, new_node: NodeOrText<Self::Handle>) {
+        let mut this = self.0.borrow_mut();
+
         if let NodeOrText::AppendNode(id) = new_node {
-            self.tree.get_mut(id).unwrap().detach();
+            this.tree.get_mut(id).unwrap().detach();
         }
 
-        let mut sibling = self.tree.get_mut(*sibling).unwrap();
+        let mut sibling = this.tree.get_mut(*sibling).unwrap();
         if sibling.parent().is_some() {
             match new_node {
                 NodeOrText::AppendNode(id) => {
@@ -180,13 +201,15 @@ impl TreeSink for Html {
     }
 
     // Detach the given node from its parent.
-    fn remove_from_parent(&mut self, target: &Self::Handle) {
-        self.tree.get_mut(*target).unwrap().detach();
+    fn remove_from_parent(&self, target: &Self::Handle) {
+        self.0.borrow_mut().tree.get_mut(*target).unwrap().detach();
     }
 
     // Remove all the children from node and append them to new_parent.
-    fn reparent_children(&mut self, node: &Self::Handle, new_parent: &Self::Handle) {
-        self.tree
+    fn reparent_children(&self, node: &Self::Handle, new_parent: &Self::Handle) {
+        self.0
+            .borrow_mut()
+            .tree
             .get_mut(*new_parent)
             .unwrap()
             .reparent_from_id_append(*node);
@@ -194,8 +217,9 @@ impl TreeSink for Html {
 
     // Add each attribute to the given element, if no attribute with that name already exists. The
     // tree builder promises this will never be called with something else than an element.
-    fn add_attrs_if_missing(&mut self, target: &Self::Handle, attrs: Vec<Attribute>) {
-        let mut node = self.tree.get_mut(*target).unwrap();
+    fn add_attrs_if_missing(&self, target: &Self::Handle, attrs: Vec<Attribute>) {
+        let mut this = self.0.borrow_mut();
+        let mut node = this.tree.get_mut(*target).unwrap();
         let element = match *node.value() {
             Node::Element(ref mut e) => e,
             _ => unreachable!(),
@@ -213,18 +237,27 @@ impl TreeSink for Html {
     //
     // The tree builder promises this will never be called with something else than a template
     // element.
-    fn get_template_contents(&mut self, target: &Self::Handle) -> Self::Handle {
-        self.tree.get(*target).unwrap().first_child().unwrap().id()
+    fn get_template_contents(&self, target: &Self::Handle) -> Self::Handle {
+        self.0
+            .borrow()
+            .tree
+            .get(*target)
+            .unwrap()
+            .first_child()
+            .unwrap()
+            .id()
     }
 
     // Mark a HTML <script> element as "already started".
-    fn mark_script_already_started(&mut self, _node: &Self::Handle) {}
+    fn mark_script_already_started(&self, _node: &Self::Handle) {}
 
     // Create Processing Instruction.
-    fn create_pi(&mut self, target: StrTendril, data: StrTendril) -> Self::Handle {
+    fn create_pi(&self, target: StrTendril, data: StrTendril) -> Self::Handle {
         let target = make_tendril(target);
         let data = make_tendril(data);
-        self.tree
+        self.0
+            .borrow_mut()
+            .tree
             .orphan(Node::ProcessingInstruction(ProcessingInstruction {
                 target,
                 data,
@@ -233,12 +266,21 @@ impl TreeSink for Html {
     }
 
     fn append_based_on_parent_node(
-        &mut self,
+        &self,
         element: &Self::Handle,
         prev_element: &Self::Handle,
         child: NodeOrText<Self::Handle>,
     ) {
-        if self.tree.get(*element).unwrap().parent().is_some() {
+        let has_parent = self
+            .0
+            .borrow()
+            .tree
+            .get(*element)
+            .unwrap()
+            .parent()
+            .is_some();
+
+        if has_parent {
             self.append_before_sibling(element, child)
         } else {
             self.append(prev_element, child)
