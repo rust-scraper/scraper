@@ -7,7 +7,7 @@ use std::ops::Deref;
 use ego_tree::iter::{Edge, Traverse};
 use ego_tree::NodeRef;
 use html5ever::serialize::{serialize, SerializeOpts, TraversalScope};
-use selectors::NthIndexCache;
+use selectors::matching::SelectorCaches;
 
 use crate::node::Element;
 use crate::{Node, Selector};
@@ -49,7 +49,7 @@ impl<'a> ElementRef<'a> {
             scope: *self,
             inner,
             selector,
-            nth_index_cache: NthIndexCache::default(),
+            caches: Default::default(),
         }
     }
 
@@ -135,7 +135,7 @@ pub struct Select<'a, 'b> {
     scope: ElementRef<'a>,
     inner: Traverse<'a, Node>,
     selector: &'b Selector,
-    nth_index_cache: NthIndexCache,
+    caches: SelectorCaches,
 }
 
 impl Debug for Select<'_, '_> {
@@ -144,7 +144,7 @@ impl Debug for Select<'_, '_> {
             .field("scope", &self.scope)
             .field("inner", &self.inner)
             .field("selector", &self.selector)
-            .field("nth_index_cache", &"..")
+            .field("caches", &"..")
             .finish()
     }
 }
@@ -155,7 +155,7 @@ impl Clone for Select<'_, '_> {
             scope: self.scope,
             inner: self.inner.clone(),
             selector: self.selector,
-            nth_index_cache: NthIndexCache::default(),
+            caches: Default::default(),
         }
     }
 }
@@ -170,7 +170,7 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
                     if self.selector.matches_with_scope_and_cache(
                         &element,
                         Some(self.scope),
-                        &mut self.nth_index_cache,
+                        &mut self.caches,
                     ) {
                         return Some(element);
                     }

@@ -10,11 +10,13 @@ use ego_tree::Tree;
 use html5ever::serialize::SerializeOpts;
 use html5ever::tree_builder::QuirksMode;
 use html5ever::{driver, serialize, QualName};
-use selectors::NthIndexCache;
+use selectors::matching::SelectorCaches;
 use tendril::TendrilSink;
 
 use crate::selector::Selector;
 use crate::{ElementRef, Node};
+
+pub use tree_sink::HtmlTreeSink;
 
 /// An HTML tree.
 ///
@@ -67,22 +69,23 @@ impl Html {
     /// # fn main() {
     /// # let document = "";
     /// use html5ever::driver::{self, ParseOpts};
-    /// use scraper::Html;
+    /// use scraper::{Html, HtmlTreeSink};
     /// use tendril::TendrilSink;
     ///
-    /// let parser = driver::parse_document(Html::new_document(), ParseOpts::default());
+    /// let parser = driver::parse_document(HtmlTreeSink::new(Html::new_document()), ParseOpts::default());
     /// let html = parser.one(document);
     /// # }
     /// ```
     pub fn parse_document(document: &str) -> Self {
-        let parser = driver::parse_document(Self::new_document(), Default::default());
+        let parser =
+            driver::parse_document(HtmlTreeSink::new(Self::new_document()), Default::default());
         parser.one(document)
     }
 
     /// Parses a string of HTML as a fragment.
     pub fn parse_fragment(fragment: &str) -> Self {
         let parser = driver::parse_fragment(
-            Self::new_fragment(),
+            HtmlTreeSink::new(Self::new_fragment()),
             Default::default(),
             QualName::new(None, ns!(html), local_name!("body")),
             Vec::new(),
@@ -95,7 +98,7 @@ impl Html {
         Select {
             inner: self.tree.nodes(),
             selector,
-            nth_index_cache: NthIndexCache::default(),
+            caches: Default::default(),
         }
     }
 
@@ -127,7 +130,7 @@ impl Html {
 pub struct Select<'a, 'b> {
     inner: Nodes<'a, Node>,
     selector: &'b Selector,
-    nth_index_cache: NthIndexCache,
+    caches: SelectorCaches,
 }
 
 impl fmt::Debug for Select<'_, '_> {
@@ -135,7 +138,7 @@ impl fmt::Debug for Select<'_, '_> {
         fmt.debug_struct("Select")
             .field("inner", &self.inner)
             .field("selector", &self.selector)
-            .field("nth_index_cache", &"..")
+            .field("caches", &"..")
             .finish()
     }
 }
@@ -145,7 +148,7 @@ impl Clone for Select<'_, '_> {
         Self {
             inner: self.inner.clone(),
             selector: self.selector,
-            nth_index_cache: NthIndexCache::default(),
+            caches: Default::default(),
         }
     }
 }
@@ -157,11 +160,9 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
         for node in self.inner.by_ref() {
             if let Some(element) = ElementRef::wrap(node) {
                 if element.parent().is_some()
-                    && self.selector.matches_with_scope_and_cache(
-                        &element,
-                        None,
-                        &mut self.nth_index_cache,
-                    )
+                    && self
+                        .selector
+                        .matches_with_scope_and_cache(&element, None, &mut self.caches)
                 {
                     return Some(element);
                 }
@@ -182,11 +183,9 @@ impl<'a, 'b> DoubleEndedIterator for Select<'a, 'b> {
         for node in self.inner.by_ref().rev() {
             if let Some(element) = ElementRef::wrap(node) {
                 if element.parent().is_some()
-                    && self.selector.matches_with_scope_and_cache(
-                        &element,
-                        None,
-                        &mut self.nth_index_cache,
-                    )
+                    && self
+                        .selector
+                        .matches_with_scope_and_cache(&element, None, &mut self.caches)
                 {
                     return Some(element);
                 }
