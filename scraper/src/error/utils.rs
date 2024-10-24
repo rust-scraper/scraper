@@ -1,14 +1,12 @@
 use cssparser::Token;
 
 pub(crate) fn render_token(token: &Token<'_>) -> String {
-    // THIS TOOK FOREVER TO IMPLEMENT
-
     match token {
-        // TODO: Give these guys some better names
-        Token::Ident(ident) => format!("{}", ident.clone()),
-        Token::AtKeyword(value) => format!("@{}", value.clone()),
-        Token::Hash(name) | Token::IDHash(name) => format!("#{}", name.clone()),
-        Token::QuotedString(value) => format!("\"{}\"", value.clone()),
+        Token::Ident(ident) => ident.to_string(),
+        Token::AtKeyword(value) => format!("@{}", value),
+        Token::Hash(name) | Token::IDHash(name) => format!("#{}", name),
+        Token::QuotedString(value) => format!("\"{}\"", value),
+        Token::UnquotedUrl(value) => value.to_string(),
         Token::Number {
             has_sign: signed,
             value: num,
@@ -27,37 +25,28 @@ pub(crate) fn render_token(token: &Token<'_>) -> String {
         } => format!("{}{}", render_int(*signed, *num), unit),
         Token::WhiteSpace(_) => String::from(" "),
         Token::Comment(comment) => format!("/* {} */", comment),
-        Token::Function(name) => format!("{}()", name.clone()),
-        Token::BadString(string) => format!("<Bad String {:?}>", string.clone()),
-        Token::BadUrl(url) => format!("<Bad URL {:?}>", url.clone()),
+        Token::Function(name) => format!("{}()", name),
+        Token::BadString(string) => format!("<Bad String {:?}>", string),
+        Token::BadUrl(url) => format!("<Bad URL {:?}>", url),
         // Single-character token
-        sc_token => render_single_char_token(sc_token),
+        Token::Colon => ":".into(),
+        Token::Semicolon => ";".into(),
+        Token::Comma => ",".into(),
+        Token::IncludeMatch => "~=".into(),
+        Token::DashMatch => "|=".into(),
+        Token::PrefixMatch => "^=".into(),
+        Token::SuffixMatch => "$=".into(),
+        Token::SubstringMatch => "*=".into(),
+        Token::CDO => "<!--".into(),
+        Token::CDC => "-->".into(),
+        Token::ParenthesisBlock => "<(".into(),
+        Token::SquareBracketBlock => "<[".into(),
+        Token::CurlyBracketBlock => "<{".into(),
+        Token::CloseParenthesis => "<)".into(),
+        Token::CloseSquareBracket => "<]".into(),
+        Token::CloseCurlyBracket => "<}".into(),
+        Token::Delim(delim) => (*delim).into(),
     }
-}
-
-fn render_single_char_token(token: &Token) -> String {
-    String::from(match token {
-        Token::Colon => ":",
-        Token::Semicolon => ";",
-        Token::Comma => ",",
-        Token::IncludeMatch => "~=",
-        Token::DashMatch => "|=",
-        Token::PrefixMatch => "^=",
-        Token::SuffixMatch => "$=",
-        Token::SubstringMatch => "*=",
-        Token::CDO => "<!--",
-        Token::CDC => "-->",
-        Token::ParenthesisBlock => "<(",
-        Token::SquareBracketBlock => "<[",
-        Token::CurlyBracketBlock => "<{",
-        Token::CloseParenthesis => "<)",
-        Token::CloseSquareBracket => "<]",
-        Token::CloseCurlyBracket => "<}",
-        other => panic!(
-            "Token {:?} is not supposed to match as a single-character token!",
-            other
-        ),
-    })
 }
 
 fn render_number(signed: bool, num: f32, token: &Token) -> String {
@@ -88,4 +77,15 @@ fn render_int_signed(num: f32) -> String {
 
 fn render_int_unsigned(num: f32) -> String {
     format!("{}", num)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Selector;
+
+    #[test]
+    fn regression_test_issue212() {
+        let err = Selector::parse("div138293@!#@!!@#").unwrap_err();
+        assert_eq!(err.to_string(), "Token \"@\" was not expected");
+    }
 }
