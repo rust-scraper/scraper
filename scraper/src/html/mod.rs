@@ -10,7 +10,7 @@ use ego_tree::Tree;
 use html5ever::serialize::SerializeOpts;
 use html5ever::tree_builder::QuirksMode;
 use html5ever::{driver, serialize, QualName};
-use selectors::NthIndexCache;
+use selectors::matching::SelectorCaches;
 use tendril::TendrilSink;
 
 use crate::selector::Selector;
@@ -95,7 +95,7 @@ impl Html {
         Select {
             inner: self.tree.nodes(),
             selector,
-            nth_index_cache: NthIndexCache::default(),
+            caches: Default::default(),
         }
     }
 
@@ -127,7 +127,7 @@ impl Html {
 pub struct Select<'a, 'b> {
     inner: Nodes<'a, Node>,
     selector: &'b Selector,
-    nth_index_cache: NthIndexCache,
+    caches: SelectorCaches,
 }
 
 impl fmt::Debug for Select<'_, '_> {
@@ -135,7 +135,7 @@ impl fmt::Debug for Select<'_, '_> {
         fmt.debug_struct("Select")
             .field("inner", &self.inner)
             .field("selector", &self.selector)
-            .field("nth_index_cache", &"..")
+            .field("caches", &"..")
             .finish()
     }
 }
@@ -145,7 +145,7 @@ impl Clone for Select<'_, '_> {
         Self {
             inner: self.inner.clone(),
             selector: self.selector,
-            nth_index_cache: NthIndexCache::default(),
+            caches: Default::default(),
         }
     }
 }
@@ -157,11 +157,9 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
         for node in self.inner.by_ref() {
             if let Some(element) = ElementRef::wrap(node) {
                 if element.parent().is_some()
-                    && self.selector.matches_with_scope_and_cache(
-                        &element,
-                        None,
-                        &mut self.nth_index_cache,
-                    )
+                    && self
+                        .selector
+                        .matches_with_scope_and_cache(&element, None, &mut self.caches)
                 {
                     return Some(element);
                 }
@@ -182,11 +180,9 @@ impl<'a, 'b> DoubleEndedIterator for Select<'a, 'b> {
         for node in self.inner.by_ref().rev() {
             if let Some(element) = ElementRef::wrap(node) {
                 if element.parent().is_some()
-                    && self.selector.matches_with_scope_and_cache(
-                        &element,
-                        None,
-                        &mut self.nth_index_cache,
-                    )
+                    && self
+                        .selector
+                        .matches_with_scope_and_cache(&element, None, &mut self.caches)
                 {
                     return Some(element);
                 }

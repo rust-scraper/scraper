@@ -5,10 +5,10 @@ use std::fmt;
 
 pub use cssparser::ToCss;
 use html5ever::{LocalName, Namespace};
+use precomputed_hash::PrecomputedHash;
 use selectors::{
     matching,
     parser::{self, ParseRelative, SelectorList, SelectorParseErrorKind},
-    NthIndexCache,
 };
 
 use crate::error::SelectorErrorKind;
@@ -43,7 +43,7 @@ impl Selector {
     /// The optional `scope` argument is used to specify which element has `:scope` pseudo-class.
     /// When it is `None`, `:scope` will match the root element.
     pub fn matches_with_scope(&self, element: &ElementRef, scope: Option<ElementRef>) -> bool {
-        self.matches_with_scope_and_cache(element, scope, &mut NthIndexCache::default())
+        self.matches_with_scope_and_cache(element, scope, &mut Default::default())
     }
 
     // The `nth_index_cache` must not be used after `self` is dropped
@@ -53,19 +53,19 @@ impl Selector {
         &self,
         element: &ElementRef,
         scope: Option<ElementRef>,
-        nth_index_cache: &mut NthIndexCache,
+        caches: &mut matching::SelectorCaches,
     ) -> bool {
         let mut context = matching::MatchingContext::new(
             matching::MatchingMode::Normal,
             None,
-            nth_index_cache,
+            caches,
             matching::QuirksMode::NoQuirks,
             matching::NeedsSelectorFlags::No,
-            matching::IgnoreNthChildForInvalidation::No,
+            matching::MatchingForInvalidation::No,
         );
         context.scope_element = scope.map(|x| selectors::Element::opaque(&x));
         self.selectors
-            .0
+            .slice()
             .iter()
             .any(|s| matching::matches_selector(s, 0, None, element, &mut context))
     }
@@ -157,6 +157,12 @@ impl ToCss for CssLocalName {
         W: fmt::Write,
     {
         dest.write_str(&self.0)
+    }
+}
+
+impl PrecomputedHash for CssLocalName {
+    fn precomputed_hash(&self) -> u32 {
+        self.0.precomputed_hash()
     }
 }
 

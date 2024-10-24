@@ -1,6 +1,7 @@
 use html5ever::Namespace;
 use selectors::{
     attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint},
+    bloom::BloomFilter,
     matching, Element, OpaqueElement,
 };
 
@@ -122,6 +123,10 @@ impl<'a> Element for ElementRef<'a> {
         self.value().has_class(&name.0, case_sensitivity)
     }
 
+    fn has_custom_state(&self, _name: &CssLocalName) -> bool {
+        false
+    }
+
     fn is_empty(&self) -> bool {
         !self
             .children()
@@ -134,6 +139,11 @@ impl<'a> Element for ElementRef<'a> {
     }
 
     fn apply_selector_flags(&self, _flags: matching::ElementSelectorFlags) {}
+
+    fn add_element_unique_hashes(&self, _filter: &mut BloomFilter) -> bool {
+        // FIXME: Do we want to add `self.node.id()` here?
+        false
+    }
 }
 
 #[cfg(test)]
