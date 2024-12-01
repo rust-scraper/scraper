@@ -10,7 +10,11 @@ use std::slice::Iter as SliceIter;
 
 use crate::{CaseSensitivity, StrTendril};
 use html5ever::{Attribute, LocalName, QualName};
-use std::cell::OnceCell;
+
+#[cfg(not(feature = "atomic"))]
+use std::cell::OnceCell as OnceLock;
+#[cfg(feature = "atomic")]
+use std::sync::OnceLock;
 
 /// An HTML node.
 // `Element` is usally the most common variant and hence boxing it
@@ -230,9 +234,9 @@ pub struct Element {
     /// The element attributes.
     pub attrs: Attributes,
 
-    id: OnceCell<Option<StrTendril>>,
+    id: OnceLock<Option<StrTendril>>,
 
-    classes: OnceCell<Vec<LocalName>>,
+    classes: OnceLock<Vec<LocalName>>,
 }
 
 impl Element {
@@ -246,8 +250,8 @@ impl Element {
         Element {
             attrs,
             name,
-            id: OnceCell::new(),
-            classes: OnceCell::new(),
+            id: OnceLock::new(),
+            classes: OnceLock::new(),
         }
     }
 
