@@ -73,7 +73,7 @@ impl<'a> From<SelectorParseErrorKind<'a>> for SelectorErrorKind<'a> {
     }
 }
 
-impl<'a> Display for SelectorErrorKind<'a> {
+impl Display for SelectorErrorKind<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -103,7 +103,7 @@ impl<'a> Display for SelectorErrorKind<'a> {
     }
 }
 
-impl<'a> Error for SelectorErrorKind<'a> {
+impl Error for SelectorErrorKind<'_> {
     fn description(&self) -> &str {
         match self {
             Self::UnexpectedToken(_) => "Token was not expected",

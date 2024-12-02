@@ -9,7 +9,7 @@ use super::ElementRef;
 use crate::selector::{CssLocalName, CssString, NonTSPseudoClass, PseudoElement, Simple};
 
 /// Note: will never match against non-tree-structure pseudo-classes.
-impl<'a> Element for ElementRef<'a> {
+impl Element for ElementRef<'_> {
     type Impl = Simple;
 
     fn opaque(&self) -> OpaqueElement {
@@ -135,7 +135,7 @@ impl<'a> Element for ElementRef<'a> {
 
     fn is_root(&self) -> bool {
         self.parent()
-            .map_or(false, |parent| parent.value().is_document())
+            .is_some_and(|parent| parent.value().is_document())
     }
 
     fn apply_selector_flags(&self, _flags: matching::ElementSelectorFlags) {}

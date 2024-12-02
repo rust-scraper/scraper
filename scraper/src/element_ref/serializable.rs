@@ -4,7 +4,7 @@ use html5ever::serialize::{Serialize, Serializer, TraversalScope};
 
 use crate::ElementRef;
 
-impl<'a> Serialize for ElementRef<'a> {
+impl Serialize for ElementRef<'_> {
     fn serialize<S: Serializer>(
         &self,
         serializer: &mut S,

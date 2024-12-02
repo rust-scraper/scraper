@@ -141,7 +141,7 @@ impl TreeSink for HtmlTreeSink {
             NodeOrText::AppendText(text) => {
                 let text = make_tendril(text);
 
-                let did_concat = parent.last_child().map_or(false, |mut n| match n.value() {
+                let did_concat = parent.last_child().is_some_and(|mut n| match n.value() {
                     Node::Text(t) => {
                         t.text.push_tendril(&text);
                         true
@@ -181,16 +181,13 @@ impl TreeSink for HtmlTreeSink {
                 NodeOrText::AppendText(text) => {
                     let text = make_tendril(text);
 
-                    let did_concat =
-                        sibling
-                            .prev_sibling()
-                            .map_or(false, |mut n| match n.value() {
-                                Node::Text(t) => {
-                                    t.text.push_tendril(&text);
-                                    true
-                                }
-                                _ => false,
-                            });
+                    let did_concat = sibling.prev_sibling().is_some_and(|mut n| match n.value() {
+                        Node::Text(t) => {
+                            t.text.push_tendril(&text);
+                            true
+                        }
+                        _ => false,
+                    });
 
                     if !did_concat {
                         sibling.insert_before(Node::Text(Text { text }));

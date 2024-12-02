@@ -153,7 +153,7 @@ impl Clone for Select<'_, '_> {
     }
 }
 
-impl<'a, 'b> Iterator for Select<'a, 'b> {
+impl<'a> Iterator for Select<'a, '_> {
     type Item = ElementRef<'a>;
 
     fn next(&mut self) -> Option<ElementRef<'a>> {
@@ -178,7 +178,7 @@ impl<'a, 'b> Iterator for Select<'a, 'b> {
     }
 }
 
-impl<'a, 'b> DoubleEndedIterator for Select<'a, 'b> {
+impl DoubleEndedIterator for Select<'_, '_> {
     fn next_back(&mut self) -> Option<Self::Item> {
         for node in self.inner.by_ref().rev() {
             if let Some(element) = ElementRef::wrap(node) {
