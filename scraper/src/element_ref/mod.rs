@@ -117,7 +117,7 @@ impl<'a> ElementRef<'a> {
     }
 }
 
-impl<'a> Debug for ElementRef<'a> {
+impl Debug for ElementRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Debug::fmt(self.value(), f)
     }
@@ -160,7 +160,7 @@ impl Clone for Select<'_, '_> {
     }
 }
 
-impl<'a, 'b> Iterator for Select<'a, 'b> {
+impl<'a> Iterator for Select<'a, '_> {
     type Item = ElementRef<'a>;
 
     fn next(&mut self) -> Option<ElementRef<'a>> {

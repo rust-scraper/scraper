@@ -125,8 +125,7 @@ fn main() {
             .iter()
             .map(File::open)
             .map(Result::unwrap)
-            .map(|mut f| query(&input, &output, &selector, &mut f))
-            .any(|m| m)
+            .any(|mut f| query(&input, &output, &selector, &mut f))
     };
 
     process::exit(i32::from(!matched));
