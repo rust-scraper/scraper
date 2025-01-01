@@ -11,7 +11,7 @@ use std::cell::{Ref, RefCell};
 
 /// Wraps `Html` instances as sinks to drive parsing
 #[derive(Debug)]
-pub struct HtmlTreeSink(RefCell<Html>);
+pub struct HtmlTreeSink(pub RefCell<Html>);
 
 impl HtmlTreeSink {
     /// Wrap a `Html`instance as a sink to drive parsing
