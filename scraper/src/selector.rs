@@ -101,7 +101,7 @@ impl<'de> Deserialize<'de> for Selector {
 struct SelectorVisitor;
 
 #[cfg(feature = "serde")]
-impl<'de> Visitor<'de> for SelectorVisitor {
+impl Visitor<'_> for SelectorVisitor {
     type Value = Selector;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
