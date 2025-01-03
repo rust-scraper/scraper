@@ -109,7 +109,7 @@ impl<'de> Visitor<'de> for SelectorVisitor {
     }
 
     fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
-        Ok(Selector::parse(v).map_err(serde::de::Error::custom)?)
+        Selector::parse(v).map_err(serde::de::Error::custom)
     }
 }
 
