@@ -399,6 +399,7 @@ dependencies = [
  "indexmap",
  "precomputed-hash",
  "selectors",
+ "serde",
  "tendril",
 ]
 
