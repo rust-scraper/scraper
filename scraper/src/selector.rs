@@ -11,6 +11,9 @@ use selectors::{
     parser::{self, ParseRelative, SelectorList, SelectorParseErrorKind},
 };
 
+#[cfg(feature = "serde")]
+use serde::{de::Visitor, Deserialize, Serialize};
+
 use crate::error::SelectorErrorKind;
 use crate::ElementRef;
 
@@ -77,6 +80,36 @@ impl ToCss for Selector {
         W: fmt::Write,
     {
         self.selectors.to_css(dest)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Selector {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&self.to_css_string())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Selector {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        deserializer.deserialize_str(SelectorVisitor)
+    }
+}
+
+#[cfg(feature = "serde")]
+struct SelectorVisitor;
+
+#[cfg(feature = "serde")]
+impl Visitor<'_> for SelectorVisitor {
+    type Value = Selector;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "a css selector string")
+    }
+
+    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+        Selector::parse(v).map_err(serde::de::Error::custom)
     }
 }
 
