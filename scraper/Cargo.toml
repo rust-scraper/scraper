@@ -18,7 +18,7 @@ ego-tree = "0.10.0"
 html5ever = "0.31.0"
 indexmap = { version = "2.7.1", optional = true }
 precomputed-hash = "0.1.1"
-selectors = "0.27.0"
+selectors = "0.28.0"
 serde = { version = "1.0.218", optional = true }
 tendril = "0.4.3"
 
