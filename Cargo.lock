@@ -354,9 +354,9 @@ dependencies = [
 
 [[package]]
 name = "selectors"
-version = "0.27.0"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b75e048a93e14929e68e37b82e207db957cbb368375a80ed3ca28ac75080856"
+checksum = "db3079aef7a4383aff1e60eca2818995d3de8168e85ae4b6ea8fb2804b182c54"
 dependencies = [
  "bitflags",
  "cssparser",
