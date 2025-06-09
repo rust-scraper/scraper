@@ -108,9 +108,9 @@ dependencies = [
 
 [[package]]
 name = "getopts"
-version = "0.2.21"
+version = "0.2.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14dbbfd5c71d70241ecf9e6f13737f7b5ce823821063188d7e46c41d371eebd5"
+checksum = "65f92ffdcc7377b15ba73857be6a1a2fd54aec37baca587b96bc8ea3f8757088"
 dependencies = [
  "unicode-width",
 ]
