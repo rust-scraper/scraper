@@ -23,7 +23,7 @@ serde = { version = "1.0.218", optional = true }
 tendril = "0.4.3"
 
 [dependencies.getopts]
-version = "0.2.21"
+version = "0.2.22"
 optional = true
 
 [features]
