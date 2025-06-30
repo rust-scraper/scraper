@@ -16,7 +16,7 @@ readme = "README.md"
 cssparser = "0.35.0"
 ego-tree = "0.10.0"
 html5ever = "0.31.0"
-indexmap = { version = "2.7.1", optional = true }
+indexmap = { version = "2.10.0", optional = true }
 precomputed-hash = "0.1.1"
 selectors = "0.29.0"
 serde = { version = "1.0.218", optional = true }
