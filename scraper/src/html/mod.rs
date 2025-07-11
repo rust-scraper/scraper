@@ -89,6 +89,7 @@ impl Html {
             Default::default(),
             QualName::new(None, ns!(html), local_name!("body")),
             Vec::new(),
+            false,
         );
         parser.one(fragment)
     }
