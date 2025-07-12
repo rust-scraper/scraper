@@ -28,7 +28,7 @@ pub struct Selector {
 
 impl Selector {
     /// Parses a CSS selector group.
-    pub fn parse(selectors: &'_ str) -> Result<Self, SelectorErrorKind> {
+    pub fn parse(selectors: &str) -> Result<Self, SelectorErrorKind<'_>> {
         let mut parser_input = cssparser::ParserInput::new(selectors);
         let mut parser = cssparser::Parser::new(&mut parser_input);
 

@@ -20,7 +20,7 @@ fn main() {
     stdin.read_to_string(&mut input).unwrap();
     let fragment = Html::parse_fragment(&input);
 
-    println!("{:#?}", fragment);
+    println!("{fragment:#?}");
 
     for node in fragment.select(&selector) {
         println!("{:?}", node.value());

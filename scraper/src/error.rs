@@ -83,7 +83,7 @@ impl Display for SelectorErrorKind<'_> {
                     format!("Token {:?} was not expected", utils::render_token(token))
                 }
                 Self::EndOfLine => "Unexpected EOL".to_string(),
-                Self::InvalidAtRule(rule) => format!("Invalid @-rule {:?}", rule),
+                Self::InvalidAtRule(rule) => format!("Invalid @-rule {rule:?}"),
                 Self::InvalidAtRuleBody => "The body of an @-rule was invalid".to_string(),
                 Self::QualRuleInvalid => "The qualified name was invalid".to_string(),
                 Self::ExpectedColonOnPseudoElement(token) => format!(
@@ -95,8 +95,7 @@ impl Display for SelectorErrorKind<'_> {
                     utils::render_token(token)
                 ),
                 Self::UnexpectedSelectorParseError(err) => format!(
-                    "Unexpected error occurred. Please report this to the developer\n{:#?}",
-                    err
+                    "Unexpected error occurred. Please report this to the developer\n{err:#?}"
                 ),
             }
         )
