@@ -104,7 +104,7 @@ impl Html {
     }
 
     /// Returns the root `<html>` element.
-    pub fn root_element(&self) -> ElementRef {
+    pub fn root_element(&self) -> ElementRef<'_> {
         let root_node = self
             .tree
             .root()

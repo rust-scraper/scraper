@@ -114,11 +114,11 @@ impl fmt::Debug for Node {
         match *self {
             Node::Document => write!(f, "Document"),
             Node::Fragment => write!(f, "Fragment"),
-            Node::Doctype(ref d) => write!(f, "Doctype({:?})", d),
-            Node::Comment(ref c) => write!(f, "Comment({:?})", c),
-            Node::Text(ref t) => write!(f, "Text({:?})", t),
-            Node::Element(ref e) => write!(f, "Element({:?})", e),
-            Node::ProcessingInstruction(ref pi) => write!(f, "ProcessingInstruction({:?})", pi),
+            Node::Doctype(ref d) => write!(f, "Doctype({d:?})"),
+            Node::Comment(ref c) => write!(f, "Comment({c:?})"),
+            Node::Text(ref t) => write!(f, "Text({t:?})"),
+            Node::Element(ref e) => write!(f, "Element({e:?})"),
+            Node::ProcessingInstruction(ref pi) => write!(f, "ProcessingInstruction({pi:?})"),
         }
     }
 }
@@ -275,7 +275,7 @@ impl Element {
     }
 
     /// Returns an iterator over the element's classes.
-    pub fn classes(&self) -> Classes {
+    pub fn classes(&self) -> Classes<'_> {
         let classes = self.classes.get_or_init(|| {
             let mut classes = self
                 .attrs
@@ -313,7 +313,7 @@ impl Element {
     }
 
     /// Returns an iterator over the element's attributes.
-    pub fn attrs(&self) -> Attrs {
+    pub fn attrs(&self) -> Attrs<'_> {
         Attrs {
             inner: self.attrs.iter(),
         }
@@ -362,7 +362,7 @@ impl fmt::Debug for Element {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "<{}", self.name())?;
         for (key, value) in self.attrs() {
-            write!(f, " {}={:?}", key, value)?;
+            write!(f, " {key}={value:?}")?;
         }
         write!(f, ">")
     }

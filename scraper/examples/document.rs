@@ -20,7 +20,7 @@ fn main() {
     stdin.read_to_string(&mut input).unwrap();
     let document = Html::parse_document(&input);
 
-    println!("{:#?}", document);
+    println!("{document:#?}");
 
     for node in document.select(&selector) {
         println!("{:?}", node.value());
