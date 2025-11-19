@@ -66,6 +66,7 @@ fn main() {
     opts.optflag("t", "text", "output text of elements");
     opts.optflag("h", "help", "this cruft");
     opts.optopt("", "install-man-page", "install real documentation", "PATH");
+    opts.optflag("", "version", "output version number");
 
     let args: Vec<String> = env::args().collect();
     let matches = match opts.parse(&args[1..]) {
@@ -77,6 +78,10 @@ fn main() {
             "{}",
             opts.usage("Usage: scraper [options] SELECTOR [FILE ...]")
         );
+        return;
+    }
+    if matches.opt_present("version") {
+        println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
         return;
     }
 
