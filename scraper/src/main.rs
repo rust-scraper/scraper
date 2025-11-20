@@ -124,10 +124,16 @@ fn main() {
         Output::Html
     };
 
-    let selector = matches.free.first().expect("missing selector");
+    let selector = matches.free.first().unwrap_or_else(|| {
+        eprintln!("missing selector");
+        process::exit(USAGE);
+    });
     let files = &matches.free[1..];
 
-    let selector = Selector::parse(selector).unwrap();
+    let selector = Selector::parse(selector).unwrap_or_else(|e| {
+        eprintln!("failed to parse selector: {}", e);
+        process::exit(USAGE);
+    });
 
     let matched = if files.is_empty() {
         query(&input, &output, &selector, &mut io::stdin())
