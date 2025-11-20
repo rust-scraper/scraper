@@ -24,6 +24,9 @@ enum Output {
     Text,
 }
 
+// Based on sysexits.h
+const USAGE: i32 = 64;
+
 fn query<T: Read>(input: &Input, output: &Output, selector: &Selector, file: &mut T) -> bool {
     let mut html = String::new();
     file.read_to_string(&mut html).unwrap();
@@ -71,7 +74,10 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
-        Err(f) => panic!("{}", f.to_string()),
+        Err(f) => {
+            eprintln!("{}", f);
+            process::exit(USAGE);
+        }
     };
     if matches.opt_present("h") {
         print!(
