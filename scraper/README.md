@@ -2,17 +2,18 @@
 
 [![crates.io](https://img.shields.io/crates/v/scraper?color=dark-green)][crate]
 [![downloads](https://img.shields.io/crates/d/scraper)][crate]
-[![test](https://github.com/causal-agent/scraper/actions/workflows/test.yml/badge.svg)][tests]
+[![test](https://github.com/rust-scraper/scraper/actions/workflows/test.yml/badge.svg)][tests]
 
 HTML parsing and querying with CSS selectors.
 
-`scraper` is on [Crates.io][crate] and [GitHub][github].
+`scraper` is on [crates.io][crate] and [GitHub][github].
 
 [crate]: https://crates.io/crates/scraper
-[github]: https://github.com/causal-agent/scraper
-[tests]: https://github.com/causal-agent/scraper/actions/workflows/test.yml
+[github]: https://github.com/rust-scraper/scraper
+[tests]: https://github.com/rust-scraper/scraper/actions/workflows/test.yml
 
-Scraper provides an interface to Servo's `html5ever` and `selectors` crates, for browser-grade parsing and querying.
+Scraper provides an interface to Servo's `html5ever` and `selectors` crates, for
+browser-grade parsing and querying.
 
 ## Examples
 
@@ -148,5 +149,5 @@ assert_eq!(document.html(), "<html><head></head><body>hello</body></html>");
 ## Contributing
 
 Please feel free to open pull requests. If you're planning on implementing
-something big (i.e. not fixing a typo, a small bug fix, minor refactor, etc)
+something big (i.e. not fixing a typo, a small bug fix, minor refactor, etc.)
 then please open an issue first.
