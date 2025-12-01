@@ -9,7 +9,7 @@ keywords = ["html", "css", "selector", "scraping"]
 authors = ["June McEnroe <june@causal.agency>"]
 license = "ISC"
 
-repository = "https://github.com/causal-agent/scraper"
+repository = "https://github.com/rust-scraper/scraper"
 readme = "README.md"
 
 [dependencies]
