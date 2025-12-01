@@ -7,7 +7,7 @@ fn tag_with_newline() {
     let document = Html::parse_fragment(
         r#"
         <a
-                            href="https://github.com/rust-scraper/scraper">
+                            href="https://github.com/causal-agent/scraper">
 
                             </a>
         "#,
@@ -17,7 +17,7 @@ fn tag_with_newline() {
     let a = iter.next().unwrap();
     assert_eq!(
         a.value().attr("href"),
-        Some("https://github.com/rust-scraper/scraper")
+        Some("https://github.com/causal-agent/scraper")
     );
 }
 
