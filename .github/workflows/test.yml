@@ -45,9 +45,6 @@ jobs:
             key: ${{matrix.rust_version}}
       - run: cargo update
       - run: cargo test --all-features
-      - name: Install cargo-audit, cargo-deny
-        run: cargo install cargo-audit cargo-deny
-      - name: Security Check
-        run: cargo audit
-      - name: Dependency Check
-        run: cargo deny check ban advisories sources
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+            command: check bans sources advisories
