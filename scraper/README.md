@@ -134,15 +134,17 @@ assert_eq!(vec!["Hello, ", "world!"], text);
 
 ```rust
 use html5ever::tree_builder::TreeSink;
-use scraper::{Html, Selector};
+use scraper::{Html, Selector, HtmlTreeSink};
 
 let html = "<html><body>hello<p class=\"hello\">REMOVE ME</p></body></html>";
 let selector = Selector::parse(".hello").unwrap();
 let mut document = Html::parse_document(html);
 let node_ids: Vec<_> = document.select(&selector).map(|x| x.id()).collect();
+let tree = HtmlTreeSink::new(document);
 for id in node_ids {
-    document.remove_from_parent(&id);
+    tree.remove_from_parent(&id);
 }
+let document = tree.finish();
 assert_eq!(document.html(), "<html><head></head><body>hello</body></html>");
 ```
 
