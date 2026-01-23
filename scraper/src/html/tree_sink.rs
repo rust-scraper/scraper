@@ -1,7 +1,7 @@
 use super::Html;
 use crate::node::{Comment, Doctype, Element, Node, ProcessingInstruction, Text};
 use crate::tendril_util::make as make_tendril;
-use ego_tree::NodeId;
+use ego_tree::{NodeId, Tree};
 use html5ever::tendril::StrTendril;
 use html5ever::tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use html5ever::Attribute;
@@ -293,5 +293,38 @@ impl TreeSink for HtmlTreeSink {
         } else {
             self.append(prev_element, child)
         }
+    }
+
+    // Clone the subtree rooted at the given node.
+    fn clone_subtree(&self, target: &Self::Handle) -> Self::Handle {
+        let this = self.0.borrow();
+
+        fn clone_node_recursive(
+            tree: &Tree<Node>,
+            node_id: NodeId,
+            new_tree: &mut Tree<Node>,
+            parent_id: Option<NodeId>,
+        ) -> NodeId {
+            let node = tree.get(node_id).unwrap();
+            let cloned_value = node.value().clone();
+
+            let new_node_id = if let Some(parent) = parent_id {
+                let mut parent_node = new_tree.get_mut(parent).unwrap();
+                parent_node.append(cloned_value);
+                parent_node.last_child().unwrap().id()
+            } else {
+                new_tree.orphan(cloned_value).id()
+            };
+
+            for child in node.children() {
+                clone_node_recursive(tree, child.id(), new_tree, Some(new_node_id));
+            }
+
+            new_node_id
+        }
+
+        drop(this);
+        let mut this = self.0.borrow_mut();
+        clone_node_recursive(&this.tree.clone(), *target, &mut this.tree, None)
     }
 }
