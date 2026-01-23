@@ -75,7 +75,7 @@ fn main() {
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
         Err(f) => {
-            eprintln!("{}", f);
+            eprintln!("{f}");
             process::exit(USAGE);
         }
     };
@@ -131,7 +131,7 @@ fn main() {
     let files = &matches.free[1..];
 
     let selector = Selector::parse(selector).unwrap_or_else(|e| {
-        eprintln!("failed to parse selector: {}", e);
+        eprintln!("failed to parse selector: {e}");
         process::exit(USAGE);
     });
 
