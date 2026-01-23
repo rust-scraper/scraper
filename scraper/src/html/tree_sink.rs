@@ -294,4 +294,13 @@ impl TreeSink for HtmlTreeSink {
             self.append(prev_element, child)
         }
     }
+
+    fn clone_subtree(&self, target: &Self::Handle) -> Self::Handle {
+        let mut html = self.0.borrow_mut();
+
+        let mut source_node = html.tree.get_mut(*target).unwrap();
+        let cloned_subtree = source_node.clone_subtree();
+
+        cloned_subtree.id()
+    }
 }
