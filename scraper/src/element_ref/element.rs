@@ -1,8 +1,9 @@
 use html5ever::Namespace;
 use selectors::{
+    Element, OpaqueElement,
     attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint},
     bloom::BloomFilter,
-    matching, Element, OpaqueElement,
+    matching,
 };
 
 use super::ElementRef;
@@ -150,8 +151,8 @@ impl Element for ElementRef<'_> {
 mod tests {
     use crate::html::Html;
     use crate::selector::{CssLocalName, Selector};
-    use selectors::attr::CaseSensitivity;
     use selectors::Element;
+    use selectors::attr::CaseSensitivity;
 
     #[test]
     fn test_has_id() {

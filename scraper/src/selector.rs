@@ -12,10 +12,10 @@ use selectors::{
 };
 
 #[cfg(feature = "serde")]
-use serde::{de::Visitor, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::Visitor};
 
-use crate::error::SelectorErrorKind;
 use crate::ElementRef;
+use crate::error::SelectorErrorKind;
 
 /// Wrapper around CSS selectors.
 ///

@@ -2,10 +2,10 @@ use super::Html;
 use crate::node::{Comment, Doctype, Element, Node, ProcessingInstruction, Text};
 use crate::tendril_util::make as make_tendril;
 use ego_tree::NodeId;
-use html5ever::tendril::StrTendril;
-use html5ever::tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use html5ever::Attribute;
 use html5ever::QualName;
+use html5ever::tendril::StrTendril;
+use html5ever::tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 

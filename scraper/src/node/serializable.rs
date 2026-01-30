@@ -1,6 +1,6 @@
 use std::io::Error;
 
-use ego_tree::{iter::Edge, NodeRef};
+use ego_tree::{NodeRef, iter::Edge};
 use html5ever::serialize::{Serializer, TraversalScope};
 
 use crate::Node;

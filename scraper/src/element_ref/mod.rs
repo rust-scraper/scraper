@@ -4,9 +4,9 @@ use std::fmt::{self, Debug};
 use std::iter::FusedIterator;
 use std::ops::Deref;
 
-use ego_tree::iter::{Edge, Traverse};
 use ego_tree::NodeRef;
-use html5ever::serialize::{serialize, SerializeOpts, TraversalScope};
+use ego_tree::iter::{Edge, Traverse};
+use html5ever::serialize::{SerializeOpts, TraversalScope, serialize};
 use selectors::matching::SelectorCaches;
 
 use crate::node::Element;
@@ -167,13 +167,14 @@ impl<'a> Iterator for Select<'a, '_> {
         for edge in &mut self.inner {
             if let Edge::Open(node) = edge
                 && let Some(element) = ElementRef::wrap(node)
-                    && self.selector.matches_with_scope_and_cache(
-                        &element,
-                        Some(self.scope),
-                        &mut self.caches,
-                    ) {
-                        return Some(element);
-                    }
+                && self.selector.matches_with_scope_and_cache(
+                    &element,
+                    Some(self.scope),
+                    &mut self.caches,
+                )
+            {
+                return Some(element);
+            }
         }
         None
     }
@@ -193,9 +194,10 @@ impl<'a> Iterator for Text<'a> {
     fn next(&mut self) -> Option<&'a str> {
         for edge in &mut self.inner {
             if let Edge::Open(node) = edge
-                && let Node::Text(text) = node.value() {
-                    return Some(&**text);
-                }
+                && let Node::Text(text) = node.value()
+            {
+                return Some(&**text);
+            }
         }
         None
     }

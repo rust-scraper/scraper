@@ -19,7 +19,7 @@ pub use crate::html::{Html, HtmlTreeSink};
 pub use crate::node::Node;
 pub use crate::selector::Selector;
 
-pub use selectors::{attr::CaseSensitivity, Element};
+pub use selectors::{Element, attr::CaseSensitivity};
 
 pub mod element_ref;
 pub mod error;
