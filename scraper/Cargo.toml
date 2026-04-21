@@ -1,6 +1,6 @@
 [package]
 name = "scraper"
-version = "0.26.0"
+version = "0.27.0"
 edition = "2024"
 
 description = "HTML parsing and querying with CSS selectors"
@@ -29,8 +29,8 @@ optional = true
 
 [features]
 default = ["main", "errors"]
-deterministic = ["indexmap"]
-main = ["getopts"]
+deterministic = ["dep:indexmap"]
+main = ["dep:getopts"]
 atomic = []
 errors = []
 serde = ["dep:serde"]
