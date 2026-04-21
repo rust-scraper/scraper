@@ -4,6 +4,7 @@ version = "0.26.0"
 edition = "2024"
 
 description = "HTML parsing and querying with CSS selectors"
+categories = ["web-programming", "text-processing"]
 keywords = ["html", "css", "selector", "scraping"]
 
 authors = ["June McEnroe <june@causal.agency>"]
