@@ -149,8 +149,12 @@ assert_eq!(document.html(), "<html><head></head><body>hello</body></html>");
 ```
 
 ### Using the library across threads
-By default, many types of this library are `!Send` due to some internal data
-structures used. To make them `Send`, enable the `atomic` feature flag.
+The `html5ever` crate uses the
+[`Tendril`](https://docs.rs/html5ever/latest/html5ever/tendril/struct.Tendril.html)
+type as their reference counted string. By default, it's thread-local and thus
+`!Send`, enabling the `atomic` flag will use the atomic counting version of
+[`Tendril`](https://docs.rs/html5ever/latest/html5ever/tendril/struct.Tendril.html),
+implementing `Send` and allow the use across threads.
 ```toml
 [dependencies]
 scraper = { version = "0.27.0", features = ["atomic"] }
