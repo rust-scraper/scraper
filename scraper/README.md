@@ -148,6 +148,14 @@ let document = tree.finish();
 assert_eq!(document.html(), "<html><head></head><body>hello</body></html>");
 ```
 
+### Using the library across threads
+By default, many types of this library are `!Send` due to some internal data
+structures used. To make them `Send`, enable the `atomic` feature flag.
+```toml
+[dependencies]
+scraper = { version = "0.27.0", features = ["atomic"] }
+```
+
 ## Contributing
 
 Please feel free to open pull requests. If you're planning on implementing
