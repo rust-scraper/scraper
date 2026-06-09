@@ -312,7 +312,6 @@ dependencies = [
  "precomputed-hash",
  "selectors",
  "serde",
- "tendril",
 ]
 
 [[package]]

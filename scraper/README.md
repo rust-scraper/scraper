@@ -148,6 +148,18 @@ let document = tree.finish();
 assert_eq!(document.html(), "<html><head></head><body>hello</body></html>");
 ```
 
+### Using the library across threads
+The `html5ever` crate uses the
+[`Tendril`](https://docs.rs/html5ever/latest/html5ever/tendril/struct.Tendril.html)
+type as their reference counted string. By default, it's thread-local and thus
+`!Send`, enabling the `atomic` flag will use the atomic counting version of
+[`Tendril`](https://docs.rs/html5ever/latest/html5ever/tendril/struct.Tendril.html),
+implementing `Send` and allow their use across threads.
+```toml
+[dependencies]
+scraper = { version = "0.27.0", features = ["atomic"] }
+```
+
 ## Contributing
 
 Please feel free to open pull requests. If you're planning on implementing
