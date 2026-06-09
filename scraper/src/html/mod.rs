@@ -68,8 +68,8 @@ impl Html {
     /// # fn main() {
     /// # let document = "";
     /// use html5ever::driver::{self, ParseOpts};
-    /// use scraper::{Html, HtmlTreeSink};
     /// use html5ever::tendril::TendrilSink;
+    /// use scraper::{Html, HtmlTreeSink};
     ///
     /// let parser = driver::parse_document(HtmlTreeSink::new(Html::new_document()), ParseOpts::default());
     /// let html = parser.one(document);
