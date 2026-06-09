@@ -11,7 +11,7 @@ use html5ever::serialize::SerializeOpts;
 use html5ever::tree_builder::QuirksMode;
 use html5ever::{QualName, driver, serialize};
 use selectors::matching::SelectorCaches;
-use tendril::TendrilSink;
+use html5ever::tendril::TendrilSink;
 
 use crate::selector::Selector;
 use crate::{ElementRef, Node};
@@ -65,12 +65,11 @@ impl Html {
     /// ```
     /// # extern crate html5ever;
     /// # extern crate scraper;
-    /// # extern crate tendril;
     /// # fn main() {
     /// # let document = "";
     /// use html5ever::driver::{self, ParseOpts};
     /// use scraper::{Html, HtmlTreeSink};
-    /// use tendril::TendrilSink;
+    /// use html5ever::tendril::TendrilSink;
     ///
     /// let parser = driver::parse_document(HtmlTreeSink::new(Html::new_document()), ParseOpts::default());
     /// let html = parser.one(document);
