@@ -8,10 +8,10 @@ use std::iter::FusedIterator;
 use ego_tree::Tree;
 use ego_tree::iter::Nodes;
 use html5ever::serialize::SerializeOpts;
+use html5ever::tendril::TendrilSink;
 use html5ever::tree_builder::QuirksMode;
 use html5ever::{QualName, driver, serialize};
 use selectors::matching::SelectorCaches;
-use html5ever::tendril::TendrilSink;
 
 use crate::selector::Selector;
 use crate::{ElementRef, Node};
