@@ -217,12 +217,12 @@ pub type Attributes = indexmap::IndexMap<QualName, StrTendril>;
 #[cfg(not(feature = "deterministic"))]
 pub type Attributes = Vec<(QualName, StrTendril)>;
 
-/// The name and attributes of an HTML element.
+/// An HTML element.
 ///
 /// This is the data stored in a [`Node::Element`] node. It is distinct from the
 /// [`Element`](selectors::Element) trait re-exported at the crate root, which is
 /// implemented by [`ElementRef`](crate::ElementRef) for CSS selector matching.
-/// To get one from a selected element, call
+/// To access the underlying element of a selected element, call
 /// [`ElementRef::value`](crate::ElementRef::value).
 #[derive(Clone, PartialEq, Eq)]
 pub struct Element {
