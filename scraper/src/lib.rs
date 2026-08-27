@@ -11,6 +11,47 @@
     variant_size_differences
 )]
 
+//! # The core types
+//!
+//! Parsing produces an [`Html`] document that owns a tree of
+//! [`Node`]s. Every node is one variant of the [`Node`] enum, for example
+//! [`Node::Text`] for text and [`Node::Element`] for an element. The data that
+//! belongs to an element node, like its attributes, is held in a
+//! [`node::Element`](crate::node::Element).
+//!
+//! Running a [`Selector`] over a document does not hand back bare [`Node`]s.
+//! CSS selectors only ever match elements, so it yields [`ElementRef`]s, each
+//! one a handle to an element node that also knows where it sits in the tree.
+//! From an [`ElementRef`] you can reach the element data with
+//! [`ElementRef::value`], read the text under it with [`ElementRef::text`], or
+//! select further into its descendants. Because an [`ElementRef`] also
+//! dereferences to an `ego_tree::NodeRef`, the tree navigation methods (parent,
+//! children, siblings) are available on it too.
+//!
+//! The re-exported [`Element`] trait is a different thing from
+//! [`node::Element`](crate::node::Element). The trait comes from the
+//! `selectors` crate and is what lets an [`ElementRef`] be matched against a
+//! CSS selector. Most code never names it directly, though its convenience
+//! methods (such as `parent_element`) are available on an [`ElementRef`]
+//! through the trait impl, which is why it is re-exported.
+//!
+//! ```
+//! use scraper::{Html, Selector};
+//!
+//! let document = Html::parse_fragment(r#"<ul><li id="a">one</li><li>two <em>three</em></li></ul>"#);
+//! let selector = Selector::parse("li").unwrap();
+//!
+//! for element in document.select(&selector) {
+//!     // The element data: its tag name and attributes.
+//!     let name = element.value().name();
+//!     // `attr` is the short-hand for reading a single attribute by name.
+//!     let id = element.attr("id");
+//!     // All descendant text nodes below this element, concatenated.
+//!     let text = element.text().collect::<String>();
+//!     println!("{name} id={id:?} text={text:?}");
+//! }
+//! ```
+
 #[macro_use]
 extern crate html5ever;
 
