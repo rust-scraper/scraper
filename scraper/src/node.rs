@@ -268,7 +268,7 @@ impl Element {
             .get_or_init(|| {
                 self.attrs
                     .iter()
-                    .find(|(name, _)| name.local.as_ref() == "id")
+                    .find(|(name, _)| name.local.as_str() == "id")
                     .map(|(_, value)| value.clone())
             })
             .as_deref()
@@ -286,7 +286,7 @@ impl Element {
             let mut classes = self
                 .attrs
                 .iter()
-                .filter(|(name, _)| name.local.as_ref() == "class")
+                .filter(|(name, _)| name.local.as_str() == "class")
                 .flat_map(|(_, value)| value.split_ascii_whitespace().map(LocalName::from))
                 .collect::<Vec<_>>();
 
