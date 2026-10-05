@@ -2,6 +2,7 @@
 
 use std::convert::TryFrom;
 use std::fmt;
+use std::str::FromStr;
 
 pub use cssparser::ToCss;
 use html5ever::{LocalName, Namespace};
@@ -28,9 +29,8 @@ pub struct Selector {
 
 impl Selector {
     /// Parses a CSS selector group.
-    pub fn parse(selectors: &str) -> Result<Self, SelectorErrorKind<'_>> {
-        let mut parser_input = cssparser::ParserInput::new(selectors);
-        let mut parser = cssparser::Parser::new(&mut parser_input);
+    pub fn parse(selectors: &str) -> Result<Self, SelectorErrorKind> {
+        let mut parser = cssparser::Parser::new(selectors);
 
         SelectorList::parse(&Parser, &mut parser, ParseRelative::No)
             .map(|selectors| Self { selectors })
@@ -118,7 +118,7 @@ impl Visitor<'_> for SelectorVisitor {
 pub struct Parser;
 impl<'i> parser::Parser<'i> for Parser {
     type Impl = Simple;
-    type Error = SelectorParseErrorKind<'i>;
+    type Error = SelectorParseErrorKind;
 
     fn parse_is_and_where(&self) -> bool {
         true
@@ -204,8 +204,6 @@ impl PrecomputedHash for CssLocalName {
 pub enum NonTSPseudoClass {}
 
 impl parser::NonTSPseudoClass for NonTSPseudoClass {
-    type Impl = Simple;
-
     fn is_active_or_hover(&self) -> bool {
         false
     }
@@ -228,9 +226,7 @@ impl ToCss for NonTSPseudoClass {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PseudoElement {}
 
-impl parser::PseudoElement for PseudoElement {
-    type Impl = Simple;
-}
+impl parser::PseudoElement for PseudoElement {}
 
 impl ToCss for PseudoElement {
     fn to_css<W>(&self, dest: &mut W) -> fmt::Result
@@ -241,10 +237,18 @@ impl ToCss for PseudoElement {
     }
 }
 
-impl<'i> TryFrom<&'i str> for Selector {
-    type Error = SelectorErrorKind<'i>;
+impl TryFrom<&str> for Selector {
+    type Error = SelectorErrorKind;
 
-    fn try_from(s: &'i str) -> Result<Self, Self::Error> {
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Selector::parse(s)
+    }
+}
+
+impl FromStr for Selector {
+    type Err = SelectorErrorKind;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         Selector::parse(s)
     }
 }

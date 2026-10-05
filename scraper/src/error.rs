@@ -1,24 +1,22 @@
 //! Custom error types for diagnostics
 //! Includes re-exported error types from dependencies
 
-mod utils;
-
 use std::{error::Error, fmt::Display};
 
-use cssparser::{BasicParseErrorKind, ParseErrorKind, Token};
+use cssparser::{BasicParseErrorKind, ParseErrorKind};
 use selectors::parser::SelectorParseErrorKind;
 
 /// Error type that is returned when calling `Selector::parse`
 #[derive(Debug, Clone)]
-pub enum SelectorErrorKind<'a> {
+pub enum SelectorErrorKind {
     /// A `Token` was not expected
-    UnexpectedToken(Token<'a>),
+    UnexpectedToken,
 
     /// End-Of-Line was unexpected
     EndOfLine,
 
     /// `@` rule is invalid
-    InvalidAtRule(String),
+    InvalidAtRule,
 
     /// The body of an `@` rule is invalid
     InvalidAtRuleBody,
@@ -26,18 +24,21 @@ pub enum SelectorErrorKind<'a> {
     /// The qualified rule is invalid
     QualRuleInvalid,
 
+    /// Too many nested blocks
+    TooManyNestedBlocks,
+
     /// Expected a `::` for a pseudoelement
-    ExpectedColonOnPseudoElement(Token<'a>),
+    ExpectedColonOnPseudoElement,
 
     /// Expected an identity for a pseudoelement
-    ExpectedIdentityOnPseudoElement(Token<'a>),
+    ExpectedIdentityOnPseudoElement,
 
     /// A `SelectorParseErrorKind` error that isn't really supposed to happen did
-    UnexpectedSelectorParseError(SelectorParseErrorKind<'a>),
+    UnexpectedSelectorParseError(SelectorParseErrorKind),
 }
 
-impl<'a> From<cssparser::ParseError<'a, SelectorParseErrorKind<'a>>> for SelectorErrorKind<'a> {
-    fn from(original: cssparser::ParseError<'a, SelectorParseErrorKind<'a>>) -> Self {
+impl From<cssparser::ParseError<SelectorParseErrorKind>> for SelectorErrorKind {
+    fn from(original: cssparser::ParseError<SelectorParseErrorKind>) -> Self {
         // NOTE: This could be improved, but I dont
         // exactly know how
         match original.kind {
@@ -47,71 +48,67 @@ impl<'a> From<cssparser::ParseError<'a, SelectorParseErrorKind<'a>>> for Selecto
     }
 }
 
-impl<'a> From<BasicParseErrorKind<'a>> for SelectorErrorKind<'a> {
-    fn from(err: BasicParseErrorKind<'a>) -> Self {
+impl From<BasicParseErrorKind> for SelectorErrorKind {
+    fn from(err: BasicParseErrorKind) -> Self {
         match err {
-            BasicParseErrorKind::UnexpectedToken(token) => Self::UnexpectedToken(token),
+            BasicParseErrorKind::UnexpectedToken => Self::UnexpectedToken,
             BasicParseErrorKind::EndOfInput => Self::EndOfLine,
-            BasicParseErrorKind::AtRuleInvalid(rule) => Self::InvalidAtRule(rule.to_string()),
+            BasicParseErrorKind::AtRuleInvalid => Self::InvalidAtRule,
             BasicParseErrorKind::AtRuleBodyInvalid => Self::InvalidAtRuleBody,
             BasicParseErrorKind::QualifiedRuleInvalid => Self::QualRuleInvalid,
+            BasicParseErrorKind::TooManyNestedBlocks => Self::TooManyNestedBlocks,
         }
     }
 }
 
-impl<'a> From<SelectorParseErrorKind<'a>> for SelectorErrorKind<'a> {
-    fn from(err: SelectorParseErrorKind<'a>) -> Self {
+impl From<SelectorParseErrorKind> for SelectorErrorKind {
+    fn from(err: SelectorParseErrorKind) -> Self {
         match err {
-            SelectorParseErrorKind::PseudoElementExpectedColon(token) => {
-                Self::ExpectedColonOnPseudoElement(token)
+            SelectorParseErrorKind::PseudoElementExpectedColon => {
+                Self::ExpectedColonOnPseudoElement
             }
-            SelectorParseErrorKind::PseudoElementExpectedIdent(token) => {
-                Self::ExpectedIdentityOnPseudoElement(token)
+            SelectorParseErrorKind::PseudoElementExpectedIdent => {
+                Self::ExpectedIdentityOnPseudoElement
             }
             other => Self::UnexpectedSelectorParseError(other),
         }
     }
 }
 
-impl Display for SelectorErrorKind<'_> {
+impl Display for SelectorErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::UnexpectedToken(token) => {
-                    format!("Token {:?} was not expected", utils::render_token(token))
-                }
-                Self::EndOfLine => "Unexpected EOL".to_string(),
-                Self::InvalidAtRule(rule) => format!("Invalid @-rule {rule:?}"),
-                Self::InvalidAtRuleBody => "The body of an @-rule was invalid".to_string(),
-                Self::QualRuleInvalid => "The qualified name was invalid".to_string(),
-                Self::ExpectedColonOnPseudoElement(token) => format!(
-                    "Expected a ':' token for pseudoelement, got {:?} instead",
-                    utils::render_token(token)
-                ),
-                Self::ExpectedIdentityOnPseudoElement(token) => format!(
-                    "Expected identity for pseudoelement, got {:?} instead",
-                    utils::render_token(token)
-                ),
-                Self::UnexpectedSelectorParseError(err) => format!(
+        let msg = match self {
+            Self::UnexpectedToken => "Token was not expected",
+            Self::EndOfLine => "Unexpected EOL",
+            Self::InvalidAtRule => "Invalid @-rule",
+            Self::InvalidAtRuleBody => "The body of an @-rule was invalid",
+            Self::QualRuleInvalid => "The qualified name was invalid",
+            Self::TooManyNestedBlocks => "Too many nested blocks",
+            Self::ExpectedColonOnPseudoElement => "Missing colon character on pseudoelement",
+            Self::ExpectedIdentityOnPseudoElement => "Missing pseudoelement identity",
+            Self::UnexpectedSelectorParseError(err) => {
+                return write!(
+                    f,
                     "Unexpected error occurred. Please report this to the developer\n{err:#?}"
-                ),
+                );
             }
-        )
+        };
+
+        f.write_str(msg)
     }
 }
 
-impl Error for SelectorErrorKind<'_> {
+impl Error for SelectorErrorKind {
     fn description(&self) -> &str {
         match self {
-            Self::UnexpectedToken(_) => "Token was not expected",
+            Self::UnexpectedToken => "Token was not expected",
             Self::EndOfLine => "Unexpected EOL",
-            Self::InvalidAtRule(_) => "Invalid @-rule",
+            Self::InvalidAtRule => "Invalid @-rule",
             Self::InvalidAtRuleBody => "The body of an @-rule was invalid",
             Self::QualRuleInvalid => "The qualified name was invalid",
-            Self::ExpectedColonOnPseudoElement(_) => "Missing colon character on pseudoelement",
-            Self::ExpectedIdentityOnPseudoElement(_) => "Missing pseudoelement identity",
+            Self::TooManyNestedBlocks => "Too many nested blocks",
+            Self::ExpectedColonOnPseudoElement => "Missing colon character on pseudoelement",
+            Self::ExpectedIdentityOnPseudoElement => "Missing pseudoelement identity",
             Self::UnexpectedSelectorParseError(_) => "Unexpected error",
         }
     }
