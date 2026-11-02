@@ -10,7 +10,7 @@ use ego_tree::iter::Nodes;
 use html5ever::serialize::SerializeOpts;
 use html5ever::tendril::TendrilSink;
 use html5ever::tree_builder::QuirksMode;
-use html5ever::{QualName, driver, serialize};
+use html5ever::{ParseOpts, QualName, driver, serialize};
 use selectors::matching::SelectorCaches;
 
 use crate::selector::Selector;
@@ -83,12 +83,14 @@ impl Html {
 
     /// Parses a string of HTML as a fragment.
     pub fn parse_fragment(fragment: &str) -> Self {
+        let opts = ParseOpts::default();
+        let context_element_allows_scripting = opts.tree_builder.scripting_enabled;
         let parser = driver::parse_fragment(
             HtmlTreeSink::new(Self::new_fragment()),
-            Default::default(),
+            opts,
             QualName::new(None, ns!(html), local_name!("body")),
             Vec::new(),
-            false,
+            context_element_allows_scripting,
         );
         parser.one(fragment)
     }
@@ -116,9 +118,8 @@ impl Html {
     /// Serialize entire document into HTML.
     pub fn html(&self) -> String {
         let opts = SerializeOpts {
-            scripting_enabled: false, // It's not clear what this does.
             traversal_scope: serialize::TraversalScope::IncludeNode,
-            create_missing_parent: false,
+            ..Default::default()
         };
         let mut buf = Vec::new();
         serialize(&mut buf, self, opts).unwrap();
@@ -256,6 +257,36 @@ mod tests {
         let (lower, upper) = html.select(&selector).size_hint();
         assert_eq!(lower, 0);
         assert_eq!(upper, Some(10));
+    }
+
+    #[test]
+    fn noscript_is_just_text() {
+        let html = Html::parse_document(
+            "<html><head></head><body><noscript><h1>Hello</h1><h2>world</h2></noscript></body></html>",
+        );
+
+        let selector = Selector::parse("h1").unwrap();
+        let result = html.select(&selector).collect::<Vec<_>>();
+        assert_eq!(result, []);
+
+        let selector = Selector::parse("noscript").unwrap();
+        let mut result = html.select(&selector).collect::<Vec<_>>();
+        assert_eq!(result.len(), 1);
+        let element = result.pop().unwrap();
+        let texts = element.text().collect::<Vec<_>>();
+        assert_eq!(texts, ["<h1>Hello</h1><h2>world</h2>"]);
+    }
+
+    #[test]
+    fn noscript_parse_roundtrip_stays_the_same() {
+        let input =
+            "<html><head></head><body><noscript><h1>Hello, world!</h1></noscript></body></html>";
+        let mut output = input.to_owned();
+        // Parsing and serializing this many times should stay the same and not escape the already escaped escape sequences
+        for _ in 0..3 {
+            output = Html::parse_document(&output).html();
+        }
+        assert_eq!(output, input);
     }
 
     #[cfg(feature = "atomic")]
