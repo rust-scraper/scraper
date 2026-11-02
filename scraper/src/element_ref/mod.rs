@@ -55,9 +55,8 @@ impl<'a> ElementRef<'a> {
 
     fn serialize(&self, traversal_scope: TraversalScope) -> String {
         let opts = SerializeOpts {
-            scripting_enabled: false, // It's not clear what this does.
             traversal_scope,
-            create_missing_parent: false,
+            ..Default::default()
         };
         let mut buf = Vec::new();
         serialize(&mut buf, self, opts).unwrap();
