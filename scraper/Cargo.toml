@@ -50,7 +50,6 @@ pedantic = { level = "warn", priority = -1 }
 allow_attributes = "warn"
 
 default_trait_access = "allow"
-enum_glob_use = "allow"
 explicit_deref_methods = "allow"
 manual_let_else = "allow"
 missing_errors_doc = "allow"
