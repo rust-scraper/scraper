@@ -138,17 +138,17 @@ pub struct Doctype {
 impl Doctype {
     /// Returns the doctype name.
     pub fn name(&self) -> &str {
-        self.name.deref()
+        &self.name
     }
 
     /// Returns the doctype public ID.
     pub fn public_id(&self) -> &str {
-        self.public_id.deref()
+        &self.public_id
     }
 
     /// Returns the doctype system ID.
     pub fn system_id(&self) -> &str {
-        self.system_id.deref()
+        &self.system_id
     }
 }
 
@@ -181,7 +181,7 @@ impl Deref for Comment {
 
 impl fmt::Debug for Comment {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "<!-- {:?} -->", self.deref())
+        write!(f, "<!-- {:?} -->", &**self)
     }
 }
 
@@ -202,7 +202,7 @@ impl Deref for Text {
 
 impl fmt::Debug for Text {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{:?}", self.deref())
+        write!(f, "{:?}", &**self)
     }
 }
 
@@ -258,7 +258,7 @@ impl Element {
 
     /// Returns the element name.
     pub fn name(&self) -> &str {
-        self.name.local.deref()
+        &self.name.local
     }
 
     /// Returns the element ID.
@@ -359,7 +359,7 @@ impl<'a> Iterator for Attrs<'a> {
     type Item = (&'a str, &'a str);
 
     fn next(&mut self) -> Option<(&'a str, &'a str)> {
-        self.inner.next().map(|(k, v)| (k.local.deref(), v.deref()))
+        self.inner.next().map(|(k, v)| (&*k.local, &**v))
     }
 }
 
