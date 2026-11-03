@@ -115,7 +115,7 @@ impl Visitor<'_> for SelectorVisitor {
 /// An implementation of `Parser` for `selectors`
 #[derive(Clone, Copy, Debug)]
 pub struct Parser;
-impl<'i> parser::Parser<'i> for Parser {
+impl parser::Parser<'_> for Parser {
     type Impl = Simple;
     type Error = SelectorParseErrorKind;
 
