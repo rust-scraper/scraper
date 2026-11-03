@@ -1,6 +1,5 @@
 //! CSS selectors.
 
-use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 
@@ -256,7 +255,6 @@ impl FromStr for Selector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::convert::TryInto;
 
     #[test]
     fn selector_conversions() {

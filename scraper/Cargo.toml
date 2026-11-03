@@ -37,6 +37,7 @@ serde = ["dep:serde"]
 [lints.rust]
 missing_copy_implementations = "warn"
 missing_debug_implementations = "warn"
+redundant_imports = "warn"
 trivial_casts = "warn"
 trivial_numeric_casts = "warn"
 unused_extern_crates = "warn"
