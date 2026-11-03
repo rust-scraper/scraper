@@ -33,7 +33,7 @@ fn query<T: Read>(input: &Input, output: &Output, selector: &Selector, file: &mu
         Input::Fragment => Html::parse_fragment(&html),
     };
 
-    let mut matched = false;
+    let mut has_matches = false;
     for element in html.select(selector) {
         use crate::Output::{Attr, Classes, Html, Id, InnerHtml, Name, Text};
         match *output {
@@ -48,9 +48,9 @@ fn query<T: Read>(input: &Input, output: &Output, selector: &Selector, file: &mu
             Name => println!("{}", element.value().name()),
             Text => println!("{}", element.text().collect::<String>()),
         }
-        matched = true;
+        has_matches = true;
     }
-    matched
+    has_matches
 }
 
 fn main() {
@@ -132,7 +132,7 @@ fn main() {
         process::exit(USAGE);
     });
 
-    let matched = if files.is_empty() {
+    let selector_has_matches = if files.is_empty() {
         query(&input, &output, &selector, &mut io::stdin())
     } else {
         files
@@ -142,5 +142,5 @@ fn main() {
             .any(|mut f| query(&input, &output, &selector, &mut f))
     };
 
-    process::exit(i32::from(!matched));
+    process::exit(i32::from(!selector_has_matches));
 }
