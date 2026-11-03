@@ -99,7 +99,7 @@ let fragment = Html::parse_fragment(r#"<input name="foo" value="bar">"#);
 let selector = Selector::parse(r#"input[name="foo"]"#).unwrap();
 
 let input = fragment.select(&selector).next().unwrap();
-assert_eq!(Some("bar"), input.value().attr("value"));
+assert_eq!(Some("bar"), input.attr("value"));
 ```
 
 ### Serializing HTML and inner HTML
