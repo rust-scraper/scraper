@@ -49,7 +49,6 @@ variant_size_differences = "warn"
 pedantic = { level = "warn", priority = -1 }
 allow_attributes = "warn"
 
-default_trait_access = "allow"
 manual_let_else = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"

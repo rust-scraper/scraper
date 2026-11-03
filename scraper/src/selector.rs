@@ -45,7 +45,7 @@ impl Selector {
     /// The optional `scope` argument is used to specify which element has `:scope` pseudo-class.
     /// When it is `None`, `:scope` will match the root element.
     pub fn matches_with_scope(&self, element: &ElementRef, scope: Option<ElementRef>) -> bool {
-        self.matches_with_scope_and_cache(element, scope, &mut Default::default())
+        self.matches_with_scope_and_cache(element, scope, &mut matching::SelectorCaches::default())
     }
 
     // The `nth_index_cache` must not be used after `self` is dropped

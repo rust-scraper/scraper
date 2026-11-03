@@ -76,8 +76,10 @@ impl Html {
     /// # }
     /// ```
     pub fn parse_document(document: &str) -> Self {
-        let parser =
-            driver::parse_document(HtmlTreeSink::new(Self::new_document()), Default::default());
+        let parser = driver::parse_document(
+            HtmlTreeSink::new(Self::new_document()),
+            ParseOpts::default(),
+        );
         parser.one(document)
     }
 
@@ -100,7 +102,7 @@ impl Html {
         Select {
             inner: self.tree.nodes(),
             selector,
-            caches: Default::default(),
+            caches: SelectorCaches::default(),
         }
     }
 
@@ -149,7 +151,7 @@ impl Clone for Select<'_, '_> {
         Self {
             inner: self.inner.clone(),
             selector: self.selector,
-            caches: Default::default(),
+            caches: SelectorCaches::default(),
         }
     }
 }
