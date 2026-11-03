@@ -11,7 +11,6 @@ use std::cell::OnceCell;
 /// An HTML node.
 // `Element` is usally the most common variant and hence boxing it
 // will most likely not improve performance overall.
-#[allow(variant_size_differences)]
 #[derive(Clone, PartialEq, Eq)]
 pub enum Node {
     /// The document root.
@@ -240,7 +239,7 @@ pub struct Element {
 impl Element {
     #[doc(hidden)]
     pub fn new(name: QualName, attributes: Vec<Attribute>) -> Self {
-        #[allow(unused_mut)]
+        #[cfg_attr(feature = "deterministic", expect(unused_mut))]
         let mut attrs = attributes
             .into_iter()
             .map(|attr| (attr.name, crate::tendril_util::make(attr.value)))
@@ -327,7 +326,7 @@ impl Element {
 }
 
 /// Iterator over classes.
-#[allow(missing_debug_implementations)]
+#[expect(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Classes<'a> {
     inner: SliceIter<'a, LocalName>,
@@ -350,7 +349,7 @@ pub type AttributesIter<'a> = indexmap::map::Iter<'a, QualName, StrTendril>;
 pub type AttributesIter<'a> = SliceIter<'a, (QualName, StrTendril)>;
 
 /// Iterator over attributes.
-#[allow(missing_debug_implementations)]
+#[expect(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Attrs<'a> {
     inner: AttributesIter<'a>,

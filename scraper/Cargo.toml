@@ -45,6 +45,8 @@ unused_extern_crates = "warn"
 unused_import_braces = "warn"
 unused_qualifications = "warn"
 variant_size_differences = "warn"
+[lints.clippy]
+allow_attributes = "warn"
 
 [[bin]]
 name = "scraper"
