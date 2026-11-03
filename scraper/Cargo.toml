@@ -54,7 +54,6 @@ manual_let_else = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 must_use_candidate = "allow"
-should_panic_without_expect = "allow"
 similar_names = "allow"
 
 [[bin]]

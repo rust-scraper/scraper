@@ -266,7 +266,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic = "UnexpectedSelectorParseError"]
     fn invalid_selector_conversions() {
         let s = "<failing selector>";
         let _sel: Selector = s.try_into().unwrap();
