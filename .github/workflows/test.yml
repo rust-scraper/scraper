@@ -20,13 +20,17 @@ jobs:
   clippy:
     name: Clippy check
     runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: --deny warnings
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
             components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --all-targets --all-features -- --deny warnings
+      - run: cargo clippy --all-targets --all-features
+      - run: cargo clippy --all-targets
+      - run: cargo clippy --all-targets --no-default-features
 
   test:
     name: Test code

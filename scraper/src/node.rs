@@ -11,7 +11,6 @@ use std::cell::OnceCell;
 /// An HTML node.
 // `Element` is usally the most common variant and hence boxing it
 // will most likely not improve performance overall.
-#[allow(variant_size_differences)]
 #[derive(Clone, PartialEq, Eq)]
 pub enum Node {
     /// The document root.
@@ -139,17 +138,17 @@ pub struct Doctype {
 impl Doctype {
     /// Returns the doctype name.
     pub fn name(&self) -> &str {
-        self.name.deref()
+        &self.name
     }
 
     /// Returns the doctype public ID.
     pub fn public_id(&self) -> &str {
-        self.public_id.deref()
+        &self.public_id
     }
 
     /// Returns the doctype system ID.
     pub fn system_id(&self) -> &str {
-        self.system_id.deref()
+        &self.system_id
     }
 }
 
@@ -182,7 +181,7 @@ impl Deref for Comment {
 
 impl fmt::Debug for Comment {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "<!-- {:?} -->", self.deref())
+        write!(f, "<!-- {:?} -->", &**self)
     }
 }
 
@@ -203,7 +202,7 @@ impl Deref for Text {
 
 impl fmt::Debug for Text {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{:?}", self.deref())
+        write!(f, "{:?}", &**self)
     }
 }
 
@@ -240,7 +239,7 @@ pub struct Element {
 impl Element {
     #[doc(hidden)]
     pub fn new(name: QualName, attributes: Vec<Attribute>) -> Self {
-        #[allow(unused_mut)]
+        #[cfg_attr(feature = "deterministic", expect(unused_mut))]
         let mut attrs = attributes
             .into_iter()
             .map(|attr| (attr.name, crate::tendril_util::make(attr.value)))
@@ -259,7 +258,7 @@ impl Element {
 
     /// Returns the element name.
     pub fn name(&self) -> &str {
-        self.name.local.deref()
+        &self.name.local
     }
 
     /// Returns the element ID.
@@ -327,7 +326,7 @@ impl Element {
 }
 
 /// Iterator over classes.
-#[allow(missing_debug_implementations)]
+#[expect(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Classes<'a> {
     inner: SliceIter<'a, LocalName>,
@@ -350,7 +349,7 @@ pub type AttributesIter<'a> = indexmap::map::Iter<'a, QualName, StrTendril>;
 pub type AttributesIter<'a> = SliceIter<'a, (QualName, StrTendril)>;
 
 /// Iterator over attributes.
-#[allow(missing_debug_implementations)]
+#[expect(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Attrs<'a> {
     inner: AttributesIter<'a>,
@@ -360,7 +359,7 @@ impl<'a> Iterator for Attrs<'a> {
     type Item = (&'a str, &'a str);
 
     fn next(&mut self) -> Option<(&'a str, &'a str)> {
-        self.inner.next().map(|(k, v)| (k.local.deref(), v.deref()))
+        self.inner.next().map(|(k, v)| (&*k.local, &**v))
     }
 }
 

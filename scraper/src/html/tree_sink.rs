@@ -217,9 +217,8 @@ impl TreeSink for HtmlTreeSink {
     fn add_attrs_if_missing(&self, target: &Self::Handle, attrs: Vec<Attribute>) {
         let mut this = self.0.borrow_mut();
         let mut node = this.tree.get_mut(*target).unwrap();
-        let element = match *node.value() {
-            Node::Element(ref mut e) => e,
-            _ => unreachable!(),
+        let Node::Element(ref mut element) = *node.value() else {
+            unreachable!()
         };
 
         for attr in attrs {
@@ -289,9 +288,9 @@ impl TreeSink for HtmlTreeSink {
             .is_some();
 
         if has_parent {
-            self.append_before_sibling(element, child)
+            self.append_before_sibling(element, child);
         } else {
-            self.append(prev_element, child)
+            self.append(prev_element, child);
         }
     }
 }

@@ -6,6 +6,10 @@ use html5ever::serialize::{Serializer, TraversalScope};
 use crate::Node;
 
 /// Serialize an HTML node using html5ever serializer.
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "same as html5ever Serialize trait"
+)]
 pub(crate) fn serialize<S: Serializer>(
     self_node: NodeRef<Node>,
     serializer: &mut S,

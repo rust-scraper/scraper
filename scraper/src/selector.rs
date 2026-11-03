@@ -1,6 +1,5 @@
 //! CSS selectors.
 
-use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 
@@ -46,7 +45,7 @@ impl Selector {
     /// The optional `scope` argument is used to specify which element has `:scope` pseudo-class.
     /// When it is `None`, `:scope` will match the root element.
     pub fn matches_with_scope(&self, element: &ElementRef, scope: Option<ElementRef>) -> bool {
-        self.matches_with_scope_and_cache(element, scope, &mut Default::default())
+        self.matches_with_scope_and_cache(element, scope, &mut matching::SelectorCaches::default())
     }
 
     // The `nth_index_cache` must not be used after `self` is dropped
@@ -116,7 +115,7 @@ impl Visitor<'_> for SelectorVisitor {
 /// An implementation of `Parser` for `selectors`
 #[derive(Clone, Copy, Debug)]
 pub struct Parser;
-impl<'i> parser::Parser<'i> for Parser {
+impl parser::Parser<'_> for Parser {
     type Impl = Simple;
     type Error = SelectorParseErrorKind;
 
@@ -256,7 +255,6 @@ impl FromStr for Selector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::convert::TryInto;
 
     #[test]
     fn selector_conversions() {
@@ -268,7 +266,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic = "UnexpectedSelectorParseError"]
     fn invalid_selector_conversions() {
         let s = "<failing selector>";
         let _sel: Selector = s.try_into().unwrap();

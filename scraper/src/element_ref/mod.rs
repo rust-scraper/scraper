@@ -49,7 +49,7 @@ impl<'a> ElementRef<'a> {
             scope: *self,
             inner,
             selector,
-            caches: Default::default(),
+            caches: SelectorCaches::default(),
         }
     }
 
@@ -154,7 +154,7 @@ impl Clone for Select<'_, '_> {
             scope: self.scope,
             inner: self.inner.clone(),
             selector: self.selector,
-            caches: Default::default(),
+            caches: SelectorCaches::default(),
         }
     }
 }
