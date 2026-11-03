@@ -27,6 +27,8 @@ jobs:
             components: clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --all-targets --all-features -- --deny warnings
+      - run: cargo clippy --all-targets -- --deny warnings
+      - run: cargo clippy --all-targets --no-default-features -- --deny warnings
 
   test:
     name: Test code
