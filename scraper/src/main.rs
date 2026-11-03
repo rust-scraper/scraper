@@ -1,6 +1,3 @@
-extern crate getopts;
-extern crate scraper;
-
 use getopts::Options;
 use scraper::{Html, Selector};
 use std::env;
