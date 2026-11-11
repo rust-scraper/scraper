@@ -70,7 +70,12 @@ impl<'a> ElementRef<'a> {
 
     /// Returns the inner HTML of this element.
     pub fn inner_html(&self) -> String {
-        self.serialize(TraversalScope::ChildrenOnly(None))
+        // Pass this element as the parent so that its text is escaped as in `html()`, i.e. not at
+        // all in `<script>`, `<style>` etc. Only for HTML elements: html5ever does not check the
+        // namespace of this name, but e.g. the text of an SVG `<style>` is escaped.
+        let name = &self.value().name;
+        let parent = (name.ns == ns!(html)).then(|| name.clone());
+        self.serialize(TraversalScope::ChildrenOnly(parent))
     }
 
     /// Returns the value of an attribute.
@@ -209,6 +214,7 @@ mod serializable;
 
 #[cfg(test)]
 mod tests {
+    use crate::element_ref::ElementRef;
     use crate::html::Html;
     use crate::selector::Selector;
 
@@ -230,5 +236,62 @@ mod tests {
         let element1 = fragment.select(&sel1).next().unwrap();
         let element2 = element1.select(&sel2).next().unwrap();
         assert_eq!(element2.inner_html(), "3");
+    }
+
+    fn first<'a>(html: &'a Html, selector: &str) -> ElementRef<'a> {
+        html.select(&Selector::parse(selector).unwrap())
+            .next()
+            .unwrap()
+    }
+
+    #[test]
+    fn inner_html_raw_text_is_not_escaped() {
+        let raw_text = [
+            "style", "script", "xmp", "iframe", "noembed", "noframes", "noscript",
+        ];
+        for tag in raw_text {
+            let html = Html::parse_document(&format!("<div><{tag}>a & b < c > d</{tag}></div>"));
+            let element = first(&html, tag);
+            assert_eq!(element.inner_html(), "a & b < c > d", "{tag}");
+            assert_eq!(element.html(), format!("<{tag}>a & b < c > d</{tag}>"));
+        }
+
+        let html = Html::parse_document("<plaintext>a & b < c > </plaintext>");
+        let element = first(&html, "plaintext");
+        assert_eq!(element.inner_html(), "a & b < c > </plaintext>");
+    }
+
+    #[test]
+    fn inner_html_text_is_escaped() {
+        for tag in ["p", "div", "title", "textarea"] {
+            let html = Html::parse_document(&format!("<{tag}>a &amp; b &lt; c &gt; d</{tag}>"));
+            let element = first(&html, tag);
+            assert_eq!(element.inner_html(), "a &amp; b &lt; c &gt; d", "{tag}");
+        }
+
+        // Only the HTML elements are raw text, not <style> and <script> in SVG.
+        let html =
+            Html::parse_document("<svg><style>a &gt; b</style><script>1 &lt; 2</script></svg>");
+        assert_eq!(first(&html, "style").inner_html(), "a &gt; b");
+        assert_eq!(first(&html, "script").inner_html(), "1 &lt; 2");
+    }
+
+    #[test]
+    fn inner_html_nested_raw_text() {
+        let html = Html::parse_document(
+            r#"<div><span title="a&amp;b &quot;c&quot; <d>">x &amp; y<script data-x="1&amp;2">if (a < b && c > d) {}</script></span></div>"#,
+        );
+        assert_eq!(
+            first(&html, "div").inner_html(),
+            r#"<span title="a&amp;b &quot;c&quot; &lt;d&gt;">x &amp; y<script data-x="1&amp;2">if (a < b && c > d) {}</script></span>"#
+        );
+        assert_eq!(
+            first(&html, "span").inner_html(),
+            r#"x &amp; y<script data-x="1&amp;2">if (a < b && c > d) {}</script>"#
+        );
+        assert_eq!(
+            first(&html, "script").inner_html(),
+            "if (a < b && c > d) {}"
+        );
     }
 }

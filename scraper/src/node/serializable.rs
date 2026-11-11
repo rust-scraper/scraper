@@ -14,7 +14,7 @@ pub(crate) fn serialize<S: Serializer>(
     for edge in self_node.traverse() {
         match edge {
             Edge::Open(node) => {
-                if node == self_node && traversal_scope == TraversalScope::ChildrenOnly(None) {
+                if node == self_node && matches!(traversal_scope, TraversalScope::ChildrenOnly(_)) {
                     continue;
                 }
 
@@ -37,7 +37,7 @@ pub(crate) fn serialize<S: Serializer>(
             }
 
             Edge::Close(node) => {
-                if node == self_node && traversal_scope == TraversalScope::ChildrenOnly(None) {
+                if node == self_node && matches!(traversal_scope, TraversalScope::ChildrenOnly(_)) {
                     continue;
                 }
 
