@@ -289,9 +289,9 @@ impl TreeSink for HtmlTreeSink {
             .is_some();
 
         if has_parent {
-            self.append_before_sibling(element, child)
+            self.append_before_sibling(element, child);
         } else {
-            self.append(prev_element, child)
+            self.append(prev_element, child);
         }
     }
 }

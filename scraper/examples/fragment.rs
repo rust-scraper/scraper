@@ -1,5 +1,3 @@
-extern crate scraper;
-
 use std::io::{self, Read, Write};
 
 use scraper::{Html, Selector};

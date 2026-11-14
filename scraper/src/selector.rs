@@ -1,6 +1,5 @@
 //! CSS selectors.
 
-use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 
@@ -116,7 +115,8 @@ impl Visitor<'_> for SelectorVisitor {
 /// An implementation of `Parser` for `selectors`
 #[derive(Clone, Copy, Debug)]
 pub struct Parser;
-impl<'i> parser::Parser<'i> for Parser {
+
+impl parser::Parser<'_> for Parser {
     type Impl = Simple;
     type Error = SelectorParseErrorKind;
 
@@ -256,7 +256,6 @@ impl FromStr for Selector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::convert::TryInto;
 
     #[test]
     fn selector_conversions() {
